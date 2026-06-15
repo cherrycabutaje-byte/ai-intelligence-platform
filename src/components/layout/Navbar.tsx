@@ -96,11 +96,11 @@ export default function Navbar() {
               >
                 {/* Avatar */}
                 <div className="w-8 h-8 rounded-full bg-cyan-500/20 border border-cyan-500/30 flex items-center justify-center text-cyan-400 text-xs font-bold">
-                  {email ? getInitials(email) : '??'}
+                {email ? getInitials(email) : ''}
                 </div>
                 {/* Email */}
                 <span className="text-sm text-gray-300 max-w-[140px] truncate">
-                  {email ?? 'Loading...'}
+                {email ?? ''}
                 </span>
                 {/* Chevron */}
                 <span className={`text-gray-500 text-xs transition-transform ${profileOpen ? 'rotate-180' : ''}`}>
