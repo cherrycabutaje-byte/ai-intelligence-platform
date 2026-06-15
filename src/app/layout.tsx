@@ -1,22 +1,21 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Navbar from "@/components/layout/Navbar";
+import NavbarWrapper from "@/components/layout/NavbarWrapper";
 import { ToastProvider } from "@/components/ui/Toast";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
 });
-
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
-  title: "AI Intelligence Platform",
-  description: "Content & Product Intelligence Platform",
+  title: "Jarvis — AI Business Manager for Creators & Sellers",
+  description: "Jarvis analyzes your YouTube, TikTok, Amazon, or Etsy and tells you exactly what to do to grow faster, rank higher, and earn more.",
 };
 
 export default function RootLayout({
@@ -31,7 +30,7 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col bg-[#0f1117]">
         <ToastProvider>
-          <Navbar />
+          <NavbarWrapper />
           <main className="flex-1">
             {children}
           </main>
