@@ -1,9 +1,10 @@
-// src/lib/content.ts
-
 import { createClient } from './supabase'
 import type { ContentAnalysis } from '@/types/database'
 
 const TABLE = 'content_analysis' as const
+
+export const CONTENT_PLATFORMS = ['YouTube', 'TikTok', 'Instagram', 'Twitter', 'LinkedIn']
+export const PRODUCT_PLATFORMS = ['Amazon', 'Shopify', 'Etsy']
 
 export interface GetContentOptions {
   page?: number
@@ -25,9 +26,6 @@ export interface GetContentResult {
   currentPage: number
 }
 
-/**
- * Fetch paginated, searchable, sortable list of content analyses.
- */
 export async function getContentAnalyses(
   options: GetContentOptions = {}
 ): Promise<ContentResult<GetContentResult>> {
@@ -47,6 +45,7 @@ export async function getContentAnalyses(
     let query = supabase
       .from(TABLE)
       .select('*', { count: 'exact' })
+      .in('platform', CONTENT_PLATFORMS)
 
     if (search.trim()) {
       query = query.or(
@@ -65,7 +64,6 @@ export async function getContentAnalyses(
     }
 
     const totalPages = Math.ceil((count ?? 0) / pageSize)
-
     return {
       data: {
         data: (data as ContentAnalysis[]) ?? [],
@@ -83,9 +81,6 @@ export async function getContentAnalyses(
   }
 }
 
-/**
- * Fetch a single content analysis by ID.
- */
 export async function getContentById(
   id: number
 ): Promise<ContentResult<ContentAnalysis>> {
@@ -100,8 +95,29 @@ export async function getContentById(
     if (error) {
       return { data: null, error: { message: error.message, code: error.code } }
     }
-
     return { data: data as ContentAnalysis, error: null }
+  } catch (err) {
+    return {
+      data: null,
+      error: { message: err instanceof Error ? err.message : 'Unknown error' },
+    }
+  }
+}
+
+export async function deleteContentAnalysis(
+  id: number
+): Promise<ContentResult<null>> {
+  try {
+    const supabase = createClient()
+    const { error } = await supabase
+      .from(TABLE)
+      .delete()
+      .eq('id', id)
+
+    if (error) {
+      return { data: null, error: { message: error.message, code: error.code } }
+    }
+    return { data: null, error: null }
   } catch (err) {
     return {
       data: null,

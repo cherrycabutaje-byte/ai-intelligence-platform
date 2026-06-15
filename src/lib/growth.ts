@@ -1,6 +1,4 @@
-// src/lib/growth.ts
-
-import { createClient } from './supabase'
+﻿import { createClient } from './supabase'
 import type { GrowthOpportunity } from '@/types/database'
 
 const TABLE = 'growth_opportunities' as const
@@ -31,9 +29,6 @@ export type GrowthResult<T> =
   | { data: T; error: null }
   | { data: null; error: GrowthQueryError }
 
-/**
- * Fetch paginated, searchable, sortable list of growth opportunities.
- */
 export async function getGrowthOpportunities(
   options: GetGrowthOptions = {}
 ): Promise<GrowthResult<GetGrowthResult>> {
@@ -62,13 +57,8 @@ export async function getGrowthOpportunities(
       )
     }
 
-    if (status !== 'all') {
-      query = query.eq('status', status)
-    }
-
-    if (priority !== 'all') {
-      query = query.eq('priority', priority)
-    }
+    if (status !== 'all') query = query.eq('status', status)
+    if (priority !== 'all') query = query.eq('priority', priority)
 
     query = query
       .order(sortBy as string, { ascending: sortOrder === 'asc' })
@@ -81,7 +71,6 @@ export async function getGrowthOpportunities(
     }
 
     const totalPages = Math.ceil((count ?? 0) / pageSize)
-
     return {
       data: {
         data: (data as GrowthOpportunity[]) ?? [],
@@ -99,9 +88,6 @@ export async function getGrowthOpportunities(
   }
 }
 
-/**
- * Fetch a single growth opportunity by ID.
- */
 export async function getGrowthById(
   id: number
 ): Promise<GrowthResult<GrowthOpportunity>> {
@@ -116,8 +102,29 @@ export async function getGrowthById(
     if (error) {
       return { data: null, error: { message: error.message, code: error.code } }
     }
-
     return { data: data as GrowthOpportunity, error: null }
+  } catch (err) {
+    return {
+      data: null,
+      error: { message: err instanceof Error ? err.message : 'Unknown error' },
+    }
+  }
+}
+
+export async function deleteGrowthOpportunity(
+  id: number
+): Promise<GrowthResult<null>> {
+  try {
+    const supabase = createClient()
+    const { error } = await supabase
+      .from(TABLE)
+      .delete()
+      .eq('id', id)
+
+    if (error) {
+      return { data: null, error: { message: error.message, code: error.code } }
+    }
+    return { data: null, error: null }
   } catch (err) {
     return {
       data: null,
