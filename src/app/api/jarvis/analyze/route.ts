@@ -94,7 +94,14 @@ export async function POST(req: NextRequest) {
         { role: "system", content: SYSTEM_PROMPT },
         {
           role: "user",
-          content: `Coach this creator/seller with specific organic growth strategy:
+          content: `Coach this creator/seller with specific organic growth strategy.
+
+CRITICAL INSTRUCTION - READ FIRST:
+If VIDEO STATUS says "Already uploaded" - you MUST give advice ONLY for boosting an existing live video. DO NOT give pre-launch advice. DO NOT say "film next video" or "before you upload". Instead say "update your title NOW", "fix your tags TODAY", "share to Reddit immediately", "pin this comment", "create a Short from this video".
+
+If VIDEO STATUS says "Not uploaded yet" - give pre-launch optimization advice.
+
+The action plan MUST match the video status!
 Name: ${name ?? "Unknown"}
 Platform: ${platform ?? "Unknown"}
 Asset Type: ${asset_type ?? "Unknown"}
@@ -195,3 +202,4 @@ Give 12 copy-paste SEO tags, full description template, word-for-word hook scrip
     return NextResponse.json({ error: "Internal server error", details: message }, { status: 500 });
   }
 }
+
