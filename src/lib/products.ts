@@ -1,9 +1,9 @@
-// src/lib/products.ts
-
-import { createClient } from './supabase'
+﻿import { createClient } from './supabase'
 import type { ProductAnalysis } from '@/types/database'
 
 const TABLE = 'product_analysis' as const
+
+export const PRODUCT_PLATFORMS = ['Amazon', 'Shopify', 'Etsy']
 
 export interface GetProductsOptions {
   page?: number
@@ -29,87 +29,44 @@ export type ProductResult<T> =
   | { data: T; error: null }
   | { data: null; error: ProductQueryError }
 
-/**
- * Fetch paginated, searchable, sortable list of product analyses.
- */
 export async function getProductAnalyses(
   options: GetProductsOptions = {}
 ): Promise<ProductResult<GetProductsResult>> {
-  const {
-    page = 1,
-    pageSize = 10,
-    search = '',
-    sortBy = 'created_at',
-    sortOrder = 'desc',
-  } = options
-
+  const { page = 1, pageSize = 10, search = '', sortBy = 'created_at', sortOrder = 'desc' } = options
   const from = (page - 1) * pageSize
   const to = from + pageSize - 1
-
   try {
     const supabase = createClient()
-    let query = supabase
-      .from(TABLE)
-      .select('*', { count: 'exact' })
-
-    if (search.trim()) {
-      query = query.or(
-        `product_title.ilike.%${search}%,platform.ilike.%${search}%`
-      )
-    }
-
-    query = query
-      .order(sortBy as string, { ascending: sortOrder === 'asc' })
-      .range(from, to)
-
+    let query = supabase.from(TABLE).select('*', { count: 'exact' }).in('platform', PRODUCT_PLATFORMS)
+    if (search.trim()) query = query.or(`product_title.ilike.%${search}%,platform.ilike.%${search}%`)
+    query = query.order(sortBy as string, { ascending: sortOrder === 'asc' }).range(from, to)
     const { data, error, count } = await query
-
-    if (error) {
-      return { data: null, error: { message: error.message, code: error.code } }
-    }
-
+    if (error) return { data: null, error: { message: error.message, code: error.code } }
     const totalPages = Math.ceil((count ?? 0) / pageSize)
-
-    return {
-      data: {
-        data: (data as ProductAnalysis[]) ?? [],
-        count: count ?? 0,
-        totalPages,
-        currentPage: page,
-      },
-      error: null,
-    }
+    return { data: { data: (data as ProductAnalysis[]) ?? [], count: count ?? 0, totalPages, currentPage: page }, error: null }
   } catch (err) {
-    return {
-      data: null,
-      error: { message: err instanceof Error ? err.message : 'Unknown error' },
-    }
+    return { data: null, error: { message: err instanceof Error ? err.message : 'Unknown error' } }
   }
 }
 
-/**
- * Fetch a single product analysis by ID.
- */
-export async function getProductById(
-  id: number
-): Promise<ProductResult<ProductAnalysis>> {
+export async function getProductById(id: number): Promise<ProductResult<ProductAnalysis>> {
   try {
     const supabase = createClient()
-    const { data, error } = await supabase
-      .from(TABLE)
-      .select('*')
-      .eq('id', id)
-      .single()
-
-    if (error) {
-      return { data: null, error: { message: error.message, code: error.code } }
-    }
-
+    const { data, error } = await supabase.from(TABLE).select('*').eq('id', id).single()
+    if (error) return { data: null, error: { message: error.message, code: error.code } }
     return { data: data as ProductAnalysis, error: null }
   } catch (err) {
-    return {
-      data: null,
-      error: { message: err instanceof Error ? err.message : 'Unknown error' },
-    }
+    return { data: null, error: { message: err instanceof Error ? err.message : 'Unknown error' } }
+  }
+}
+
+export async function deleteProductAnalysis(id: number): Promise<ProductResult<null>> {
+  try {
+    const supabase = createClient()
+    const { error } = await supabase.from(TABLE).delete().eq('id', id)
+    if (error) return { data: null, error: { message: error.message, code: error.code } }
+    return { data: null, error: null }
+  } catch (err) {
+    return { data: null, error: { message: err instanceof Error ? err.message : 'Unknown error' } }
   }
 }
