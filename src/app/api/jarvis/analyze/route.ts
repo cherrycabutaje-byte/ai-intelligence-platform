@@ -258,6 +258,36 @@ Return ONLY the JSON object.`
       monetization_opportunity: analysis.monetization_opportunity,
       viral_drivers: analysis.viral_drivers,
       content_blueprint: analysis.content_blueprint,
+      seo_tags: analysis.seo_tags,
+      seo_description_template: analysis.seo_description_template,
+      hook_script: analysis.hook_script,
+      thumbnail_strategy: analysis.thumbnail_strategy,
+      engagement_strategy: analysis.engagement_strategy,
+      algorithm_tips: analysis.algorithm_tips,
+      shorts_strategy: analysis.shorts_strategy,
+      collaboration_playbook: analysis.collaboration_playbook,
+      organic_growth_playbook: analysis.organic_growth_playbook,
+      title_options: analysis.title_options,
+      content_roadmap: analysis.content_roadmap,
+      revenue_projection_30: analysis.revenue_projection_30_days,
+      revenue_projection_60: analysis.revenue_projection_60_days,
+      revenue_projection_90: analysis.revenue_projection_90_days,
+      ceo_decision: analysis.ceo_decision,
+      ceo_reasoning: analysis.ceo_reasoning,
+      status: "active",
+    });
+      user_id: user.id,
+      source_id,
+      platform: platform ?? null,
+      viral_score: analysis.viral_score,
+      opportunity_score: analysis.opportunity_score,
+      content_gap: analysis.content_gap,
+      next_content_idea: analysis.next_content_idea,
+      action_plan: analysis.content_action_plan,
+      report: analysis.content_report,
+      monetization_opportunity: analysis.monetization_opportunity,
+      viral_drivers: analysis.viral_drivers,
+      content_blueprint: analysis.content_blueprint,
       status: "active",
     });
     await supabase.from("product_analysis").insert({
@@ -303,3 +333,5 @@ Return ONLY the JSON object.`
     return NextResponse.json({ error: "Internal server error", details: message }, { status: 500 });
   }
 }
+
+
