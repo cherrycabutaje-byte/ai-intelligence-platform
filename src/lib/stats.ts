@@ -41,9 +41,14 @@ export async function upsertStat(
 ): Promise<StatResult<SourceStat>> {
   try {
     const supabase = createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { data: null, error: { message: 'Not authenticated' } }
     const { data, error } = await supabase
       .from(TABLE)
-      .upsert(stat, { onConflict: 'user_id,source_id,recorded_date' })
+      .upsert(
+        { ...stat, user_id: user.id },
+        { onConflict: 'user_id,source_id,recorded_date' }
+      )
       .select()
       .single()
     if (error) return { data: null, error: { message: error.message } }
@@ -82,8 +87,6 @@ export async function getAllSourcesLatestStats(): Promise<StatResult<SourceStat[
       .select('*')
       .order('recorded_date', { ascending: false })
     if (error) return { data: null, error: { message: error.message } }
-    
-    // Get only the latest stat per source
     const latest = new Map<number, SourceStat>()
     for (const stat of (data as SourceStat[])) {
       if (!latest.has(stat.source_id)) {
@@ -117,7 +120,6 @@ export function getMilestones(stats: SourceStat[], platform: string) {
   if (stats.length === 0) return []
   const last = stats[stats.length - 1]
   const milestones = []
-
   if (platform === 'YouTube') {
     const subs = last.subscribers
     const targets = [100, 500, 1000, 5000, 10000, 50000, 100000, 500000, 1000000]
@@ -131,7 +133,6 @@ export function getMilestones(stats: SourceStat[], platform: string) {
       })
     }
   }
-
   if (platform === 'TikTok') {
     const followers = last.followers
     const targets = [100, 1000, 5000, 10000, 50000, 100000]
@@ -145,6 +146,31 @@ export function getMilestones(stats: SourceStat[], platform: string) {
       })
     }
   }
-
+  if (platform === 'Instagram') {
+    const followers = last.followers
+    const targets = [100, 1000, 5000, 10000, 50000, 100000]
+    for (const target of targets) {
+      milestones.push({
+        label: `${target.toLocaleString()} Followers`,
+        target,
+        current: followers,
+        achieved: followers >= target,
+        special: target === 10000 ? 'Instagram Swipe Up links!' : null
+      })
+    }
+  }
+  if (['Amazon', 'Etsy', 'Shopify'].includes(platform)) {
+    const sales = last.total_sales
+    const targets = [10, 50, 100, 500, 1000, 5000]
+    for (const target of targets) {
+      milestones.push({
+        label: `${target.toLocaleString()} Sales`,
+        target,
+        current: sales,
+        achieved: sales >= target,
+        special: target === 100 ? 'Top Seller potential!' : null
+      })
+    }
+  }
   return milestones
 }
