@@ -32,6 +32,7 @@ export type SourceResult<T> =
 
 /**
  * Fetch paginated, searchable, sortable list of sources.
+ * RLS ensures users only see their own rows.
  */
 export async function getSources(
   options: GetSourcesOptions = {}
@@ -121,16 +122,23 @@ export async function getSourceById(
 }
 
 /**
- * Create a new source.
+ * Create a new source — automatically attaches the current user's ID.
  */
 export async function createSource(
   payload: SourceInsert
 ): Promise<SourceResult<Source>> {
   try {
     const supabase = createClient()
+
+    // Get the current logged-in user
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      return { data: null, error: { message: 'Not authenticated' } }
+    }
+
     const { data, error } = await supabase
       .from(TABLE)
-      .insert(payload)
+      .insert({ ...payload, user_id: user.id })
       .select()
       .single()
 
