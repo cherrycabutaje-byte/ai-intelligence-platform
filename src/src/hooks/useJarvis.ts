@@ -21,11 +21,12 @@ export function useJarvis() {
     setError(null);
 
     try {
-        const supabaseClient = createClient(
-            process.env.NEXT_PUBLIC_SUPABASE_URL!,
-            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-          );
-          const { data: { session } } = await supabaseClient.auth.getSession();
+      const supabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      );
+
+      const { data: { session } } = await supabase.auth.getSession();
 
       const res = await fetch("/api/jarvis/analyze", {
         method: "POST",
