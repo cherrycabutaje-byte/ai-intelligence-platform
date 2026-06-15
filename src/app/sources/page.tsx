@@ -1,15 +1,314 @@
-PS C:\Users\cherr\ai-intelligence-platform> git add .
-PS C:\Users\cherr\ai-intelligence-platform> git commit -m "Phase 2A: Upgrade Jarvis to Business Manager"
-[main 85ea68d] Phase 2A: Upgrade Jarvis to Business Manager
- 1 file changed, 83 insertions(+), 36 deletions(-)
-PS C:\Users\cherr\ai-intelligence-platform> git push origin main
-Enumerating objects: 17, done.
-Counting objects: 100% (17/17), done.
-Delta compression using up to 16 threads
-Compressing objects: 100% (5/5), done.
-Writing objects: 100% (9/9), 2.52 KiB | 858.00 KiB/s, done.
-Total 9 (delta 4), reused 0 (delta 0), pack-reused 0 (from 0)
-remote: Resolving deltas: 100% (4/4), completed with 4 local objects.
-To https://github.com/cherrycabutaje-byte/ai-intelligence-platform.git
-   451b443..85ea68d  main -> main
-PS C:\Users\cherr\ai-intelligence-platform>
+﻿"use client";
+
+import { useEffect, useState, useCallback } from "react";
+import type { Source } from "@/types/database";
+import type { GetSourcesOptions, GetSourcesResult } from "@/lib/sources";
+import { getSources } from "@/lib/sources";
+import { exportToCSV } from "@/lib/exportCSV";
+import AddSourceModal from "@/components/sources/AddSourceModal";
+import EditSourceModal from "@/components/sources/EditSourceModal";
+import DeleteSourceModal from "@/components/sources/DeleteSourceModal";
+import { useJarvis } from "@/hooks/useJarvis";
+
+const PAGE_SIZE = 10;
+
+export default function SourcesPage() {
+  const [result, setResult] = useState<GetSourcesResult | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [searchInput, setSearchInput] = useState("");
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const [sortBy, setSortBy] = useState<keyof Source>("created_at");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+  const [statusFilter, setStatusFilter] = useState<GetSourcesOptions["status"]>("all");
+  const [showAdd, setShowAdd] = useState(false);
+  const [editSource, setEditSource] = useState<Source | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Source | null>(null);
+  const [analyzingId, setAnalyzingId] = useState<number | null>(null);
+  const [toast, setToast] = useState<string | null>(null);
+
+  // Jarvis description popup
+  const [jarvisSource, setJarvisSource] = useState<Source | null>(null);
+  const [jarvisDescription, setJarvisDescription] = useState("");
+
+  const { analyze, loading: jarvisLoading } = useJarvis();
+
+  const showToast = (message: string) => {
+    setToast(message);
+    setTimeout(() => setToast(null), 4000);
+  };
+
+  const fetchSources = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    const { data, error: fetchError } = await getSources({
+      page, pageSize: PAGE_SIZE, search, sortBy, sortOrder, status: statusFilter,
+    });
+    if (fetchError) { setError(fetchError.message); setResult(null); }
+    else { setResult(data); }
+    setLoading(false);
+  }, [page, search, sortBy, sortOrder, statusFilter]);
+
+  useEffect(() => { fetchSources(); }, [fetchSources]);
+
+  useEffect(() => {
+    const t = setTimeout(() => { setSearch(searchInput); setPage(1); }, 400);
+    return () => clearTimeout(t);
+  }, [searchInput]);
+
+  const openJarvisPopup = (source: Source) => {
+    if (!source.asset_url) { showToast("❌ This source has no URL."); return; }
+    setJarvisSource(source);
+    setJarvisDescription(source.notes ?? "");
+  };
+
+  const runJarvisAnalysis = async () => {
+    if (!jarvisSource) return;
+    setAnalyzingId(jarvisSource.id);
+    setJarvisSource(null);
+
+    const result = await analyze({
+      id: String(jarvisSource.id),
+      url: jarvisSource.asset_url!,
+      platform: jarvisSource.platform,
+      name: jarvisSource.asset_name,
+      niche: jarvisSource.niche ?? undefined,
+      category: jarvisSource.category ?? undefined,
+      notes: jarvisDescription || jarvisSource.notes || undefined,
+      asset_type: jarvisSource.asset_type ?? undefined,
+    });
+
+    setAnalyzingId(null);
+    setJarvisDescription("");
+
+    if (result?.success) {
+      showToast("✅ Analysis complete! Jarvis has updated all tables.");
+      fetchSources();
+    } else {
+      showToast("❌ Analysis failed. Please try again.");
+    }
+  };
+
+  const statusColor = (s: Source["status"]) => {
+    if (s === "active") return "bg-green-500/20 text-green-400 border border-green-500/30";
+    if (s === "inactive") return "bg-red-500/20 text-red-400 border border-red-500/30";
+    return "bg-yellow-500/20 text-yellow-400 border border-yellow-500/30";
+  };
+
+  return (
+    <div className="min-h-screen bg-[#0f1117] text-white">
+
+      {/* Toast */}
+      {toast && (
+        <div className="fixed top-6 right-6 z-50 bg-[#1a1d27] border border-gray-700 text-white text-sm px-5 py-3 rounded-xl shadow-xl">
+          {toast}
+        </div>
+      )}
+
+      {/* Jarvis Description Popup */}
+      {jarvisSource && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-[#1a1d27] border border-purple-500/30 rounded-xl w-full max-w-lg">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-800">
+              <div>
+                <h2 className="text-lg font-semibold text-white">🤖 Jarvis Analysis</h2>
+                <p className="text-xs text-gray-400 mt-0.5">Analyzing: {jarvisSource.asset_name}</p>
+              </div>
+              <button onClick={() => { setJarvisSource(null); setJarvisDescription(""); }} className="text-gray-400 hover:text-white text-xl">✕</button>
+            </div>
+            <div className="px-6 py-4 space-y-3">
+              <div>
+                <label className="block text-xs text-purple-400 font-medium mb-2">
+                  📋 Paste your video description, content details, or product info
+                </label>
+                <p className="text-xs text-gray-500 mb-3">
+                  The more context you give Jarvis, the more specific and accurate the analysis will be. Paste your video description, channel about section, or product details here.
+                </p>
+                <textarea
+                  value={jarvisDescription}
+                  onChange={e => setJarvisDescription(e.target.value)}
+                  placeholder={`Example for YouTube:
+"This video is about stoicism and how to face reality. 
+Target audience: people feeling stuck in life aged 25-40.
+Channel focuses on personal development and psychology..."
+
+Example for Amazon:
+"Product: Bamboo cutting board set. 
+Price range: $25-45. 
+Main competitors: OXO, Totally Bamboo..."`}
+                  rows={8}
+                  className="w-full bg-[#0f1117] border border-gray-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-purple-500 transition-colors resize-none"
+                />
+              </div>
+              <div className="bg-purple-500/10 border border-purple-500/20 rounded-lg px-4 py-3">
+                <p className="text-xs text-purple-300">
+                  💡 <strong>Pro tip:</strong> Paste your full YouTube video description for the most accurate content strategy, title suggestions, and revenue projections.
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-3 justify-end px-6 py-4 border-t border-gray-800">
+              <button
+                onClick={() => { setJarvisSource(null); setJarvisDescription(""); }}
+                className="px-4 py-2 text-sm text-gray-400 border border-gray-700 rounded-lg hover:border-gray-500 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={runJarvisAnalysis}
+                className="px-6 py-2 text-sm bg-purple-600 hover:bg-purple-500 text-white font-semibold rounded-lg transition-colors"
+              >
+                🚀 Run Jarvis Analysis
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="max-w-7xl mx-auto px-6 py-8 space-y-6">
+
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-white">Source Management</h1>
+            <p className="text-gray-400 text-sm mt-1">{result ? `${result.count} total sources` : "Loading..."}</p>
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={() => exportToCSV(result?.data ?? [], "sources")}
+              className="bg-[#1a1d27] hover:bg-gray-800 text-gray-300 hover:text-white border border-gray-700 font-medium px-4 py-2 rounded-lg text-sm transition-colors"
+            >
+              ↓ Export CSV
+            </button>
+            <button
+              onClick={() => setShowAdd(true)}
+              className="bg-cyan-500 hover:bg-cyan-400 text-black font-semibold px-4 py-2 rounded-lg text-sm"
+            >
+              + Add Source
+            </button>
+          </div>
+        </div>
+
+        <div className="flex flex-col sm:flex-row gap-3">
+          <input
+            type="text"
+            placeholder="Search..."
+            value={searchInput}
+            onChange={e => setSearchInput(e.target.value)}
+            className="flex-1 bg-[#1a1d27] border border-gray-700 rounded-lg px-4 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-cyan-500"
+          />
+          <select value={statusFilter} onChange={e => { setStatusFilter(e.target.value as GetSourcesOptions["status"]); setPage(1); }} className="bg-[#1a1d27] border border-gray-700 rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-cyan-500">
+            <option value="all">All Status</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+            <option value="pending">Pending</option>
+          </select>
+          <select value={sortBy} onChange={e => { setSortBy(e.target.value as keyof Source); setPage(1); }} className="bg-[#1a1d27] border border-gray-700 rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-cyan-500">
+            <option value="created_at">Sort: Date</option>
+            <option value="asset_name">Sort: Name</option>
+            <option value="platform">Sort: Platform</option>
+            <option value="status">Sort: Status</option>
+          </select>
+          <button onClick={() => setSortOrder(p => p === "asc" ? "desc" : "asc")} className="bg-[#1a1d27] border border-gray-700 rounded-lg px-3 py-2.5 text-sm text-white hover:border-cyan-500 min-w-[80px]">
+            {sortOrder === "asc" ? "↑ Asc" : "↓ Desc"}
+          </button>
+        </div>
+
+        {error && (
+          <div className="bg-red-500/10 border border-red-500/30 rounded-lg px-4 py-3 text-red-400 text-sm">⚠️ {error}</div>
+        )}
+
+        <div className="bg-[#1a1d27] border border-gray-800 rounded-xl overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-gray-800 bg-[#13151f]">
+                  <th className="text-left px-4 py-3 text-gray-400 font-medium">Asset Name</th>
+                  <th className="text-left px-4 py-3 text-gray-400 font-medium">Platform</th>
+                  <th className="text-left px-4 py-3 text-gray-400 font-medium">Type</th>
+                  <th className="text-left px-4 py-3 text-gray-400 font-medium">Niche</th>
+                  <th className="text-left px-4 py-3 text-gray-400 font-medium">Status</th>
+                  <th className="text-left px-4 py-3 text-gray-400 font-medium">Created</th>
+                  <th className="text-left px-4 py-3 text-gray-400 font-medium">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {loading ? (
+                  Array.from({ length: 5 }).map((_, i) => (
+                    <tr key={i} className="border-b border-gray-800/50">
+                      {Array.from({ length: 7 }).map((__, j) => (
+                        <td key={j} className="px-4 py-3"><div className="h-4 bg-gray-800 rounded animate-pulse w-3/4" /></td>
+                      ))}
+                    </tr>
+                  ))
+                ) : result?.data.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="px-4 py-16 text-center text-gray-500">
+                      <div className="flex flex-col items-center gap-2">
+                        <span className="text-3xl">📭</span>
+                        <span>No sources found</span>
+                      </div>
+                    </td>
+                  </tr>
+                ) : (
+                  result?.data.map(source => (
+                    <tr key={source.id} className="border-b border-gray-800/50 hover:bg-white/[0.02]">
+                      <td className="px-4 py-3">
+                        <div className="font-medium text-white truncate max-w-[200px]">{source.asset_name}</div>
+                        <div className="text-cyan-400 text-xs truncate max-w-[200px]">{source.asset_url ?? ""}</div>
+                      </td>
+                      <td className="px-4 py-3 text-gray-300">{source.platform ?? "—"}</td>
+                      <td className="px-4 py-3 text-gray-300 capitalize">{source.asset_type ?? "—"}</td>
+                      <td className="px-4 py-3 text-gray-300">{source.niche ?? "—"}</td>
+                      <td className="px-4 py-3">
+                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusColor(source.status)}`}>{source.status}</span>
+                      </td>
+                      <td className="px-4 py-3 text-gray-400 text-xs">
+                        {new Date(source.created_at).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex gap-2">
+                          <button onClick={() => setEditSource(source)} className="text-xs text-gray-400 hover:text-cyan-400 px-2 py-1 rounded hover:bg-cyan-500/10">Edit</button>
+                          <button onClick={() => setDeleteTarget(source)} className="text-xs text-gray-400 hover:text-red-400 px-2 py-1 rounded hover:bg-red-500/10">Delete</button>
+                          <button
+                            onClick={() => openJarvisPopup(source)}
+                            disabled={analyzingId === source.id || jarvisLoading}
+                            className="text-xs text-gray-400 hover:text-purple-400 px-2 py-1 rounded hover:bg-purple-500/10 disabled:opacity-40 disabled:cursor-not-allowed"
+                          >
+                            {analyzingId === source.id ? "⏳ Analyzing..." : "🤖 Analyze"}
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {result && result.totalPages > 1 && (
+            <div className="flex items-center justify-between px-4 py-3 border-t border-gray-800 bg-[#13151f]">
+              <span className="text-xs text-gray-500">Page {result.currentPage} of {result.totalPages}</span>
+              <div className="flex gap-1">
+                <button onClick={() => setPage(1)} disabled={page === 1} className="px-2 py-1 text-xs text-gray-400 hover:text-white disabled:opacity-30">«</button>
+                <button onClick={() => setPage(p => p - 1)} disabled={page === 1} className="px-2 py-1 text-xs text-gray-400 hover:text-white disabled:opacity-30">‹</button>
+                <button onClick={() => setPage(p => p + 1)} disabled={page === result.totalPages} className="px-2 py-1 text-xs text-gray-400 hover:text-white disabled:opacity-30">›</button>
+                <button onClick={() => setPage(result.totalPages)} disabled={page === result.totalPages} className="px-2 py-1 text-xs text-gray-400 hover:text-white disabled:opacity-30">»</button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {showAdd && (
+          <AddSourceModal onClose={() => setShowAdd(false)} onSuccess={() => { setShowAdd(false); fetchSources(); }} />
+        )}
+        {editSource && (
+          <EditSourceModal source={editSource} onClose={() => setEditSource(null)} onSuccess={() => { setEditSource(null); fetchSources(); }} />
+        )}
+        {deleteTarget && (
+          <DeleteSourceModal source={deleteTarget} onClose={() => setDeleteTarget(null)} onSuccess={() => { setDeleteTarget(null); fetchSources(); }} />
+        )}
+
+      </div>
+    </div>
+  );
+}
