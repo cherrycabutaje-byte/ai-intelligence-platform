@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import type { Source } from '@/types/database';
 import { deleteSource } from '@/lib/sources';
+import { useToast } from '@/components/ui/Toast';
 
 interface Props {
   source: Source;
@@ -11,6 +12,7 @@ interface Props {
 }
 
 export default function DeleteSourceModal({ source, onClose, onSuccess }: Props) {
+  const { showToast } = useToast();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -20,6 +22,7 @@ export default function DeleteSourceModal({ source, onClose, onSuccess }: Props)
     const { error: e } = await deleteSource(String(source.id));
     if (e) { setError(e.message); setLoading(false); return; }
     setLoading(false);
+    showToast(`"${source.asset_name}" deleted successfully.`, 'success');
     onSuccess();
   };
 
@@ -70,7 +73,7 @@ export default function DeleteSourceModal({ source, onClose, onSuccess }: Props)
 
           {error && (
             <div className="bg-red-500/10 border border-red-500/30 rounded-lg px-4 py-3 text-red-400 text-sm">
-              ⚠️ {error}
+              ⚠ {error}
             </div>
           )}
 

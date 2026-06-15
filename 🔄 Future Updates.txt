@@ -1,0 +1,8 @@
+🔄 Future Updates
+Any time you make changes locally, just run:
+bashgit add .
+git commit -m "your message"
+git push origin main
+
+cd C:\Users\cherr\ai-intelligence-platform
+type src\components\layout\Navbar.tsx

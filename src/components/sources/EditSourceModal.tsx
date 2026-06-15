@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import type { Source, SourceUpdate } from '@/types/database';
 import { updateSource } from '@/lib/sources';
+import { useToast } from '@/components/ui/Toast';
 
 interface Props {
   source: Source;
@@ -11,6 +12,7 @@ interface Props {
 }
 
 export default function EditSourceModal({ source, onClose, onSuccess }: Props) {
+  const { showToast } = useToast();
   const [form, setForm] = useState<SourceUpdate>({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -42,6 +44,7 @@ export default function EditSourceModal({ source, onClose, onSuccess }: Props) {
     const { error: e } = await updateSource(String(source.id), form);
     if (e) { setError(e.message); setLoading(false); return; }
     setLoading(false);
+    showToast('Source updated successfully!', 'success');
     onSuccess();
   };
 
@@ -66,7 +69,7 @@ export default function EditSourceModal({ source, onClose, onSuccess }: Props) {
 
           {error && (
             <div className="bg-red-500/10 border border-red-500/30 rounded-lg px-4 py-3 text-red-400 text-sm">
-              ⚠️ {error}
+              ⚠ {error}
             </div>
           )}
 
@@ -83,11 +86,7 @@ export default function EditSourceModal({ source, onClose, onSuccess }: Props) {
             </div>
             <div>
               <label className={labelClass}>Platform <span className="text-red-400">*</span></label>
-              <select
-                value={form.platform ?? ''}
-                onChange={e => setForm(p => ({ ...p, platform: e.target.value }))}
-                className={inputClass}
-              >
+              <select value={form.platform ?? ''} onChange={e => setForm(p => ({ ...p, platform: e.target.value }))} className={inputClass}>
                 <option value="">Select platform...</option>
                 <option value="YouTube">YouTube</option>
                 <option value="TikTok">TikTok</option>
@@ -160,11 +159,7 @@ export default function EditSourceModal({ source, onClose, onSuccess }: Props) {
           {/* Row 5 */}
           <div>
             <label className={labelClass}>Status</label>
-            <select
-              value={form.status ?? 'active'}
-              onChange={e => setForm(p => ({ ...p, status: e.target.value as Source['status'] }))}
-              className={inputClass}
-            >
+            <select value={form.status ?? 'active'} onChange={e => setForm(p => ({ ...p, status: e.target.value as Source['status'] }))} className={inputClass}>
               <option value="active">Active</option>
               <option value="inactive">Inactive</option>
               <option value="pending">Pending</option>
@@ -175,7 +170,6 @@ export default function EditSourceModal({ source, onClose, onSuccess }: Props) {
           <div>
             <label className={labelClass}>Notes</label>
             <textarea
-              placeholder="Any additional notes..."
               value={form.notes ?? ''}
               onChange={e => set('notes', e.target.value)}
               rows={3}

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import type { SourceInsert } from '@/types/database';
 import { createSource } from '@/lib/sources';
+import { useToast } from '@/components/ui/Toast';
 
 interface Props {
   onClose: () => void;
@@ -23,6 +24,7 @@ const EMPTY_FORM: SourceInsert = {
 };
 
 export default function AddSourceModal({ onClose, onSuccess }: Props) {
+  const { showToast } = useToast();
   const [form, setForm] = useState<SourceInsert>(EMPTY_FORM);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -39,6 +41,7 @@ export default function AddSourceModal({ onClose, onSuccess }: Props) {
     const { error: e } = await createSource(form);
     if (e) { setError(e.message); setLoading(false); return; }
     setLoading(false);
+    showToast('Source added successfully!', 'success');
     onSuccess();
   };
 
@@ -48,7 +51,7 @@ export default function AddSourceModal({ onClose, onSuccess }: Props) {
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div className="bg-[#1a1d27] border border-gray-700 rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        
+
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-800">
           <h2 className="text-lg font-semibold text-white">Add New Source</h2>
@@ -60,7 +63,7 @@ export default function AddSourceModal({ onClose, onSuccess }: Props) {
 
           {error && (
             <div className="bg-red-500/10 border border-red-500/30 rounded-lg px-4 py-3 text-red-400 text-sm">
-              ⚠️ {error}
+              ⚠ {error}
             </div>
           )}
 
@@ -102,7 +105,6 @@ export default function AddSourceModal({ onClose, onSuccess }: Props) {
                 <option value="video">Video</option>
                 <option value="blog">Blog</option>
                 <option value="product">Product</option>
-                <option value="channel">Channel</option>
                 <option value="store">Store</option>
                 <option value="other">Other</option>
               </select>
