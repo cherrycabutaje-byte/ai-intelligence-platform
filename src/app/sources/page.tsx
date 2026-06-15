@@ -8,6 +8,7 @@ import { exportToCSV } from '@/lib/exportCSV';
 import AddSourceModal from '@/components/sources/AddSourceModal';
 import EditSourceModal from '@/components/sources/EditSourceModal';
 import DeleteSourceModal from '@/components/sources/DeleteSourceModal';
+import { useJarvis } from '../../src/hooks/useJarvis';
 
 const PAGE_SIZE = 10;
 
@@ -24,6 +25,15 @@ export default function SourcesPage() {
   const [showAdd, setShowAdd] = useState(false);
   const [editSource, setEditSource] = useState<Source | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Source | null>(null);
+  const [analyzingId, setAnalyzingId] = useState<number | null>(null);
+  const [toast, setToast] = useState<string | null>(null);
+
+  const { analyze, loading: jarvisLoading } = useJarvis();
+
+  const showToast = (message: string) => {
+    setToast(message);
+    setTimeout(() => setToast(null), 4000);
+  };
 
   const fetchSources = useCallback(async () => {
     setLoading(true);
@@ -43,6 +53,27 @@ export default function SourcesPage() {
     return () => clearTimeout(t);
   }, [searchInput]);
 
+  const handleAnalyze = async (source: Source) => {
+    if (!source.asset_url) {
+      showToast('❌ This source has no URL.');
+      return;
+    }
+    setAnalyzingId(source.id);
+    const result = await analyze({
+      id: String(source.id),
+      url: source.asset_url,
+      platform: source.platform,
+      name: source.asset_name,
+    });
+    setAnalyzingId(null);
+    if (result?.success) {
+      showToast('✅ Analysis complete! Jarvis has updated all tables.');
+      fetchSources();
+    } else {
+      showToast('❌ Analysis failed. Please try again.');
+    }
+  };
+
   const statusColor = (s: Source['status']) => {
     if (s === 'active') return 'bg-green-500/20 text-green-400 border border-green-500/30';
     if (s === 'inactive') return 'bg-red-500/20 text-red-400 border border-red-500/30';
@@ -51,6 +82,14 @@ export default function SourcesPage() {
 
   return (
     <div className="min-h-screen bg-[#0f1117] text-white">
+
+      {/* Toast Notification */}
+      {toast && (
+        <div className="fixed top-6 right-6 z-50 bg-[#1a1d27] border border-gray-700 text-white text-sm px-5 py-3 rounded-xl shadow-xl animate-fade-in">
+          {toast}
+        </div>
+      )}
+
       <div className="max-w-7xl mx-auto px-6 py-8 space-y-6">
 
         <div className="flex items-center justify-between">
@@ -155,6 +194,13 @@ export default function SourcesPage() {
                         <div className="flex gap-2">
                           <button onClick={() => setEditSource(source)} className="text-xs text-gray-400 hover:text-cyan-400 px-2 py-1 rounded hover:bg-cyan-500/10">Edit</button>
                           <button onClick={() => setDeleteTarget(source)} className="text-xs text-gray-400 hover:text-red-400 px-2 py-1 rounded hover:bg-red-500/10">Delete</button>
+                          <button
+                            onClick={() => handleAnalyze(source)}
+                            disabled={analyzingId === source.id || jarvisLoading}
+                            className="text-xs text-gray-400 hover:text-purple-400 px-2 py-1 rounded hover:bg-purple-500/10 disabled:opacity-40 disabled:cursor-not-allowed"
+                          >
+                            {analyzingId === source.id ? '⏳ Analyzing...' : '🤖 Analyze'}
+                          </button>
                         </div>
                       </td>
                     </tr>
