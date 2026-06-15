@@ -31,6 +31,8 @@ export default function SourcesPage() {
   const [activeStep, setActiveStep] = useState(1);
 
   const [jarvisForm, setJarvisForm] = useState({
+    video_status: "already_uploaded",
+    upload_timing: "1_week",
     main_keyword: "",
     target_audience: "",
     competitors: "",
@@ -81,6 +83,7 @@ export default function SourcesPage() {
 
   const buildNotesContext = () => {
     return `
+VIDEO STATUS: ${jarvisForm.video_status === "already_uploaded" ? "Already uploaded - " + jarvisForm.upload_timing + " ago. Give advice to BOOST existing content NOW, not pre-launch advice." : "Not uploaded yet - Give pre-launch optimization advice."}
 MAIN KEYWORD TO RANK FOR: ${jarvisForm.main_keyword}
 TARGET AUDIENCE: ${jarvisForm.target_audience}
 TOP COMPETITORS: ${jarvisForm.competitors}
@@ -487,3 +490,6 @@ The more detail you give, the better Jarvis performs!`}
     </div>
   );
 }
+
+
+
