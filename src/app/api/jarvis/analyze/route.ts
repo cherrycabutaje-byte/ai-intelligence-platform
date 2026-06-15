@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
 import { createClient } from "@supabase/supabase-js";
 
@@ -13,7 +13,7 @@ function getSupabase(authHeader: string | null) {
   });
 }
 
-const SYSTEM_PROMPT = `You are Jarvis, the Executive Intelligence Agent. Return ONLY valid JSON. No markdown. No explanation.
+const SYSTEM_PROMPT = `You are Jarvis, an AI Business Manager. Speak directly to the owner. Be specific with numbers and timelines. Use real scraped data as PRIMARY source. Return ONLY valid JSON.
 
 Schema:
 {
@@ -22,21 +22,41 @@ Schema:
   "confidence": 0,
   "viral_score": 0,
   "market_score": 0,
+  "scout_findings": "string",
   "content_gap": "string",
   "next_content_idea": "string",
-  "content_action_plan": "string",
-  "content_report": "string",
-  "monetization_opportunity": "string",
   "viral_drivers": "string",
   "content_blueprint": "string",
+  "content_action_plan": "string",
+  "monetization_opportunity": "string",
+  "content_report": "string",
   "product_gap": "string",
   "next_product_idea": "string",
   "product_action_plan": "string",
   "product_report": "string",
   "product_monetization_opportunities": "string",
   "product_growth_opportunities": "string",
+  "revenue_projection_30_days": "string",
+  "revenue_projection_60_days": "string",
+  "revenue_projection_90_days": "string",
+  "ceo_decision": "GO or WAIT",
+  "ceo_reasoning": "string",
   "growth_opportunities": [{"opportunity_type": "string","recommendation": "string","priority": "high","estimated_impact": "string","monetization_potential": "string"}]
 }`;
+
+async function scrapeUrl(url: string, platform: string, baseUrl: string): Promise<Record<string, string | null>> {
+  try {
+    const scrapeRes = await fetch(`${baseUrl}/api/jarvis/scrape`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ url, platform }),
+    });
+    const scrapeData = await scrapeRes.json();
+    return scrapeData.scraped_data ?? {};
+  } catch {
+    return {};
+  }
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -45,16 +65,46 @@ export async function POST(req: NextRequest) {
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const { source_id, url, platform, name } = await req.json();
+    const { source_id, url, platform, name, niche, category, notes, asset_type } = await req.json();
     if (!source_id || !url) return NextResponse.json({ error: "source_id and url are required" }, { status: 400 });
+
+    const baseUrl = req.nextUrl.origin;
+    const scraped = await scrapeUrl(url, platform ?? "", baseUrl);
+
+    const scrapeContext = Object.keys(scraped).length > 0
+      ? `REAL DATA SCRAPED FROM URL:
+- Page Title: ${scraped.title ?? "Not found"}
+- Description: ${scraped.description ?? "Not found"}
+- OG Title: ${scraped.og_title ?? "Not found"}
+- OG Description: ${scraped.og_description ?? "Not found"}
+- Keywords: ${scraped.keywords ?? "Not found"}
+- Channel Name: ${scraped.channel_name ?? "Not found"}
+- Subscribers: ${scraped.subscribers ?? "Not found"}
+- Views: ${scraped.views ?? "Not found"}
+- Video Count: ${scraped.video_count ?? "Not found"}
+- Sales: ${scraped.sales ?? "Not found"}
+- Reviews: ${scraped.reviews ?? "Not found"}
+- Rating: ${scraped.rating ?? "Not found"}`
+      : "Note: URL could not be scraped. Base analysis on provided details only.";
 
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
-      temperature: 0.3,
-      max_tokens: 2000,
+      temperature: 0.4,
+      max_tokens: 3000,
       messages: [
         { role: "system", content: SYSTEM_PROMPT },
-        { role: "user", content: `Analyze: Name: ${name ?? "Unknown"}, Platform: ${platform ?? "Unknown"}, URL: ${url}. Return ONLY JSON.` },
+        { role: "user", content: `Analyze this source as their personal business manager:
+Name: ${name ?? "Unknown"}
+Platform: ${platform ?? "Unknown"}
+Asset Type: ${asset_type ?? "Unknown"}
+Niche: ${niche ?? "Not specified"}
+Category: ${category ?? "Not specified"}
+Notes: ${notes ?? "None"}
+URL: ${url}
+
+${scrapeContext}
+
+Give specific plan and revenue projection. End with GO or WAIT. Return ONLY JSON.` },
       ],
     });
 
@@ -76,7 +126,7 @@ export async function POST(req: NextRequest) {
       await supabase.from("growth_opportunities").insert(growthRows.map((g) => ({ user_id: user.id, source_id, opportunity_type: g.opportunity_type, recommendation: g.recommendation, priority: g.priority, estimated_impact: g.estimated_impact, monetization_potential: g.monetization_potential, status: "active" })));
     }
 
-    return NextResponse.json({ success: true, source_id, analysis });
+    return NextResponse.json({ success: true, source_id, analysis, scraped });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Unknown error";
     return NextResponse.json({ error: "Internal server error", details: message }, { status: 500 });
