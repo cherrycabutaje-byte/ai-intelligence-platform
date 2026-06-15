@@ -16,6 +16,10 @@ export function useJarvis() {
     url: string;
     platform?: string;
     name?: string;
+    niche?: string;
+    category?: string;
+    notes?: string;
+    asset_type?: string;
   }): Promise<JarvisResult | null> {
     setLoading(true);
     setError(null);
@@ -35,6 +39,10 @@ export function useJarvis() {
           url: source.url,
           platform: source.platform,
           name: source.name,
+          niche: source.niche,
+          category: source.category,
+          notes: source.notes,
+          asset_type: source.asset_type,
         }),
       });
 
