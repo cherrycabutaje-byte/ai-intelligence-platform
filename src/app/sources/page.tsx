@@ -8,7 +8,7 @@ import { exportToCSV } from "@/lib/exportCSV";
 import AddSourceModal from "@/components/sources/AddSourceModal";
 import EditSourceModal from "@/components/sources/EditSourceModal";
 import DeleteSourceModal from "@/components/sources/DeleteSourceModal";
-import { useJarvis } from "@/hooks/useJarvis";
+import { useJarvis } from "../../hooks/useJarvis";
 
 const PAGE_SIZE = 10;
 
@@ -312,3 +312,4 @@ Main competitors: OXO, Totally Bamboo..."`}
     </div>
   );
 }
+
