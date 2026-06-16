@@ -65,7 +65,11 @@ export interface ContentAnalysis {
   collaboration_playbook: string | null;
   organic_growth_playbook: string | null;
   title_options: string | null;
-  content_roadmap: string | null;
+  content_roadmap: string | null
+  posting_schedule: string | null
+  next_4_titles: string | null
+  series_strategy: string | null
+  consistency_score: string | null
   revenue_projection_30: string | null;
   revenue_projection_60: string | null;
   revenue_projection_90: string | null;
@@ -117,3 +121,4 @@ export interface GrowthOpportunity {
   monetization_potential: string | null;
   status: string | null;
 }
+
