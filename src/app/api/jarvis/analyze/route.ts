@@ -227,7 +227,7 @@ Schema:
     {
       "opportunity_type": "SPECIFIC type e.g. Fix Video Title, Add Missing Tags, Pin Engagement Comment, Create YouTube Short, Share to Reddit",
       "recommendation": "FULL STEP BY STEP HOW-TO GUIDE. Reference REAL numbers from the video data. Example: Your video has X views and Y comments. Here is exactly what to do: Step 1: Go to studio.youtube.com. Step 2: Click Videos. Step 3: Change your title from [actual title] to [new title]. Time: 2 minutes. Expected result: 3x more impressions within 48 hours.",
-      "priority": "high or medium or low",
+      "priority": "high",
       "estimated_impact": "Specific measurable result using real numbers e.g. From 245 views to estimated 800+ views within 7 days",
       "monetization_potential": "Specific dollar amount and timeline e.g. At 800 views per video posting 4x per month = $15-30 AdSense within 30 days"
     }
@@ -420,6 +420,7 @@ Show the math. Show the timeline. Be specific. Return ONLY JSON.`
     return NextResponse.json({ error: "Internal server error", details: message }, { status: 500 });
   }
 }
+
 
 
 
