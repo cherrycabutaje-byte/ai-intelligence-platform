@@ -30,7 +30,6 @@ export default function SourcesPage() {
   const [jarvisSource, setJarvisSource] = useState<Source | null>(null);
   const [fetchingVideo, setFetchingVideo] = useState(false);
   const [videoData, setVideoData] = useState<Record<string, string | null> | null>(null);
-
   const [jarvisForm, setJarvisForm] = useState({
     goal: "",
     extra_context: "",
@@ -66,9 +65,9 @@ export default function SourcesPage() {
     if (!source.asset_url) { showToast("This source has no URL."); return; }
     setJarvisSource(source);
     setVideoData(null);
+    setFetchingVideo(false);
     setJarvisForm({ goal: "", extra_context: "", video_status: "already_uploaded", upload_timing: "this_week" });
 
-    // Auto-fetch video data
     if (source.platform === "YouTube" || source.asset_url.includes("youtube") || source.asset_url.includes("youtu.be")) {
       setFetchingVideo(true);
       try {
@@ -77,12 +76,12 @@ export default function SourcesPage() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ url: source.asset_url, platform: source.platform }),
         });
-        const data = await res.json();
-        if (data.scraped_data && Object.keys(data.scraped_data).length > 2) {
-          setVideoData(data.scraped_data);
+        const scraped = await res.json();
+        if (scraped.scraped_data && Object.keys(scraped.scraped_data).length > 2) {
+          setVideoData(scraped.scraped_data);
         }
       } catch {
-        // Continue without video data
+        // continue without data
       } finally {
         setFetchingVideo(false);
       }
@@ -101,7 +100,6 @@ REAL VIDEO DATA FROM YOUTUBE API:
 - Subscribers: ${videoData.subscribers ?? "N/A"}
 - Channel: ${videoData.channel_name ?? "N/A"}
 ` : "";
-
     return `
 VIDEO STATUS: ${jarvisForm.video_status === "already_uploaded" ? "Already uploaded - " + jarvisForm.upload_timing : "Not uploaded yet"}
 GOAL: ${jarvisForm.goal}
@@ -114,7 +112,6 @@ ${videoContext}
     if (!jarvisSource) return;
     setAnalyzingId(jarvisSource.id);
     setJarvisSource(null);
-
     const result = await analyze({
       id: String(jarvisSource.id),
       url: jarvisSource.asset_url!,
@@ -125,9 +122,7 @@ ${videoContext}
       notes: buildNotesContext(),
       asset_type: jarvisSource.asset_type ?? undefined,
     });
-
     setAnalyzingId(null);
-
     if (result?.success) {
       showToast("Analysis complete! Check Content and Growth pages.");
       fetchSources();
@@ -150,23 +145,18 @@ ${videoContext}
         </div>
       )}
 
-      {/* Jarvis Popup — Simple Version */}
       {jarvisSource && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-[#1a1d27] border border-purple-500/30 rounded-xl w-full max-w-lg">
-
-            {/* Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-800">
               <div>
                 <h2 className="text-lg font-semibold text-white">Jarvis Analysis</h2>
-                <p className="text-xs text-gray-400 mt-0.5">{jarvisSource.asset_name} • {jarvisSource.platform}</p>
+                <p className="text-xs text-gray-400 mt-0.5">{jarvisSource.asset_name} - {jarvisSource.platform}</p>
               </div>
               <button onClick={() => setJarvisSource(null)} className="text-gray-400 hover:text-white text-xl">x</button>
             </div>
 
             <div className="px-6 py-5 space-y-4">
-
-              {/* Auto-fetched video data preview */}
               {fetchingVideo && (
                 <div className="bg-purple-500/10 border border-purple-500/20 rounded-lg px-4 py-3">
                   <p className="text-xs text-purple-300">Fetching video data from YouTube...</p>
@@ -184,7 +174,12 @@ ${videoContext}
                 </div>
               )}
 
-              {/* Video Status */}
+              {!fetchingVideo && !videoData && jarvisSource.platform === "YouTube" && (
+                <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg px-4 py-3">
+                  <p className="text-xs text-yellow-300">Could not fetch video data automatically. Please add context below.</p>
+                </div>
+              )}
+
               <div>
                 <label className="block text-xs text-gray-400 font-semibold mb-2 uppercase tracking-wide">Content Status</label>
                 <div className="grid grid-cols-2 gap-2">
@@ -192,11 +187,8 @@ ${videoContext}
                     { value: "already_uploaded", label: "Already uploaded", desc: "Boost existing content" },
                     { value: "not_uploaded", label: "Not uploaded yet", desc: "Pre-launch optimization" },
                   ].map(opt => (
-                    <button
-                      key={opt.value}
-                      onClick={() => setJarvisForm(p => ({ ...p, video_status: opt.value }))}
-                      className={`px-3 py-2.5 rounded-lg text-left text-xs border transition-colors ${jarvisForm.video_status === opt.value ? "bg-purple-600/20 border-purple-500 text-white" : "bg-[#0f1117] border-gray-700 text-gray-400 hover:border-gray-500"}`}
-                    >
+                    <button key={opt.value} onClick={() => setJarvisForm(p => ({ ...p, video_status: opt.value }))}
+                      className={`px-3 py-2.5 rounded-lg text-left text-xs border transition-colors ${jarvisForm.video_status === opt.value ? "bg-purple-600/20 border-purple-500 text-white" : "bg-[#0f1117] border-gray-700 text-gray-400 hover:border-gray-500"}`}>
                       <div className="font-semibold">{opt.label}</div>
                       <div className="text-gray-500 mt-0.5">{opt.desc}</div>
                     </button>
@@ -204,7 +196,6 @@ ${videoContext}
                 </div>
               </div>
 
-              {/* Upload timing */}
               {jarvisForm.video_status === "already_uploaded" && (
                 <div>
                   <label className="block text-xs text-gray-400 font-semibold mb-2 uppercase tracking-wide">When did you upload?</label>
@@ -215,11 +206,8 @@ ${videoContext}
                       { value: "this_month", label: "1-4 weeks ago", desc: "Need Shorts strategy" },
                       { value: "old", label: "1+ month ago", desc: "Revival strategy" },
                     ].map(opt => (
-                      <button
-                        key={opt.value}
-                        onClick={() => setJarvisForm(p => ({ ...p, upload_timing: opt.value }))}
-                        className={`px-3 py-2 rounded-lg text-left text-xs border transition-colors ${jarvisForm.upload_timing === opt.value ? "bg-cyan-600/20 border-cyan-500 text-white" : "bg-[#0f1117] border-gray-700 text-gray-400 hover:border-gray-500"}`}
-                      >
+                      <button key={opt.value} onClick={() => setJarvisForm(p => ({ ...p, upload_timing: opt.value }))}
+                        className={`px-3 py-2 rounded-lg text-left text-xs border transition-colors ${jarvisForm.upload_timing === opt.value ? "bg-cyan-600/20 border-cyan-500 text-white" : "bg-[#0f1117] border-gray-700 text-gray-400 hover:border-gray-500"}`}>
                         <div className="font-semibold">{opt.label}</div>
                         <div className="text-gray-500">{opt.desc}</div>
                       </button>
@@ -228,43 +216,28 @@ ${videoContext}
                 </div>
               )}
 
-              {/* Goal */}
               <div>
                 <label className="block text-xs text-gray-400 font-semibold mb-1 uppercase tracking-wide">Your Goal</label>
-                <input
-                  type="text"
-                  value={jarvisForm.goal}
-                  onChange={e => setJarvisForm(p => ({ ...p, goal: e.target.value }))}
+                <input type="text" value={jarvisForm.goal} onChange={e => setJarvisForm(p => ({ ...p, goal: e.target.value }))}
                   placeholder="e.g. reach 10,000 subscribers in 6 months"
-                  className="w-full bg-[#0f1117] border border-gray-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-purple-500"
-                />
+                  className="w-full bg-[#0f1117] border border-gray-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-purple-500" />
               </div>
 
-              {/* Extra context */}
               <div>
                 <label className="block text-xs text-gray-400 font-semibold mb-1 uppercase tracking-wide">Anything else Jarvis should know? (optional)</label>
-                <textarea
-                  value={jarvisForm.extra_context}
-                  onChange={e => setJarvisForm(p => ({ ...p, extra_context: e.target.value }))}
+                <textarea value={jarvisForm.extra_context} onChange={e => setJarvisForm(p => ({ ...p, extra_context: e.target.value }))}
                   placeholder="e.g. My target audience is men 25-40 interested in stoicism. My competitors are Ryan Holiday and Einzelganger."
-                  rows={3}
-                  className="w-full bg-[#0f1117] border border-gray-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-purple-500 resize-none"
-                />
+                  rows={3} className="w-full bg-[#0f1117] border border-gray-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-purple-500 resize-none" />
               </div>
-
             </div>
 
-            {/* Footer */}
             <div className="flex justify-between px-6 py-4 border-t border-gray-800">
               <button onClick={() => setJarvisSource(null)} className="px-4 py-2 text-sm text-gray-400 border border-gray-700 rounded-lg hover:border-gray-500">
                 Cancel
               </button>
-              <button
-                onClick={runJarvisAnalysis}
-                disabled={jarvisLoading || fetchingVideo}
-                className="px-6 py-2 text-sm bg-purple-600 hover:bg-purple-500 text-white font-semibold rounded-lg disabled:opacity-50"
-              >
-                {fetchingVideo ? "Fetching data..." : "Run Jarvis Analysis"}
+              <button onClick={runJarvisAnalysis} disabled={jarvisLoading || fetchingVideo}
+                className="px-6 py-2 text-sm bg-purple-600 hover:bg-purple-500 text-white font-semibold rounded-lg disabled:opacity-50">
+                {fetchingVideo ? "Fetching data..." : jarvisLoading ? "Analyzing..." : "Run Jarvis Analysis"}
               </button>
             </div>
           </div>
@@ -288,20 +261,24 @@ ${videoContext}
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3">
-          <input type="text" placeholder="Search..." value={searchInput} onChange={e => setSearchInput(e.target.value)} className="flex-1 bg-[#1a1d27] border border-gray-700 rounded-lg px-4 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-cyan-500" />
-          <select value={statusFilter} onChange={e => { setStatusFilter(e.target.value as GetSourcesOptions["status"]); setPage(1); }} className="bg-[#1a1d27] border border-gray-700 rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-cyan-500">
+          <input type="text" placeholder="Search..." value={searchInput} onChange={e => setSearchInput(e.target.value)}
+            className="flex-1 bg-[#1a1d27] border border-gray-700 rounded-lg px-4 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-cyan-500" />
+          <select value={statusFilter} onChange={e => { setStatusFilter(e.target.value as GetSourcesOptions["status"]); setPage(1); }}
+            className="bg-[#1a1d27] border border-gray-700 rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-cyan-500">
             <option value="all">All Status</option>
             <option value="active">Active</option>
             <option value="inactive">Inactive</option>
             <option value="pending">Pending</option>
           </select>
-          <select value={sortBy} onChange={e => { setSortBy(e.target.value as keyof Source); setPage(1); }} className="bg-[#1a1d27] border border-gray-700 rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-cyan-500">
+          <select value={sortBy} onChange={e => { setSortBy(e.target.value as keyof Source); setPage(1); }}
+            className="bg-[#1a1d27] border border-gray-700 rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-cyan-500">
             <option value="created_at">Sort: Date</option>
             <option value="asset_name">Sort: Name</option>
             <option value="platform">Sort: Platform</option>
             <option value="status">Sort: Status</option>
           </select>
-          <button onClick={() => setSortOrder(p => p === "asc" ? "desc" : "asc")} className="bg-[#1a1d27] border border-gray-700 rounded-lg px-3 py-2.5 text-sm text-white hover:border-cyan-500 min-w-[80px]">
+          <button onClick={() => setSortOrder(p => p === "asc" ? "desc" : "asc")}
+            className="bg-[#1a1d27] border border-gray-700 rounded-lg px-3 py-2.5 text-sm text-white hover:border-cyan-500 min-w-[80px]">
             {sortOrder === "asc" ? "Asc" : "Desc"}
           </button>
         </div>
@@ -335,8 +312,7 @@ ${videoContext}
                   <tr>
                     <td colSpan={7} className="px-4 py-16 text-center text-gray-500">
                       <div className="flex flex-col items-center gap-2">
-                        <span className="text-3xl">📭</span>
-                        <span>No sources found</span>
+                        <span className="text-3xl">No sources found</span>
                       </div>
                     </td>
                   </tr>
@@ -347,9 +323,9 @@ ${videoContext}
                         <div className="font-medium text-white truncate max-w-[200px]">{source.asset_name}</div>
                         <div className="text-cyan-400 text-xs truncate max-w-[200px]">{source.asset_url ?? ""}</div>
                       </td>
-                      <td className="px-4 py-3 text-gray-300">{source.platform ?? "—"}</td>
-                      <td className="px-4 py-3 text-gray-300 capitalize">{source.asset_type ?? "—"}</td>
-                      <td className="px-4 py-3 text-gray-300">{source.niche ?? "—"}</td>
+                      <td className="px-4 py-3 text-gray-300">{source.platform ?? "-"}</td>
+                      <td className="px-4 py-3 text-gray-300 capitalize">{source.asset_type ?? "-"}</td>
+                      <td className="px-4 py-3 text-gray-300">{source.niche ?? "-"}</td>
                       <td className="px-4 py-3">
                         <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusColor(source.status)}`}>{source.status}</span>
                       </td>
@@ -360,11 +336,8 @@ ${videoContext}
                         <div className="flex gap-2">
                           <button onClick={() => setEditSource(source)} className="text-xs text-gray-400 hover:text-cyan-400 px-2 py-1 rounded hover:bg-cyan-500/10">Edit</button>
                           <button onClick={() => setDeleteTarget(source)} className="text-xs text-gray-400 hover:text-red-400 px-2 py-1 rounded hover:bg-red-500/10">Delete</button>
-                          <button
-                            onClick={() => openJarvisPopup(source)}
-                            disabled={analyzingId === source.id || jarvisLoading}
-                            className="text-xs text-gray-400 hover:text-purple-400 px-2 py-1 rounded hover:bg-purple-500/10 disabled:opacity-40"
-                          >
+                          <button onClick={() => openJarvisPopup(source)} disabled={analyzingId === source.id || jarvisLoading}
+                            className="text-xs text-gray-400 hover:text-purple-400 px-2 py-1 rounded hover:bg-purple-500/10 disabled:opacity-40">
                             {analyzingId === source.id ? "Analyzing..." : "Analyze"}
                           </button>
                         </div>
@@ -379,10 +352,10 @@ ${videoContext}
             <div className="flex items-center justify-between px-4 py-3 border-t border-gray-800 bg-[#13151f]">
               <span className="text-xs text-gray-500">Page {result.currentPage} of {result.totalPages}</span>
               <div className="flex gap-1">
-                <button onClick={() => setPage(1)} disabled={page === 1} className="px-2 py-1 text-xs text-gray-400 hover:text-white disabled:opacity-30">«</button>
-                <button onClick={() => setPage(p => p - 1)} disabled={page === 1} className="px-2 py-1 text-xs text-gray-400 hover:text-white disabled:opacity-30">‹</button>
-                <button onClick={() => setPage(p => p + 1)} disabled={page === result.totalPages} className="px-2 py-1 text-xs text-gray-400 hover:text-white disabled:opacity-30">›</button>
-                <button onClick={() => setPage(result.totalPages)} disabled={page === result.totalPages} className="px-2 py-1 text-xs text-gray-400 hover:text-white disabled:opacity-30">»</button>
+                <button onClick={() => setPage(1)} disabled={page === 1} className="px-2 py-1 text-xs text-gray-400 hover:text-white disabled:opacity-30">First</button>
+                <button onClick={() => setPage(p => p - 1)} disabled={page === 1} className="px-2 py-1 text-xs text-gray-400 hover:text-white disabled:opacity-30">Prev</button>
+                <button onClick={() => setPage(p => p + 1)} disabled={page === result.totalPages} className="px-2 py-1 text-xs text-gray-400 hover:text-white disabled:opacity-30">Next</button>
+                <button onClick={() => setPage(result.totalPages)} disabled={page === result.totalPages} className="px-2 py-1 text-xs text-gray-400 hover:text-white disabled:opacity-30">Last</button>
               </div>
             </div>
           )}
