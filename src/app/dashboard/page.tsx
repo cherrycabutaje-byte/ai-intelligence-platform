@@ -120,6 +120,9 @@ export default function DashboardPage() {
             onClick={() => setShowInput(true)}
             className="bg-cyan-500 hover:bg-cyan-400 text-black font-semibold px-4 py-2 rounded-lg text-sm"
           >
+            <button onClick={() => setShowFeedback(true)} className="bg-[#1a1d27] hover:bg-gray-800 text-gray-300 border border-gray-700 font-medium px-4 py-2 rounded-lg text-sm">
+              ⭐ Give Feedback
+            </button>
             + Update Stats Today
           </button>
         </div>
@@ -337,6 +340,7 @@ export default function DashboardPage() {
     </div>
   );
 }
+
 
 
 
