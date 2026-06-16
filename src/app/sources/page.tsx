@@ -28,18 +28,14 @@ export default function SourcesPage() {
   const [analyzingId, setAnalyzingId] = useState<number | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const [jarvisSource, setJarvisSource] = useState<Source | null>(null);
-  const [activeStep, setActiveStep] = useState(1);
+  const [fetchingVideo, setFetchingVideo] = useState(false);
+  const [videoData, setVideoData] = useState<Record<string, string | null> | null>(null);
 
   const [jarvisForm, setJarvisForm] = useState({
+    goal: "",
+    extra_context: "",
     video_status: "already_uploaded",
     upload_timing: "this_week",
-    main_keyword: "",
-    target_audience: "",
-    competitors: "",
-    current_stats: "",
-    unique_angle: "",
-    video_description: "",
-    goal: "",
   });
 
   const { analyze, loading: jarvisLoading } = useJarvis();
@@ -66,35 +62,51 @@ export default function SourcesPage() {
     return () => clearTimeout(t);
   }, [searchInput]);
 
-  const openJarvisPopup = (source: Source) => {
-    if (!source.asset_url) { showToast("❌ This source has no URL."); return; }
+  const openJarvisPopup = async (source: Source) => {
+    if (!source.asset_url) { showToast("This source has no URL."); return; }
     setJarvisSource(source);
-    setActiveStep(1);
-    setJarvisForm({
-      video_status: "already_uploaded",
-      upload_timing: "this_week",
-      main_keyword: source.niche ?? "",
-      target_audience: "",
-      competitors: "",
-      current_stats: "",
-      unique_angle: source.notes ?? "",
-      video_description: "",
-      goal: "",
-    });
+    setVideoData(null);
+    setJarvisForm({ goal: "", extra_context: "", video_status: "already_uploaded", upload_timing: "this_week" });
+
+    // Auto-fetch video data
+    if (source.platform === "YouTube" || source.asset_url.includes("youtube") || source.asset_url.includes("youtu.be")) {
+      setFetchingVideo(true);
+      try {
+        const res = await fetch("/api/jarvis/scrape", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url: source.asset_url, platform: source.platform }),
+        });
+        const data = await res.json();
+        if (data.scraped_data && Object.keys(data.scraped_data).length > 2) {
+          setVideoData(data.scraped_data);
+        }
+      } catch {
+        // Continue without video data
+      } finally {
+        setFetchingVideo(false);
+      }
+    }
   };
 
   const buildNotesContext = () => {
-    return `
-VIDEO STATUS: ${jarvisForm.video_status === "already_uploaded" ? "Already uploaded - " + jarvisForm.upload_timing + " ago. Give advice to BOOST existing content NOW, not pre-launch advice." : "Not uploaded yet - Give pre-launch optimization advice."}
-MAIN KEYWORD TO RANK FOR: ${jarvisForm.main_keyword}
-TARGET AUDIENCE: ${jarvisForm.target_audience}
-TOP COMPETITORS: ${jarvisForm.competitors}
-CURRENT STATS: ${jarvisForm.current_stats}
-UNIQUE ANGLE / WHAT MAKES THIS DIFFERENT: ${jarvisForm.unique_angle}
-GOAL: ${jarvisForm.goal}
+    const videoContext = videoData ? `
+REAL VIDEO DATA FROM YOUTUBE API:
+- Title: ${videoData.title ?? "N/A"}
+- Description: ${videoData.description ?? "N/A"}
+- Current Tags: ${videoData.tags ?? "N/A"}
+- Views: ${videoData.views ?? "N/A"}
+- Likes: ${videoData.likes ?? "N/A"}
+- Comments: ${videoData.comments ?? "N/A"}
+- Subscribers: ${videoData.subscribers ?? "N/A"}
+- Channel: ${videoData.channel_name ?? "N/A"}
+` : "";
 
-FULL VIDEO/CONTENT DESCRIPTION:
-${jarvisForm.video_description}
+    return `
+VIDEO STATUS: ${jarvisForm.video_status === "already_uploaded" ? "Already uploaded - " + jarvisForm.upload_timing : "Not uploaded yet"}
+GOAL: ${jarvisForm.goal}
+ADDITIONAL CONTEXT: ${jarvisForm.extra_context}
+${videoContext}
     `.trim();
   };
 
@@ -117,10 +129,10 @@ ${jarvisForm.video_description}
     setAnalyzingId(null);
 
     if (result?.success) {
-      showToast("✅ Analysis complete! Jarvis has updated all tables.");
+      showToast("Analysis complete! Check Content and Growth pages.");
       fetchSources();
     } else {
-      showToast("❌ Analysis failed. Please try again.");
+      showToast("Analysis failed. Please try again.");
     }
   };
 
@@ -130,8 +142,6 @@ ${jarvisForm.video_description}
     return "bg-yellow-500/20 text-yellow-400 border border-yellow-500/30";
   };
 
-  const isContent = ["YouTube", "TikTok", "Instagram", "Facebook", "Twitter", "LinkedIn"].includes(jarvisSource?.platform ?? "");
-
   return (
     <div className="min-h-screen bg-[#0f1117] text-white">
       {toast && (
@@ -140,229 +150,122 @@ ${jarvisForm.video_description}
         </div>
       )}
 
-      {/* Jarvis Popup */}
+      {/* Jarvis Popup — Simple Version */}
       {jarvisSource && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-[#1a1d27] border border-purple-500/30 rounded-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+          <div className="bg-[#1a1d27] border border-purple-500/30 rounded-xl w-full max-w-lg">
 
             {/* Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-800 shrink-0">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-800">
               <div>
-                <h2 className="text-lg font-semibold text-white">🤖 Jarvis Analysis</h2>
-                <p className="text-xs text-gray-400 mt-0.5">
-                  {jarvisSource.asset_name} • {jarvisSource.platform}
-                </p>
+                <h2 className="text-lg font-semibold text-white">Jarvis Analysis</h2>
+                <p className="text-xs text-gray-400 mt-0.5">{jarvisSource.asset_name} • {jarvisSource.platform}</p>
               </div>
-              <button onClick={() => setJarvisSource(null)} className="text-gray-400 hover:text-white text-xl">✕</button>
+              <button onClick={() => setJarvisSource(null)} className="text-gray-400 hover:text-white text-xl">x</button>
             </div>
 
-            {/* Step indicators */}
-            <div className="flex items-center gap-2 px-6 py-3 border-b border-gray-800 shrink-0">
-              {[1, 2, 3].map(step => (
-                <div key={step} className="flex items-center gap-2">
-                  <button
-                    onClick={() => setActiveStep(step)}
-                    className={`w-7 h-7 rounded-full text-xs font-bold transition-colors ${activeStep === step ? "bg-purple-600 text-white" : activeStep > step ? "bg-green-500 text-white" : "bg-gray-700 text-gray-400"}`}
-                  >
-                    {activeStep > step ? "✓" : step}
-                  </button>
-                  <span className={`text-xs ${activeStep === step ? "text-white" : "text-gray-500"}`}>
-                    {step === 1 ? "SEO Setup" : step === 2 ? "Audience & Competitors" : "Content Details"}
-                  </span>
-                  {step < 3 && <div className="w-8 h-px bg-gray-700 mx-1" />}
+            <div className="px-6 py-5 space-y-4">
+
+              {/* Auto-fetched video data preview */}
+              {fetchingVideo && (
+                <div className="bg-purple-500/10 border border-purple-500/20 rounded-lg px-4 py-3">
+                  <p className="text-xs text-purple-300">Fetching video data from YouTube...</p>
                 </div>
-              ))}
-            </div>
+              )}
 
-            {/* Form content */}
-            <div className="flex-1 overflow-y-auto px-6 py-4">
+              {videoData && !fetchingVideo && (
+                <div className="bg-green-500/10 border border-green-500/20 rounded-lg px-4 py-3 space-y-1">
+                  <p className="text-xs text-green-400 font-semibold">Video data fetched automatically!</p>
+                  {videoData.title && <p className="text-xs text-gray-300">Title: <span className="text-white">{videoData.title}</span></p>}
+                  {videoData.views && <p className="text-xs text-gray-300">Views: <span className="text-white">{Number(videoData.views).toLocaleString()}</span></p>}
+                  {videoData.likes && <p className="text-xs text-gray-300">Likes: <span className="text-white">{Number(videoData.likes).toLocaleString()}</span></p>}
+                  {videoData.comments && <p className="text-xs text-gray-300">Comments: <span className="text-white">{Number(videoData.comments).toLocaleString()}</span></p>}
+                  {videoData.subscribers && <p className="text-xs text-gray-300">Subscribers: <span className="text-white">{Number(videoData.subscribers).toLocaleString()}</span></p>}
+                </div>
+              )}
 
-              {activeStep === 1 && (
-                <div className="space-y-4">
-                  <div className="bg-purple-500/10 border border-purple-500/20 rounded-lg px-4 py-3">
-                    <p className="text-xs text-purple-300">
-                      💡 <strong>Step 1:</strong> Tell Jarvis what keyword you want to rank for.
-                      This is the most important input — everything else is built around this.
-                    </p>
-                  </div>
+              {/* Video Status */}
+              <div>
+                <label className="block text-xs text-gray-400 font-semibold mb-2 uppercase tracking-wide">Content Status</label>
+                <div className="grid grid-cols-2 gap-2">
+                  {[
+                    { value: "already_uploaded", label: "Already uploaded", desc: "Boost existing content" },
+                    { value: "not_uploaded", label: "Not uploaded yet", desc: "Pre-launch optimization" },
+                  ].map(opt => (
+                    <button
+                      key={opt.value}
+                      onClick={() => setJarvisForm(p => ({ ...p, video_status: opt.value }))}
+                      className={`px-3 py-2.5 rounded-lg text-left text-xs border transition-colors ${jarvisForm.video_status === opt.value ? "bg-purple-600/20 border-purple-500 text-white" : "bg-[#0f1117] border-gray-700 text-gray-400 hover:border-gray-500"}`}
+                    >
+                      <div className="font-semibold">{opt.label}</div>
+                      <div className="text-gray-500 mt-0.5">{opt.desc}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
 
-                  <div>
-                    <label className="block text-xs text-purple-400 font-semibold mb-1 uppercase tracking-wide">
-                      🎯 Main Keyword To Rank For *
-                    </label>
-                    <input
-                      type="text"
-                      value={jarvisForm.main_keyword}
-                      onChange={e => setJarvisForm(p => ({ ...p, main_keyword: e.target.value }))}
-                      placeholder="e.g. stoicism self deception, how to stop lying to yourself"
-                      className="w-full bg-[#0f1117] border border-gray-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-purple-500"
-                    />
-                    <p className="text-xs text-gray-500 mt-1">The exact phrase people type into YouTube/Google to find content like yours</p>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs text-gray-400 font-semibold mb-1 uppercase tracking-wide">
-                      📊 Current Stats
-                    </label>
-                    <input
-                      type="text"
-                      value={jarvisForm.current_stats}
-                      onChange={e => setJarvisForm(p => ({ ...p, current_stats: e.target.value }))}
-                      placeholder="e.g. 1,456 subscribers, avg 245 views per video, 3.2% CTR"
-                      className="w-full bg-[#0f1117] border border-gray-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-purple-500"
-                    />
-                    <p className="text-xs text-gray-500 mt-1">Jarvis gives realistic advice based on where you are NOW</p>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs text-gray-400 font-semibold mb-1 uppercase tracking-wide">
-                      🏆 Your Goal
-                    </label>
-                    <input
-                      type="text"
-                      value={jarvisForm.goal}
-                      onChange={e => setJarvisForm(p => ({ ...p, goal: e.target.value }))}
-                      placeholder="e.g. reach 10,000 subscribers in 6 months and monetize"
-                      className="w-full bg-[#0f1117] border border-gray-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-purple-500"
-                    />
+              {/* Upload timing */}
+              {jarvisForm.video_status === "already_uploaded" && (
+                <div>
+                  <label className="block text-xs text-gray-400 font-semibold mb-2 uppercase tracking-wide">When did you upload?</label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {[
+                      { value: "today", label: "Today / Yesterday", desc: "Golden window!" },
+                      { value: "this_week", label: "2-7 days ago", desc: "Still time to boost" },
+                      { value: "this_month", label: "1-4 weeks ago", desc: "Need Shorts strategy" },
+                      { value: "old", label: "1+ month ago", desc: "Revival strategy" },
+                    ].map(opt => (
+                      <button
+                        key={opt.value}
+                        onClick={() => setJarvisForm(p => ({ ...p, upload_timing: opt.value }))}
+                        className={`px-3 py-2 rounded-lg text-left text-xs border transition-colors ${jarvisForm.upload_timing === opt.value ? "bg-cyan-600/20 border-cyan-500 text-white" : "bg-[#0f1117] border-gray-700 text-gray-400 hover:border-gray-500"}`}
+                      >
+                        <div className="font-semibold">{opt.label}</div>
+                        <div className="text-gray-500">{opt.desc}</div>
+                      </button>
+                    ))}
                   </div>
                 </div>
               )}
 
-              {activeStep === 2 && (
-                <div className="space-y-4">
-                  <div className="bg-cyan-500/10 border border-cyan-500/20 rounded-lg px-4 py-3">
-                    <p className="text-xs text-cyan-300">
-                      💡 <strong>Step 2:</strong> Tell Jarvis WHO you are targeting and WHO your competitors are.
-                      This unlocks competitor analysis and audience-specific titles.
-                    </p>
-                  </div>
+              {/* Goal */}
+              <div>
+                <label className="block text-xs text-gray-400 font-semibold mb-1 uppercase tracking-wide">Your Goal</label>
+                <input
+                  type="text"
+                  value={jarvisForm.goal}
+                  onChange={e => setJarvisForm(p => ({ ...p, goal: e.target.value }))}
+                  placeholder="e.g. reach 10,000 subscribers in 6 months"
+                  className="w-full bg-[#0f1117] border border-gray-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-purple-500"
+                />
+              </div>
 
-                  <div>
-                    <label className="block text-xs text-cyan-400 font-semibold mb-1 uppercase tracking-wide">
-                      👥 Target Audience *
-                    </label>
-                    <input
-                      type="text"
-                      value={jarvisForm.target_audience}
-                      onChange={e => setJarvisForm(p => ({ ...p, target_audience: e.target.value }))}
-                      placeholder="e.g. men and women aged 25-40 feeling stuck in life, interested in self improvement"
-                      className="w-full bg-[#0f1117] border border-gray-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-cyan-500"
-                    />
-                    <p className="text-xs text-gray-500 mt-1">Be specific — age, gender, interests, pain points</p>
-                  </div>
+              {/* Extra context */}
+              <div>
+                <label className="block text-xs text-gray-400 font-semibold mb-1 uppercase tracking-wide">Anything else Jarvis should know? (optional)</label>
+                <textarea
+                  value={jarvisForm.extra_context}
+                  onChange={e => setJarvisForm(p => ({ ...p, extra_context: e.target.value }))}
+                  placeholder="e.g. My target audience is men 25-40 interested in stoicism. My competitors are Ryan Holiday and Einzelganger."
+                  rows={3}
+                  className="w-full bg-[#0f1117] border border-gray-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-purple-500 resize-none"
+                />
+              </div>
 
-                  <div>
-                    <label className="block text-xs text-gray-400 font-semibold mb-1 uppercase tracking-wide">
-                      🥊 Top 3 Competitors
-                    </label>
-                    <input
-                      type="text"
-                      value={jarvisForm.competitors}
-                      onChange={e => setJarvisForm(p => ({ ...p, competitors: e.target.value }))}
-                      placeholder={isContent ? "e.g. Ryan Holiday, Einzelganger, Pursuit of Wonder" : "e.g. OXO, Totally Bamboo, Bamboozle"}
-                      className="w-full bg-[#0f1117] border border-gray-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-cyan-500"
-                    />
-                    <p className="text-xs text-gray-500 mt-1">Channels or brands winning in your exact niche right now</p>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs text-gray-400 font-semibold mb-1 uppercase tracking-wide">
-                      ⚡ Your Unique Angle
-                    </label>
-                    <input
-                      type="text"
-                      value={jarvisForm.unique_angle}
-                      onChange={e => setJarvisForm(p => ({ ...p, unique_angle: e.target.value }))}
-                      placeholder="e.g. brutally honest, no fluff, stoicism for people who hate fake gurus"
-                      className="w-full bg-[#0f1117] border border-gray-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-cyan-500"
-                    />
-                    <p className="text-xs text-gray-500 mt-1">What makes you different from every other channel in your niche</p>
-                  </div>
-                </div>
-              )}
-
-              {activeStep === 3 && (
-                <div className="space-y-4">
-                  <div className="bg-green-500/10 border border-green-500/20 rounded-lg px-4 py-3">
-                    <p className="text-xs text-green-300">
-                      💡 <strong>Step 3:</strong> Paste your full video description or content details.
-                      The more you give, the more specific Jarvis gets with titles, tags, and thumbnails.
-                    </p>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs text-green-400 font-semibold mb-1 uppercase tracking-wide">
-                      📋 Full Video Description / Content Details *
-                    </label>
-                    <textarea
-                      value={jarvisForm.video_description}
-                      onChange={e => setJarvisForm(p => ({ ...p, video_description: e.target.value }))}
-                      placeholder={`Paste your full YouTube description here, OR describe your video/product in detail:
-
-Example:
-"Most people spend their lives stuck — not because they're weak, 
-but because they're afraid to face reality. This video is a wake-up call. 
-A brutally honest message about self-deception, avoidance, and the power 
-of finally confronting what's real..."
-
-The more detail you give, the better Jarvis performs!`}
-                      rows={8}
-                      className="w-full bg-[#0f1117] border border-gray-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-green-500 resize-none"
-                    />
-                  </div>
-
-                  {/* Summary of what was filled in */}
-                  <div className="bg-[#0f1117] rounded-lg px-4 py-3 space-y-1">
-                    <p className="text-xs text-gray-400 font-semibold mb-2">📝 Analysis Summary:</p>
-                    {jarvisForm.main_keyword && <p className="text-xs text-gray-300">🎯 Keyword: <span className="text-white">{jarvisForm.main_keyword}</span></p>}
-                    {jarvisForm.target_audience && <p className="text-xs text-gray-300">👥 Audience: <span className="text-white">{jarvisForm.target_audience}</span></p>}
-                    {jarvisForm.competitors && <p className="text-xs text-gray-300">🥊 Competitors: <span className="text-white">{jarvisForm.competitors}</span></p>}
-                    {jarvisForm.current_stats && <p className="text-xs text-gray-300">📊 Stats: <span className="text-white">{jarvisForm.current_stats}</span></p>}
-                    {jarvisForm.goal && <p className="text-xs text-gray-300">🏆 Goal: <span className="text-white">{jarvisForm.goal}</span></p>}
-                    {!jarvisForm.main_keyword && !jarvisForm.video_description && (
-                      <p className="text-xs text-yellow-400">⚠️ Add at least a keyword or description for best results</p>
-                    )}
-                  </div>
-                </div>
-              )}
             </div>
 
             {/* Footer */}
-            <div className="flex justify-between px-6 py-4 border-t border-gray-800 shrink-0">
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setJarvisSource(null)}
-                  className="px-4 py-2 text-sm text-gray-400 border border-gray-700 rounded-lg hover:border-gray-500 transition-colors"
-                >
-                  Cancel
-                </button>
-                {activeStep > 1 && (
-                  <button
-                    onClick={() => setActiveStep(p => p - 1)}
-                    className="px-4 py-2 text-sm text-gray-400 border border-gray-700 rounded-lg hover:border-gray-500 transition-colors"
-                  >
-                    ← Back
-                  </button>
-                )}
-              </div>
-              <div className="flex gap-2">
-                {activeStep < 3 ? (
-                  <button
-                    onClick={() => setActiveStep(p => p + 1)}
-                    className="px-6 py-2 text-sm bg-purple-600 hover:bg-purple-500 text-white font-semibold rounded-lg transition-colors"
-                  >
-                    Next →
-                  </button>
-                ) : (
-                  <button
-                    onClick={runJarvisAnalysis}
-                    className="px-6 py-2 text-sm bg-purple-600 hover:bg-purple-500 text-white font-semibold rounded-lg transition-colors"
-                  >
-                    🚀 Run Jarvis Analysis
-                  </button>
-                )}
-              </div>
+            <div className="flex justify-between px-6 py-4 border-t border-gray-800">
+              <button onClick={() => setJarvisSource(null)} className="px-4 py-2 text-sm text-gray-400 border border-gray-700 rounded-lg hover:border-gray-500">
+                Cancel
+              </button>
+              <button
+                onClick={runJarvisAnalysis}
+                disabled={jarvisLoading || fetchingVideo}
+                className="px-6 py-2 text-sm bg-purple-600 hover:bg-purple-500 text-white font-semibold rounded-lg disabled:opacity-50"
+              >
+                {fetchingVideo ? "Fetching data..." : "Run Jarvis Analysis"}
+              </button>
             </div>
           </div>
         </div>
@@ -376,7 +279,7 @@ The more detail you give, the better Jarvis performs!`}
           </div>
           <div className="flex gap-2">
             <button onClick={() => exportToCSV(result?.data ?? [], "sources")} className="bg-[#1a1d27] hover:bg-gray-800 text-gray-300 hover:text-white border border-gray-700 font-medium px-4 py-2 rounded-lg text-sm transition-colors">
-              ↓ Export CSV
+              Export CSV
             </button>
             <button onClick={() => setShowAdd(true)} className="bg-cyan-500 hover:bg-cyan-400 text-black font-semibold px-4 py-2 rounded-lg text-sm">
               + Add Source
@@ -399,11 +302,11 @@ The more detail you give, the better Jarvis performs!`}
             <option value="status">Sort: Status</option>
           </select>
           <button onClick={() => setSortOrder(p => p === "asc" ? "desc" : "asc")} className="bg-[#1a1d27] border border-gray-700 rounded-lg px-3 py-2.5 text-sm text-white hover:border-cyan-500 min-w-[80px]">
-            {sortOrder === "asc" ? "↑ Asc" : "↓ Desc"}
+            {sortOrder === "asc" ? "Asc" : "Desc"}
           </button>
         </div>
 
-        {error && <div className="bg-red-500/10 border border-red-500/30 rounded-lg px-4 py-3 text-red-400 text-sm">⚠️ {error}</div>}
+        {error && <div className="bg-red-500/10 border border-red-500/30 rounded-lg px-4 py-3 text-red-400 text-sm">{error}</div>}
 
         <div className="bg-[#1a1d27] border border-gray-800 rounded-xl overflow-hidden">
           <div className="overflow-x-auto">
@@ -460,9 +363,9 @@ The more detail you give, the better Jarvis performs!`}
                           <button
                             onClick={() => openJarvisPopup(source)}
                             disabled={analyzingId === source.id || jarvisLoading}
-                            className="text-xs text-gray-400 hover:text-purple-400 px-2 py-1 rounded hover:bg-purple-500/10 disabled:opacity-40 disabled:cursor-not-allowed"
+                            className="text-xs text-gray-400 hover:text-purple-400 px-2 py-1 rounded hover:bg-purple-500/10 disabled:opacity-40"
                           >
-                            {analyzingId === source.id ? "⏳ Analyzing..." : "🤖 Analyze"}
+                            {analyzingId === source.id ? "Analyzing..." : "Analyze"}
                           </button>
                         </div>
                       </td>
@@ -492,10 +395,3 @@ The more detail you give, the better Jarvis performs!`}
     </div>
   );
 }
-
-
-
-
-
-
-
