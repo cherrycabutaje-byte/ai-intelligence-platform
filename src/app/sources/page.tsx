@@ -130,7 +130,7 @@ ${jarvisForm.video_description}
     return "bg-yellow-500/20 text-yellow-400 border border-yellow-500/30";
   };
 
-  const isContent = ["YouTube", "TikTok", "Instagram", "Twitter", "LinkedIn"].includes(jarvisSource?.platform ?? "");
+  const isContent = ["YouTube", "TikTok", "Instagram", "Facebook", "Twitter", "LinkedIn"].includes(jarvisSource?.platform ?? "");
 
   return (
     <div className="min-h-screen bg-[#0f1117] text-white">
@@ -492,6 +492,7 @@ The more detail you give, the better Jarvis performs!`}
     </div>
   );
 }
+
 
 
 

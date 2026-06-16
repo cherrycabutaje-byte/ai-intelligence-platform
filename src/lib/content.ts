@@ -1,4 +1,4 @@
-import { createClient } from './supabase'
+﻿import { createClient } from './supabase'
 import type { ContentAnalysis } from '@/types/database'
 
 const TABLE = 'content_analysis' as const
