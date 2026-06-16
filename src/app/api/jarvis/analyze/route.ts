@@ -211,7 +211,7 @@ Schema:
   "content_roadmap": "Week 1: [Topic] | Week 2: [Topic] | Week 3: [Topic] | Week 4: [Topic]",
   "content_action_plan": "THIS WEEK: [actions] | NEXT WEEK: [actions] | WEEK 3: [actions]",
   "monetization_opportunity": "string",
-  "content_report": "string",
+  "content_report": "MUST follow this structure: 1) State REAL numbers (views, likes, comments, days since posted). 2) Calculate ratios and what they mean. 3) Identify the ROOT CAUSE of the problem. 4) State the cost of waiting (viewers lost per day). 5) Name the TOP 3 actions to take TODAY. 6) End with urgency and motivation. Reference the actual video title and real data throughout.",
   "product_gap": "string",
   "next_product_idea": "string",
   "product_action_plan": "string",
@@ -222,7 +222,7 @@ Schema:
   "revenue_projection_60_days": "string",
   "revenue_projection_90_days": "string",
   "ceo_decision": "GO or WAIT",
-  "ceo_reasoning": "string",
+  "ceo_reasoning": "MUST include: 1) How many days since posted and algorithm window status. 2) Specific actions with time estimates. 3) Expected result with real numbers. 4) Cost of NOT acting today. 5) Motivating close like a real business manager would say.",
   "growth_opportunities": [
     {
       "opportunity_type": "One specific action e.g. Fix Video Title or Add Missing Tags or Share to Reddit",
@@ -420,6 +420,8 @@ Show the math. Show the timeline. Be specific. Return ONLY JSON.`
     return NextResponse.json({ error: "Internal server error", details: message }, { status: 500 });
   }
 }
+
+
 
 
 
