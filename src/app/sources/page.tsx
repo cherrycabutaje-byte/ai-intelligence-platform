@@ -196,25 +196,7 @@ ${videoContext}
                 </div>
               </div>
 
-              {jarvisForm.video_status === "already_uploaded" && (
-                <div>
-                  <label className="block text-xs text-gray-400 font-semibold mb-2 uppercase tracking-wide">When did you upload?</label>
-                  <div className="grid grid-cols-2 gap-2">
-                    {[
-                      { value: "today", label: "Today / Yesterday", desc: "Golden window!" },
-                      { value: "this_week", label: "2-7 days ago", desc: "Still time to boost" },
-                      { value: "this_month", label: "1-4 weeks ago", desc: "Need Shorts strategy" },
-                      { value: "old", label: "1+ month ago", desc: "Revival strategy" },
-                    ].map(opt => (
-                      <button key={opt.value} onClick={() => setJarvisForm(p => ({ ...p, upload_timing: opt.value }))}
-                        className={`px-3 py-2 rounded-lg text-left text-xs border transition-colors ${jarvisForm.upload_timing === opt.value ? "bg-cyan-600/20 border-cyan-500 text-white" : "bg-[#0f1117] border-gray-700 text-gray-400 hover:border-gray-500"}`}>
-                        <div className="font-semibold">{opt.label}</div>
-                        <div className="text-gray-500">{opt.desc}</div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
+
 
               <div>
                 <label className="block text-xs text-gray-400 font-semibold mb-1 uppercase tracking-wide">Your Goal</label>
@@ -368,3 +350,4 @@ ${videoContext}
     </div>
   );
 }
+
