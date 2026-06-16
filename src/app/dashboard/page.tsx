@@ -121,7 +121,7 @@ export default function DashboardPage() {
             onClick={() => setShowInput(true)}
             className="bg-cyan-500 hover:bg-cyan-400 text-black font-semibold px-4 py-2 rounded-lg text-sm"
           >
-            + Update Today's Stats
+            + Update Stats Today
           </button>
         </div>
 
@@ -144,7 +144,7 @@ export default function DashboardPage() {
           <div className="bg-[#1a1d27] border border-gray-800 rounded-xl px-6 py-16 text-center">
             <div className="text-4xl mb-3">📈</div>
             <h3 className="text-white font-semibold text-lg mb-2">No stats yet for {selectedSource?.asset_name}</h3>
-            <p className="text-gray-400 text-sm mb-6">Start tracking your growth by adding today's stats. Takes 2 minutes!</p>
+            <p className="text-gray-400 text-sm mb-6">Start tracking your growth by adding Stats Today. Takes 2 minutes!</p>
             <button onClick={() => setShowInput(true)} className="bg-cyan-500 hover:bg-cyan-400 text-black font-semibold px-6 py-2 rounded-lg text-sm">
               + Add First Stats Entry
             </button>
@@ -250,7 +250,7 @@ export default function DashboardPage() {
             <div className="bg-[#1a1d27] border border-cyan-500/30 rounded-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
               <div className="flex items-center justify-between px-6 py-4 border-b border-gray-800">
                 <div>
-                  <h2 className="text-lg font-semibold text-white">📊 Today's Stats</h2>
+                  <h2 className="text-lg font-semibold text-white">📊 Stats Today</h2>
                   <p className="text-xs text-gray-400">{selectedSource?.asset_name} • {new Date().toLocaleDateString()}</p>
                 </div>
                 <button onClick={() => setShowInput(false)} className="text-gray-400 hover:text-white text-xl">✕</button>
@@ -338,6 +338,7 @@ export default function DashboardPage() {
     </div>
   );
 }
+
 
 
 
