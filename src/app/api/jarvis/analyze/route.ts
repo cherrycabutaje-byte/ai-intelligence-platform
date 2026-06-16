@@ -272,7 +272,9 @@ Comment Count: ${scraped.comments ?? "N/A"}
 Subscriber Count: ${scraped.subscribers ?? "N/A"}
 Channel Name: ${scraped.channel_name ?? "N/A"}
 Total Channel Views: ${scraped.total_views ?? "N/A"}
-Total Videos: ${scraped.video_count ?? "N/A"}`
+Total Videos: ${scraped.video_count ?? "N/A"}
+Published Date: ${scraped.published_at ?? "N/A"}
+Days Since Published: ${scraped.published_at ? Math.floor((Date.now() - new Date(scraped.published_at).getTime()) / (1000 * 60 * 60 * 24)) + " days ago" : "Unknown"}`
       : "URL could not be scraped. Use provided details only.";
 
     const completion = await openai.chat.completions.create({
@@ -418,6 +420,7 @@ Show the math. Show the timeline. Be specific. Return ONLY JSON.`
     return NextResponse.json({ error: "Internal server error", details: message }, { status: 500 });
   }
 }
+
 
 
 
