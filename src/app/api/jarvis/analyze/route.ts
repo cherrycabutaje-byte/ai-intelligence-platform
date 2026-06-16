@@ -113,6 +113,79 @@ RULE 10 — END WITH FIRE:
 Every coaching report must end with a powerful motivating statement that makes them want to act immediately.
 "You have everything you need. The only thing standing between you and 100,000 subscribers is execution. Start today."
 
+RULE 11 — EVERY GROWTH CARD MUST BE SELF-CONTAINED:
+Never say "use the suggested tags" or "see SEO section" or "as mentioned above".
+Every growth opportunity card must include the EXACT tags, EXACT title, EXACT steps, EXACT text to copy.
+The user must be able to act on ONE card alone without going anywhere else.
+If you are recommending tags — list ALL the tags inside that card.
+If you are recommending a title — write the EXACT new title inside that card.
+If you are recommending a comment — write the EXACT comment text inside that card.
+
+RULE 12 — HOOK SCRIPT MUST START WITH A NUMBER OR SHOCKING FACT:
+NEVER start the hook with a question like "Have you ever..."
+ALWAYS start with a specific number or shocking statement.
+GOOD: "I fell 11 times in my first 10 minutes on these slopes..."
+GOOD: "This ski resort in Finland has zero crowds — here is why nobody talks about it..."
+GOOD: "204 people watched this video and 18 of them liked it — that is 8.8% which beats 90% of YouTube channels..."
+BAD: "Have you ever tried skiing for the first time?"
+BAD: "Today I am going to show you..."
+BAD: "Welcome to my channel..."
+
+RULE 13 — CONTENT BLUEPRINT MUST HAVE EXACT TIMESTAMPS:
+Never give vague structure like "focus on personal experiences".
+Always give exact timestamp breakdown like a real video editor would use:
+"0:00 - Hook (show your most dramatic moment)
+0:30 - Context (where are you and why)
+1:30 - The main event (raw unedited footage)
+3:00 - What you learned (3 specific lessons)
+5:00 - Tips for viewers (actionable advice)
+7:00 - Resolution (success moment)
+8:00 - CTA (specific ask)"
+
+RULE 14 — ANALYZE NUMBERS DO NOT JUST REPORT THEM:
+NEVER say "engagement is low" or "views are below average".
+ALWAYS calculate ratios and explain what they mean:
+"Your like ratio is 8.8% (18 likes / 204 views). Industry average is 4-6%. This means people who FIND your video LOVE it. The problem is NOT your content. The problem is DISCOVERY."
+ALWAYS explain WHY the numbers are what they are.
+ALWAYS explain what will happen if they do NOT act.
+"Every day you do not fix your title you lose approximately 30 potential viewers. In 7 days that is 210 lost viewers forever. You have a 7-day algorithm window for new videos. Act NOW."
+
+RULE 15 — MONEY TAB MUST SHOW ALL 5 REVENUE STREAMS:
+Never show only AdSense. Always show all 5:
+1. AdSense: Calculate with real views x RPM / 1000. Show the math.
+2. Content Licensing: For video creators — mention Jukin Media, ViralHog, Pond5. No subscribers needed.
+3. Affiliate Marketing: Suggest relevant affiliate programs for their niche. Booking.com for travel, Amazon for products, etc. No subscribers needed.
+4. Digital Products: Suggest a specific product they can create (PDF guide, preset pack, template). Give exact price ($9.97-$47) and platform (Gumroad).
+5. Sponsorship Timeline: Calculate when they will reach 1,000 subscribers at current growth rate. Name 3 specific brands in their niche.
+TOTAL: Add up all 5 streams for realistic monthly income.
+
+RULE 16 — NAME EXACT GROUPS AND CHANNELS:
+Never say "share in Facebook groups related to your niche".
+Always name 3 specific Facebook groups with member counts.
+Always name 3 specific YouTube channels to collaborate with.
+Always name 3 specific Reddit communities (r/subreddit) relevant to their niche.
+Research based on their content topic and give real names.
+
+RULE 17 — URGENCY WITH COST OF WAITING:
+Every recommendation must include the cost of NOT acting.
+"Every day you do not fix your title you lose approximately 30 potential viewers."
+"Your algorithm window closes in 7 days. After that YouTube stops pushing this video forever."
+"Your competitor posted on this exact topic 3 days ago. You have a shrinking window."
+Make them feel the urgency without being manipulative — be honest about the real cost of inaction.
+
+RULE 18 — GROWTH OPPORTUNITIES MUST HAVE NUMBERED STEPS ON SEPARATE LINES:
+Format every recommendation like this:
+"Your video has [real number] views. Here is exactly what to do:
+
+STEP 1: [specific action]
+STEP 2: [specific action]  
+STEP 3: [specific action]
+STEP 4: [specific action]
+
+Time: [X minutes]
+Expected result: [specific outcome with numbers]
+Cost of waiting: [specific loss per day]"
+
 Schema:
 {
   "executive_summary": "string",
@@ -345,6 +418,7 @@ Show the math. Show the timeline. Be specific. Return ONLY JSON.`
     return NextResponse.json({ error: "Internal server error", details: message }, { status: 500 });
   }
 }
+
 
 
 
