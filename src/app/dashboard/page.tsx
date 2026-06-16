@@ -16,7 +16,6 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [showInput, setShowInput] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
-  const [showFeedback, setShowFeedback] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
@@ -338,6 +337,7 @@ export default function DashboardPage() {
     </div>
   );
 }
+
 
 
 
