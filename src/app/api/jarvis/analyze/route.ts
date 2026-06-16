@@ -225,11 +225,11 @@ Schema:
   "ceo_reasoning": "string",
   "growth_opportunities": [
     {
-      "opportunity_type": "SPECIFIC type e.g. Fix Video Title, Add Missing Tags, Pin Engagement Comment, Create YouTube Short, Share to Reddit",
-      "recommendation": "FULL STEP BY STEP HOW-TO GUIDE. Reference REAL numbers from the video data. Example: Your video has X views and Y comments. Here is exactly what to do: Step 1: Go to studio.youtube.com. Step 2: Click Videos. Step 3: Change your title from [actual title] to [new title]. Time: 2 minutes. Expected result: 3x more impressions within 48 hours.",
+      "opportunity_type": "One specific action e.g. Fix Video Title or Add Missing Tags or Share to Reddit",
+      "recommendation": "Your video has [X] views posted [Y] days ago. Here is exactly what to do: STEP 1: [action] STEP 2: [action] STEP 3: [action] STEP 4: [action] Time: [X minutes] Expected result: [specific outcome] Cost of waiting: [specific daily loss]",
       "priority": "high",
-      "estimated_impact": "From [real current views] views to estimated [target views]+ views within 7 days",
-      "monetization_potential": "Specific dollar amount and timeline e.g. At 800 views per video posting 4x per month = $15-30 AdSense within 30 days"
+      "estimated_impact": "From [X] views to [Y]+ views within 7 days",
+      "monetization_potential": "$[X]-[Y] AdSense within 30 days"
     }
   ]
 }`;
@@ -420,6 +420,7 @@ Show the math. Show the timeline. Be specific. Return ONLY JSON.`
     return NextResponse.json({ error: "Internal server error", details: message }, { status: 500 });
   }
 }
+
 
 
 
