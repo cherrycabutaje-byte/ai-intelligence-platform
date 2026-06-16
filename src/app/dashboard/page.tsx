@@ -5,6 +5,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import type { Source } from "@/types/database";
 import { getSources } from "@/lib/sources";
 import { getStats, upsertStat, computeGrowth, getMilestones, type SourceStat } from "@/lib/stats";
+import FeedbackModal from "@/components/feedback/FeedbackModal";
 
 export default function DashboardPage() {
   const [sources, setSources] = useState<Source[]>([]);
@@ -14,6 +15,8 @@ export default function DashboardPage() {
   const [milestones, setMilestones] = useState<ReturnType<typeof getMilestones>>([]);
   const [loading, setLoading] = useState(true);
   const [showInput, setShowInput] = useState(false);
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [showFeedback, setShowFeedback] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
@@ -239,6 +242,8 @@ export default function DashboardPage() {
           </>
         )}
 
+        {showFeedback && <FeedbackModal onClose={() => setShowFeedback(false)} />}
+
         {/* Stats Input Modal */}
         {showInput && (
           <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -333,3 +338,7 @@ export default function DashboardPage() {
     </div>
   );
 }
+
+
+
+
