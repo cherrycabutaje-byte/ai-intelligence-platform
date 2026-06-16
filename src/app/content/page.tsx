@@ -287,6 +287,10 @@ export default function ContentPage() {
                     <Section label="Hook Script - Read Word For Word" value={selected.hook_script} color="cyan" copyable />
                     <Section label="Content Blueprint" value={selected.content_blueprint} color="gray" />
                     <Section label="12-Week Content Roadmap" value={selected.content_roadmap} color="purple" copyable />
+                    <Section label="Next 4 Video Titles - Ready To Film" value={selected.next_4_titles} color="cyan" copyable />
+                    <Section label="Series Strategy" value={selected.series_strategy} color="yellow" />
+                    <Section label="Posting Schedule" value={selected.posting_schedule} color="green" copyable />
+                    <Section label="Consistency Score" value={selected.consistency_score} color="purple" />
                     <Section label="Action Plan" value={selected.action_plan} color="green" copyable />
                   </>
                 )}
@@ -340,3 +344,4 @@ export default function ContentPage() {
     </div>
   );
 }
+
