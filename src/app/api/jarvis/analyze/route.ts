@@ -150,7 +150,15 @@ Schema:
   "revenue_projection_90_days": "string",
   "ceo_decision": "GO or WAIT",
   "ceo_reasoning": "string",
-  "growth_opportunities": [{"opportunity_type": "string","recommendation": "string","priority": "high","estimated_impact": "string","monetization_potential": "string"}]
+  "growth_opportunities": [
+    {
+      "opportunity_type": "SPECIFIC type e.g. Fix Video Title, Add Missing Tags, Pin Engagement Comment, Create YouTube Short, Share to Reddit",
+      "recommendation": "FULL STEP BY STEP HOW-TO GUIDE. Reference REAL numbers from the video data. Example: Your video has X views and Y comments. Here is exactly what to do: Step 1: Go to studio.youtube.com. Step 2: Click Videos. Step 3: Change your title from [actual title] to [new title]. Time: 2 minutes. Expected result: 3x more impressions within 48 hours.",
+      "priority": "high or medium or low",
+      "estimated_impact": "Specific measurable result using real numbers e.g. From 245 views to estimated 800+ views within 7 days",
+      "monetization_potential": "Specific dollar amount and timeline e.g. At 800 views per video posting 4x per month = $15-30 AdSense within 30 days"
+    }
+  ]
 }`;
 
 async function scrapeUrl(url: string, platform: string, baseUrl: string): Promise<Record<string, string | null>> {
@@ -181,7 +189,17 @@ export async function POST(req: NextRequest) {
     const scraped = await scrapeUrl(url, platform ?? "", baseUrl);
 
     const scrapeContext = Object.keys(scraped).length > 0
-      ? `REAL DATA: Title: ${scraped.title ?? "N/A"} | Description: ${scraped.og_description ?? scraped.description ?? "N/A"} | Channel: ${scraped.channel_name ?? "N/A"} | Subscribers: ${scraped.subscribers ?? "N/A"}`
+      ? `REAL YOUTUBE DATA (USE THESE EXACT NUMBERS IN YOUR RESPONSE):
+Video Title: ${scraped.title ?? "N/A"}
+Full Description: ${scraped.description ?? scraped.og_description ?? "N/A"}
+Current Tags: ${scraped.tags ?? "N/A"}
+View Count: ${scraped.views ?? "N/A"}
+Like Count: ${scraped.likes ?? "N/A"}
+Comment Count: ${scraped.comments ?? "N/A"}
+Subscriber Count: ${scraped.subscribers ?? "N/A"}
+Channel Name: ${scraped.channel_name ?? "N/A"}
+Total Channel Views: ${scraped.total_views ?? "N/A"}
+Total Videos: ${scraped.video_count ?? "N/A"}`
       : "URL could not be scraped. Use provided details only.";
 
     const completion = await openai.chat.completions.create({
@@ -300,6 +318,8 @@ Give 12 copy-paste SEO tags, full description template, word-for-word hook scrip
     return NextResponse.json({ error: "Internal server error", details: message }, { status: 500 });
   }
 }
+
+
 
 
 
