@@ -227,7 +227,34 @@ Content/Notes: ${notes ?? "None provided"}
 URL: ${url}
 ${scrapeContext}
 
-Give 12 copy-paste SEO tags, full description template, word-for-word hook script, thumbnail formula, 48-hour engagement plan, algorithm tips, 12-week roadmap, revenue projections. Return ONLY JSON.`
+Give 12 copy-paste SEO tags, full description template, word-for-word hook script, thumbnail formula, 48-hour engagement plan, algorithm tips, 12-week roadmap, revenue projections. 
+
+REVENUE PROJECTIONS — CRITICAL:
+Use the REAL numbers from the scraped data to calculate revenue.
+Formula: Views x RPM / 1000 = AdSense revenue
+RPM by niche:
+- Music/Ambient: $1-3 RPM
+- Stoicism/Self improvement: $3-6 RPM
+- Finance/Business: $8-15 RPM
+- Gaming: $2-4 RPM
+- Health/Fitness: $4-8 RPM
+
+Calculate like this:
+Current views per video: [use real number]
+Current subscribers: [use real number]
+Videos per month: estimate 4
+Monthly views: current views x 4 videos
+AdSense 30 days: monthly views x RPM / 1000
+AdSense 60 days: project 30% growth
+AdSense 90 days: project 60% growth
+
+Also include:
+- Sponsorship potential (when and how much)
+- Digital product potential (course, presets, ebook)
+- Membership/Patreon potential
+- Affiliate marketing potential
+
+Show the math. Show the timeline. Be specific. Return ONLY JSON.`
         },
       ],
     });
@@ -318,6 +345,7 @@ Give 12 copy-paste SEO tags, full description template, word-for-word hook scrip
     return NextResponse.json({ error: "Internal server error", details: message }, { status: 500 });
   }
 }
+
 
 
 
