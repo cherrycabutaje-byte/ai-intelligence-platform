@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import type { SourceInsert } from '@/types/database';
@@ -55,7 +55,7 @@ export default function AddSourceModal({ onClose, onSuccess }: Props) {
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-800">
           <h2 className="text-lg font-semibold text-white">Add New Source</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-white text-xl transition-colors">✕</button>
+          <button onClick={onClose} className="text-gray-400 hover:text-white text-xl transition-colors">âœ•</button>
         </div>
 
         {/* Form */}
@@ -63,7 +63,7 @@ export default function AddSourceModal({ onClose, onSuccess }: Props) {
 
           {error && (
             <div className="bg-red-500/10 border border-red-500/30 rounded-lg px-4 py-3 text-red-400 text-sm">
-              ⚠ {error}
+              âš  {error}
             </div>
           )}
 
@@ -86,6 +86,7 @@ export default function AddSourceModal({ onClose, onSuccess }: Props) {
                 <option value="YouTube">YouTube</option>
                 <option value="TikTok">TikTok</option>
                 <option value="Instagram">Instagram</option>
+                <option value="Facebook">Facebook</option>
                 <option value="Amazon">Amazon</option>
                 <option value="Shopify">Shopify</option>
                 <option value="Etsy">Etsy</option>
@@ -192,3 +193,4 @@ export default function AddSourceModal({ onClose, onSuccess }: Props) {
     </div>
   );
 }
+
