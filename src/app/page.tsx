@@ -13,7 +13,7 @@ function PricingButton({ plan, label, className }: { plan: string; label: string
       const { data: { session } } = await supabase.auth.getSession();
 
       if (!session) {
-        window.location.href = "/signup";
+        window.location.href = `/signup?plan=${plan}`;
         return;
       }
 
@@ -341,3 +341,4 @@ export default function LandingPage() {
     </div>
   );
 }
+
