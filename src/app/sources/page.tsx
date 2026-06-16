@@ -32,7 +32,7 @@ export default function SourcesPage() {
 
   const [jarvisForm, setJarvisForm] = useState({
     video_status: "already_uploaded",
-    upload_timing: "1_week",
+    upload_timing: "this_week",
     main_keyword: "",
     target_audience: "",
     competitors: "",
@@ -490,6 +490,8 @@ The more detail you give, the better Jarvis performs!`}
     </div>
   );
 }
+
+
 
 
 
