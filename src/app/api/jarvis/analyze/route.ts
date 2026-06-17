@@ -289,7 +289,7 @@ Days Since Published: ${scraped.published_at ? Math.floor((Date.now() - new Date
 
     const completion = await anthropic.messages.create({
       model: "claude-haiku-4-5",
-      max_tokens: 4000,
+      max_tokens: 8000,
       system: SYSTEM_PROMPT,
       messages: [
         {
@@ -439,6 +439,7 @@ Show the math. Show the timeline. Be specific. Return ONLY JSON.`
     return NextResponse.json({ error: "Internal server error", details: message }, { status: 500 });
   }
 }
+
 
 
 
