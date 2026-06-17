@@ -60,8 +60,8 @@ export default function SourcesPage() {
     }
     setAnalyzingId(source.id);
     const result = await analyze({
-      sourceUrl: source.asset_url ?? "",
-      url: source.asset_url,
+   id: String(source.id),
+      url: source.asset_url ?? "",
       platform: source.platform,
       name: source.asset_name,
       niche: source.niche ?? undefined,
