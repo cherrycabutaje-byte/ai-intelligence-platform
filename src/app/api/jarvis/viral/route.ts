@@ -56,8 +56,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, dbError: error.message }, { status: 500 });
     }
 
-    console.log("[JARVIS viral] Updated row:", data?.id);
-    return NextResponse.json({ success: true, id: data?.id, viral: parsed });
+    console.log("[JARVIS viral] Updated row:", analysisId);
+    return NextResponse.json({ success: true, id: analysisId, viral: parsed });
 
   } catch (err) {
     console.error("[JARVIS viral] ERROR:", err);
