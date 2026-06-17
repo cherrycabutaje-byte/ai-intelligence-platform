@@ -106,6 +106,7 @@ export default function ContentPage() {
     { id: "content", label: "Content" },
     { id: "growth", label: "Growth" },
     { id: "money", label: "Money" },
+    { id: "viral", label: "Viral Formula" },
   ];
 
   return (
@@ -305,6 +306,17 @@ export default function ContentPage() {
                   </>
                 )}
 
+                {activeTab === "viral" && (
+                  <>
+                    <Section label="Emotion Trigger — What Makes Your Audience Act" value={selected.emotion_trigger} color="purple" />
+                    <Section label="Viral Formula For Your Niche" value={selected.viral_formula} color="cyan" copyable />
+                    <Section label="Comment Trigger — Pin This To Get More Comments" value={selected.comment_trigger} color="green" copyable />
+                    <Section label="Launch Strategy" value={selected.launch_strategy} color="yellow" copyable />
+                    <Section label="Content To Sales Funnel" value={selected.sales_funnel} color="cyan" copyable />
+                    <Section label="Compound Growth Plan — The Math" value={selected.compound_growth_plan} color="green" copyable />
+                  </>
+                )}
+
                 {activeTab === "money" && (
                   <>
                     <Section label="Monetization Stack" value={selected.monetization_opportunity} color="yellow" />
@@ -344,4 +356,6 @@ export default function ContentPage() {
     </div>
   );
 }
+
+
 

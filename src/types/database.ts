@@ -70,6 +70,12 @@ export interface ContentAnalysis {
   next_4_titles: string | null
   series_strategy: string | null
   consistency_score: string | null
+  viral_formula: string | null
+  emotion_trigger: string | null
+  comment_trigger: string | null
+  launch_strategy: string | null
+  sales_funnel: string | null
+  compound_growth_plan: string | null
   revenue_projection_30: string | null;
   revenue_projection_60: string | null;
   revenue_projection_90: string | null;
