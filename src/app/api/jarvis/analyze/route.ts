@@ -207,9 +207,9 @@ Interest content idea, Desire mention strategy, Action exact CTA words, Retentio
   "thumbnail_strategy": "string",
   "hook_script": "0-3s: [words]\n3-10s: [words]\n10-20s: [words]\n20-30s: [words]",
   "engagement_strategy": "string",
-  "algorithm_tips": "string",
-  "shorts_strategy": "string",
-  "collaboration_playbook": "string",
+
+
+
   "organic_growth_playbook": "string",
   "viral_drivers": "string",
   "content_blueprint": "string",
@@ -469,6 +469,7 @@ Show the math. Show the timeline. Be specific. Return ONLY JSON.`
     return NextResponse.json({ error: "Internal server error", details: message }, { status: 500 });
   }
 }
+
 
 
 
