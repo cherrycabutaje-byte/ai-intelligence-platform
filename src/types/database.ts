@@ -89,7 +89,8 @@ export interface ContentAnalysis {
 }
 
 export interface ProductAnalysis {
-  id: number;ceo_decision: string | null;
+  id: number;
+  created_at: string;
   ceo_reasoning: string | null;
   source_id: number | null;
   status: string | null;
