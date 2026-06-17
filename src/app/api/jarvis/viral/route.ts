@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
 
     const parsed = extractJSON(rawText);
 
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from("content_analysis")
       .update({
         emotion_trigger: parsed.emotion_trigger || null,
@@ -50,9 +50,7 @@ export async function POST(req: NextRequest) {
         compound_growth_plan: parsed.compound_growth_plan || null,
       })
       .eq("id", analysisId)
-      .select()
-      .single();
-
+      
     if (error) {
       console.error("[JARVIS viral] DB error:", error);
       return NextResponse.json({ success: false, dbError: error.message }, { status: 500 });
