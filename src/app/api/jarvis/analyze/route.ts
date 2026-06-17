@@ -67,7 +67,7 @@ RESPONSE FORMAT — RETURN THIS EXACT JSON STRUCTURE:
   "revenue_projection_30_days": "30 day: $X AdSense + $X affiliate = $X total. Math: views x RPM / 1000",
   "revenue_projection_60_days": "60 day projection with 30% growth",
   "revenue_projection_90_days": "90 day projection with 60% growth",
- "ceo_decision": "GO",
+  "ceo_decision": "GO",
   "ceo_reasoning": "Why GO or WAIT with specific reasoning",
   "readiness_scores": {
     "sponsorship_readiness": 72,
@@ -221,29 +221,14 @@ Return the complete JSON now.`
       revenue_projection_30: analysis.revenue_projection_30_days,
       revenue_projection_60: analysis.revenue_projection_60_days,
       revenue_projection_90: analysis.revenue_projection_90_days,
-    ceo_decision: analysis.ceo_decision,
+      ceo_decision: analysis.ceo_decision,
       ceo_reasoning: analysis.ceo_reasoning,
       readiness_scores: analysis.readiness_scores ?? null,
       platform_fit: analysis.platform_fit ?? null,
       status: "active",
     }).select();
 
-  opportunity_type: string;
-      recommendation: string;
-      priority: string;
-      estimated_impact: string;
-      monetization_potential: string;
-   priority_rank: number;
-      confidence_score: number;
-      confidence_level: string;
-      evidence: string;
-      impact_score: string;
-      effort_level: string;
-      forecast_low: string;
-      forecast_expected: string;
-      forecast_high: string;
-      forecast_confidence: number;
-   };
+    const growthRows = (analysis.growth_opportunities as Array<Record<string, unknown>>) ?? [];
 
     if (Array.isArray(growthRows) && growthRows.length > 0) {
       await supabase.from("growth_opportunities").insert(
