@@ -75,8 +75,8 @@ export function useJarvis() {
             }),
           });
         }
-      } catch {
-        // Viral formula failed silently
+      } catch (viralError) {
+        console.log("Viral API error:", viralError);
       }
 
       return data as JarvisResult;
@@ -90,3 +90,4 @@ export function useJarvis() {
   }
   return { analyze, loading, error };
 }
+
