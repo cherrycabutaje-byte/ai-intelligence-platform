@@ -52,11 +52,19 @@ export default function GrowthPage() {
       .eq("id", id);
     console.log("[updateStatus] id:", id, "status:", status, "session:", !!session, "error:", error);
     setUpdatingId(null);
-    if (error) {
+   if (error) {
       showToast("Update failed: " + error.message);
     } else {
       showToast(status === "completed" ? "✅ Marked as completed!" : "Updated!");
-      fetchGrowth();
+      setResult(prev => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          data: prev.data.map(item => 
+            item.id === id ? { ...item, execution_status: status, completed_at: status === "completed" ? new Date().toISOString() : null } : item
+          )
+        };
+      });
       if (selected?.id === id) {
         setSelected(prev => prev ? { ...prev, execution_status: status } : null);
       }
