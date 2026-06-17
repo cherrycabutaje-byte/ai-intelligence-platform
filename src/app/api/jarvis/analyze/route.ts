@@ -176,7 +176,7 @@ Return the complete JSON now.`
 
     let analysis: Record<string, unknown>;
     try {
-      const cleaned = rawText.replace(/^```json\s*/i, "").replace(/^```\s*/i, "").replace(/```\s*$/i, "").trim();
+  const cleaned = rawText.replace(/^```json\s*/i, "").replace(/^```\s*/i, "").replace(/```\s*$/i, "").replace(/```json/gi, "").replace(/```/g, "").trim();
       analysis = JSON.parse(cleaned);
     } catch {
       const start = rawText.indexOf("{");
