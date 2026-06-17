@@ -310,7 +310,14 @@ ${scrapeContext}
 
 Give 12 copy-paste SEO tags, full description template, word-for-word hook script, thumbnail formula, 48-hour engagement plan, algorithm tips, 12-week roadmap, revenue projections.
 
-CRITICAL: Be CONCISE. Maximum 100 words per field. No repetition. Short sentences only. The JSON must be complete and valid. 
+CRITICAL RESPONSE FORMAT:
+- Maximum 50 words per field
+- No bullet points inside JSON strings
+- Use | to separate items instead of new lines  
+- The ENTIRE JSON must fit in one response
+- Start with { and end with }
+- If running long, truncate each field to fit
+- COMPLETE JSON is more important than detail 
 
 REVENUE PROJECTIONS — CRITICAL:
 Use the REAL numbers from the scraped data to calculate revenue.
@@ -462,6 +469,7 @@ Show the math. Show the timeline. Be specific. Return ONLY JSON.`
     return NextResponse.json({ error: "Internal server error", details: message }, { status: 500 });
   }
 }
+
 
 
 
