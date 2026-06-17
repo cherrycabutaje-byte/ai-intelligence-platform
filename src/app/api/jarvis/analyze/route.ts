@@ -215,13 +215,13 @@ Schema:
   "viral_drivers": "string",
   "content_blueprint": "string",
   "content_roadmap": "Week 1: [Topic] | Week 2: [Topic] | Week 3: [Topic] | Week 4: [Topic]",
-  "posting_schedule": "MUST be specific: Best days to post (e.g. Tuesday and Friday), Best time (e.g. 6-8pm audience timezone), Frequency recommendation (e.g. 2x per week), WHY this schedule works for their niche, What happens if they post less than recommended",
-  "next_4_titles": "Title 1: [SEO optimized title ready to film] | Title 2: [SEO optimized title] | Title 3: [SEO optimized title] | Title 4: [SEO optimized title] — each title must build on the current video topic, target different keywords, serve the same audience, and together form a SERIES",
-  "series_strategy": "Name the series, explain why a series gets 3x more views, give the series title, list 6 episode titles including current video as Episode 1",
-  "consistency_score": "Rate their posting consistency 1-10 based on available data, explain what score means, show the compound growth difference between posting 1x vs 4x per month with specific subscriber projections",
+  "posting_schedule": "string",
+  "next_4_titles": "Title 1: [title] | Title 2: [title] | Title 3: [title] | Title 4: [title]",
+  "series_strategy": "string",
+  "consistency_score": "string",
   "content_action_plan": "THIS WEEK: [actions] | NEXT WEEK: [actions] | WEEK 3: [actions]",
   "monetization_opportunity": "string",
-  "content_report": "MUST follow this structure: 1) State REAL numbers (views, likes, comments, days since posted). 2) Calculate ratios and what they mean. 3) Identify the ROOT CAUSE of the problem. 4) State the cost of waiting (viewers lost per day). 5) Name the TOP 3 actions to take TODAY. 6) End with urgency and motivation. Reference the actual video title and real data throughout.",
+  "content_report": "string",
   "product_gap": "string",
   "next_product_idea": "string",
   "product_action_plan": "string",
@@ -232,7 +232,7 @@ Schema:
   "revenue_projection_60_days": "string",
   "revenue_projection_90_days": "string",
   "ceo_decision": "GO or WAIT",
-  "ceo_reasoning": "MUST include: 1) How many days since posted and algorithm window status. 2) Specific actions with time estimates. 3) Expected result with real numbers. 4) Cost of NOT acting today. 5) Motivating close like a real business manager would say.",
+  "ceo_reasoning": "string",
   "growth_opportunities": [
     {
       "opportunity_type": "One specific action e.g. Fix Video Title or Add Missing Tags or Share to Reddit",
@@ -465,6 +465,7 @@ Show the math. Show the timeline. Be specific. Return ONLY JSON.`
     return NextResponse.json({ error: "Internal server error", details: message }, { status: 500 });
   }
 }
+
 
 
 
