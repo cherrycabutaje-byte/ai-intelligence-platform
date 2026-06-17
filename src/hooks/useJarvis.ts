@@ -1,16 +1,13 @@
 ﻿import { useState } from "react";
 import { createClient } from "@/lib/supabase";
-
 interface JarvisResult {
   success: boolean;
   source_id: string;
   analysis: Record<string, unknown>;
 }
-
 export function useJarvis() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
   async function analyze(source: {
     id: string;
     url: string;
@@ -23,11 +20,9 @@ export function useJarvis() {
   }): Promise<JarvisResult | null> {
     setLoading(true);
     setError(null);
-
     try {
       const supabase = createClient();
       const { data: { session } } = await supabase.auth.getSession();
-
       const res = await fetch("/api/jarvis/analyze", {
         method: "POST",
         headers: {
@@ -45,11 +40,43 @@ export function useJarvis() {
           asset_type: source.asset_type,
         }),
       });
-
       const data = await res.json();
-
       if (!res.ok) {
         throw new Error(data.error ?? "Analysis failed");
+      }
+
+      // After main analysis — call viral formula API
+      try {
+        const { data: latestAnalysis } = await supabase
+          .from("content_analysis")
+          .select("id, seo_tags")
+          .eq("source_id", source.id)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .single();
+
+        if (latestAnalysis?.id) {
+          await fetch("/api/jarvis/viral", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${session?.access_token ?? ""}`,
+            },
+            body: JSON.stringify({
+              content_analysis_id: latestAnalysis.id,
+              platform: source.platform ?? "YouTube",
+              niche: source.niche ?? "",
+              title: data.scraped?.title ?? source.name ?? "",
+              views: data.scraped?.views ?? "",
+              subscribers: data.scraped?.subscribers ?? "",
+              days_since_posted: data.scraped?.published_at
+                ? Math.floor((Date.now() - new Date(data.scraped.published_at).getTime()) / (1000 * 60 * 60 * 24))
+                : "",
+            }),
+          });
+        }
+      } catch {
+        // Viral formula failed silently
       }
 
       return data as JarvisResult;
@@ -61,6 +88,5 @@ export function useJarvis() {
       setLoading(false);
     }
   }
-
   return { analyze, loading, error };
 }
