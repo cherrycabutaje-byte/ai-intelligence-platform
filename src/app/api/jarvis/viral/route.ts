@@ -44,7 +44,7 @@ Return ONLY this JSON with NO extra text:
 }`;
 
     const completion = await anthropic.messages.create({
-      model: "claude-haiku-4-5-20251001",
+      model: "claude-sonnet-4-6",
       max_tokens: 3000,
       messages: [{ role: "user", content: prompt }],
     });
@@ -76,3 +76,4 @@ Return ONLY this JSON with NO extra text:
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
+
