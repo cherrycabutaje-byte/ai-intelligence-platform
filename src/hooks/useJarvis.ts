@@ -55,6 +55,7 @@ export function useJarvis() {
           .limit(1)
           .single();
 
+        console.log("Latest analysis found:", latestAnalysis?.id, "for source:", source.id);
         if (latestAnalysis?.id) {
           await fetch("/api/jarvis/viral", {
             method: "POST",
@@ -90,4 +91,5 @@ export function useJarvis() {
   }
   return { analyze, loading, error };
 }
+
 
