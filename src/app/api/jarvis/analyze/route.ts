@@ -67,8 +67,26 @@ RESPONSE FORMAT — RETURN THIS EXACT JSON STRUCTURE:
   "revenue_projection_30_days": "30 day: $X AdSense + $X affiliate = $X total. Math: views x RPM / 1000",
   "revenue_projection_60_days": "60 day projection with 30% growth",
   "revenue_projection_90_days": "90 day projection with 60% growth",
-  "ceo_decision": "GO",
+ "ceo_decision": "GO",
   "ceo_reasoning": "Why GO or WAIT with specific reasoning",
+  "readiness_scores": {
+    "sponsorship_readiness": 72,
+    "sponsorship_notes": "What they need to reach sponsorship level",
+    "email_funnel_readiness": 65,
+    "email_funnel_notes": "What they need to build email funnel",
+    "monetization_readiness": 58,
+    "monetization_notes": "What they need to start monetizing",
+    "product_launch_readiness": 70,
+    "product_launch_notes": "What product they should launch and when"
+  },
+  "platform_fit": {
+    "tiktok_fit": 85,
+    "instagram_fit": 78,
+    "youtube_shorts_fit": 90,
+    "pinterest_fit": 45,
+    "tiktok_notes": "Why this content fits TikTok",
+    "shorts_notes": "Which moment to cut into a Short"
+  },
   "growth_opportunities": [
     {
  "opportunity_type": "Fix Video Title",
