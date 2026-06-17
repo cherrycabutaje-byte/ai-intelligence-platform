@@ -126,5 +126,15 @@ export interface GrowthOpportunity {
   estimated_impact: string | null;
   monetization_potential: string | null;
   status: string | null;
+  priority_rank: number | null;
+  confidence_score: number | null;
+  confidence_level: string | null;
+  evidence: string | null;
+  impact_score: string | null;
+  effort_level: string | null;
+  forecast_low: string | null;
+  forecast_expected: string | null;
+  forecast_high: string | null;
+  forecast_confidence: number | null;
 }
 

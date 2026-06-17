@@ -228,12 +228,21 @@ Return the complete JSON now.`
       status: "active",
     }).select();
 
-    const growthRows = analysis.growth_opportunities as Array<{
-      opportunity_type: string;
+  opportunity_type: string;
       recommendation: string;
       priority: string;
       estimated_impact: string;
       monetization_potential: string;
+      priority_rank?: number;
+      confidence_score?: number;
+      confidence_level?: string;
+      evidence?: string;
+      impact_score?: string;
+      effort_level?: string;
+      forecast_low?: string;
+      forecast_expected?: string;
+      forecast_high?: string;
+      forecast_confidence?: number;
     }>;
 
     if (Array.isArray(growthRows) && growthRows.length > 0) {
@@ -246,6 +255,16 @@ Return the complete JSON now.`
           priority: g.priority,
           estimated_impact: g.estimated_impact,
           monetization_potential: g.monetization_potential,
+          priority_rank: g.priority_rank ?? null,
+          confidence_score: g.confidence_score ?? null,
+          confidence_level: g.confidence_level ?? null,
+          evidence: g.evidence ?? null,
+          impact_score: g.impact_score ?? null,
+          effort_level: g.effort_level ?? null,
+          forecast_low: g.forecast_low ?? null,
+          forecast_expected: g.forecast_expected ?? null,
+          forecast_high: g.forecast_high ?? null,
+          forecast_confidence: g.forecast_confidence ?? null,
           status: "active",
         }))
       );
