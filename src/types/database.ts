@@ -85,18 +85,27 @@ export interface ContentAnalysis {
   status: string | null;
   readiness_scores: Record<string, unknown> | null;
   platform_fit: Record<string, unknown> | null;
-
 }
 
 export interface ProductAnalysis {
   id: number;
   created_at: string;
-  ceo_reasoning: string | null;
+  product_title: string | null;
+  platform: string | null;
+  market_score: number | null;
+  opportunity_score: number | null;
+  product_gap: string | null;
+  next_product_idea: string | null;
+  growth_opportunities: string | null;
+  monetization_opportunities: string | null;
+  action_plan: string | null;
+  report: string | null;
+  source_url: string | null;
   source_id: number | null;
   status: string | null;
-  readiness_scores: Record<string, unknown> | null;
-  platform_fit: Record<string, unknown> | null;
+  user_id: string | null;
 }
+
   created_at: string;
   product_title: string | null;
   platform: string | null;
