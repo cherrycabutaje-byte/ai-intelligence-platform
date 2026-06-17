@@ -289,7 +289,7 @@ Days Since Published: ${scraped.published_at ? Math.floor((Date.now() - new Date
 
     const completion = await anthropic.messages.create({
       model: "claude-haiku-4-5-20251001",
-      max_tokens: 16000,
+      max_tokens: 8000,
       system: SYSTEM_PROMPT,
       messages: [
         {
@@ -311,7 +311,9 @@ Content/Notes: ${notes ?? "None provided"}
 URL: ${url}
 ${scrapeContext}
 
-Give 12 copy-paste SEO tags, full description template, word-for-word hook script, thumbnail formula, 48-hour engagement plan, algorithm tips, 12-week roadmap, revenue projections. 
+Give 12 copy-paste SEO tags, full description template, word-for-word hook script, thumbnail formula, 48-hour engagement plan, algorithm tips, 12-week roadmap, revenue projections.
+
+CRITICAL: Be CONCISE. Maximum 100 words per field. No repetition. Short sentences only. The JSON must be complete and valid. 
 
 REVENUE PROJECTIONS — CRITICAL:
 Use the REAL numbers from the scraped data to calculate revenue.
@@ -463,6 +465,8 @@ Show the math. Show the timeline. Be specific. Return ONLY JSON.`
     return NextResponse.json({ error: "Internal server error", details: message }, { status: 500 });
   }
 }
+
+
 
 
 
