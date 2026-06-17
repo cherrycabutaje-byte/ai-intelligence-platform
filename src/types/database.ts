@@ -83,10 +83,19 @@ export interface ContentAnalysis {
   ceo_reasoning: string | null;
   source_id: number | null;
   status: string | null;
+  readiness_scores: Record<string, unknown> | null;
+  platform_fit: Record<string, unknown> | null;
+
 }
 
 export interface ProductAnalysis {
-  id: number;
+  id: number;ceo_decision: string | null;
+  ceo_reasoning: string | null;
+  source_id: number | null;
+  status: string | null;
+  readiness_scores: Record<string, unknown> | null;
+  platform_fit: Record<string, unknown> | null;
+}
   created_at: string;
   product_title: string | null;
   platform: string | null;
