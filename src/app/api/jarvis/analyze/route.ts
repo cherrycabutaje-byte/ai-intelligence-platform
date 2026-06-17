@@ -221,8 +221,10 @@ Return the complete JSON now.`
       revenue_projection_30: analysis.revenue_projection_30_days,
       revenue_projection_60: analysis.revenue_projection_60_days,
       revenue_projection_90: analysis.revenue_projection_90_days,
-      ceo_decision: analysis.ceo_decision,
+    ceo_decision: analysis.ceo_decision,
       ceo_reasoning: analysis.ceo_reasoning,
+      readiness_scores: analysis.readiness_scores ?? null,
+      platform_fit: analysis.platform_fit ?? null,
       status: "active",
     }).select();
 
