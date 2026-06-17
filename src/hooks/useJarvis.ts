@@ -68,10 +68,11 @@ export function useJarvis() {
               Authorization: `Bearer ${session?.access_token ?? ""}`,
             },
             body: JSON.stringify({
-              content_analysis_id: latestAnalysis.id,
+             analysisId: latestAnalysis.id,
               platform: source.platform ?? "YouTube",
               niche: source.niche ?? "",
-              title: data.scraped?.title ?? source.name ?? "",
+              channelName: data.scraped?.channelName ?? source.name ?? "",
+              videoTitle: data.scraped?.title ?? source.name ?? "",
               views: data.scraped?.views ?? "",
               subscribers: data.scraped?.subscribers ?? "",
               days_since_posted: data.scraped?.published_at
