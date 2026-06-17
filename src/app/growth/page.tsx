@@ -51,6 +51,24 @@ export default function GrowthPage() {
     showToast("Copied!");
   };
 
+  const getConfidenceColor = (score: number) => {
+    if (score >= 75) return "text-green-400";
+    if (score >= 50) return "text-yellow-400";
+    return "text-red-400";
+  };
+
+  const getImpactColor = (impact: string) => {
+    if (impact === "High") return "bg-green-500/20 text-green-400 border-green-500/30";
+    if (impact === "Medium") return "bg-yellow-500/20 text-yellow-400 border-yellow-500/30";
+    return "bg-gray-500/20 text-gray-400 border-gray-500/30";
+  };
+
+  const getEffortColor = (effort: string) => {
+    if (effort === "Low") return "bg-green-500/20 text-green-400 border-green-500/30";
+    if (effort === "Medium") return "bg-yellow-500/20 text-yellow-400 border-yellow-500/30";
+    return "bg-red-500/20 text-red-400 border-red-500/30";
+  };
+
   return (
     <div className="min-h-screen bg-[#0f1117] text-white">
       {toast && (
@@ -65,13 +83,55 @@ export default function GrowthPage() {
           <div className="bg-[#1a1d27] border border-gray-700 rounded-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-800 shrink-0">
               <div>
-                <h2 className="text-lg font-semibold text-white">{selected.opportunity_type ?? "Growth Action"}</h2>
+                <div className="flex items-center gap-2">
+                  {selected.priority_rank && (
+                    <span className="text-xs bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 px-2 py-0.5 rounded-full font-bold">
+                      #{selected.priority_rank}
+                    </span>
+                  )}
+                  <h2 className="text-lg font-semibold text-white">{selected.opportunity_type ?? "Growth Action"}</h2>
+                </div>
                 <p className="text-xs text-gray-400 mt-0.5">{selected.created_at ? new Date(selected.created_at).toLocaleDateString() : ""}</p>
               </div>
               <button onClick={() => setSelected(null)} className="text-gray-400 hover:text-white text-xl">x</button>
             </div>
 
             <div className="flex-1 overflow-y-auto px-6 py-4 space-y-3">
+
+              {/* Trust Layer Badges */}
+              <div className="flex flex-wrap gap-2">
+                {selected.impact_score && (
+                  <span className={`text-xs px-2 py-1 rounded-full border ${getImpactColor(selected.impact_score)}`}>
+                    Impact: {selected.impact_score}
+                  </span>
+                )}
+                {selected.effort_level && (
+                  <span className={`text-xs px-2 py-1 rounded-full border ${getEffortColor(selected.effort_level)}`}>
+                    Effort: {selected.effort_level}
+                  </span>
+                )}
+                {selected.confidence_score && (
+                  <span className={`text-xs px-2 py-1 rounded-full border border-gray-600 ${getConfidenceColor(selected.confidence_score)}`}>
+                    Confidence: {selected.confidence_score}%
+                  </span>
+                )}
+              </div>
+
+              {/* Evidence */}
+              {selected.evidence && (
+                <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg px-4 py-3">
+                  <p className="text-xs text-blue-400 font-semibold mb-2 uppercase">Evidence</p>
+                  <div className="space-y-1">
+                    {selected.evidence.split('|').map((e, i) => (
+                      <p key={i} className="text-sm text-gray-300 flex items-start gap-2">
+                        <span className="text-blue-400 mt-0.5">✓</span> {e.trim()}
+                      </p>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Action Plan */}
               {selected.recommendation && (
                 <div className="bg-[#0f1117] rounded-lg p-4">
                   <div className="flex items-center justify-between mb-3">
@@ -94,10 +154,42 @@ export default function GrowthPage() {
                 </div>
               )}
 
+              {/* Forecast */}
+              {selected.forecast_expected && (
+                <div className="bg-purple-500/10 border border-purple-500/20 rounded-lg px-4 py-3">
+                  <p className="text-xs text-purple-400 font-semibold mb-2 uppercase">
+                    Forecast {selected.forecast_confidence ? `— ${selected.forecast_confidence}% confidence` : ""}
+                  </p>
+                  <div className="grid grid-cols-3 gap-2">
+                    <div className="text-center">
+                      <p className="text-xs text-gray-500 mb-1">Low</p>
+                      <p className="text-sm text-gray-300">{selected.forecast_low ?? "—"}</p>
+                    </div>
+                    <div className="text-center border-x border-purple-500/20">
+                      <p className="text-xs text-purple-400 mb-1">Expected</p>
+                      <p className="text-sm text-white font-medium">{selected.forecast_expected}</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-xs text-gray-500 mb-1">High</p>
+                      <p className="text-sm text-gray-300">{selected.forecast_high ?? "—"}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Monetization */}
               {selected.monetization_potential && (
                 <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg px-4 py-3">
                   <p className="text-xs text-yellow-400 font-semibold mb-1 uppercase">Monetization Potential</p>
                   <p className="text-sm text-white">{selected.monetization_potential}</p>
+                </div>
+              )}
+
+              {/* Estimated Impact */}
+              {selected.estimated_impact && (
+                <div className="bg-green-500/10 border border-green-500/20 rounded-lg px-4 py-3">
+                  <p className="text-xs text-green-400 font-semibold mb-1 uppercase">Estimated Impact</p>
+                  <p className="text-sm text-white">{selected.estimated_impact}</p>
                 </div>
               )}
             </div>
@@ -124,10 +216,11 @@ export default function GrowthPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-800 bg-[#13151f]">
+                <th className="text-left px-4 py-3 text-gray-400 font-medium">#</th>
                 <th className="text-left px-4 py-3 text-gray-400 font-medium">Action</th>
-                <th className="text-left px-4 py-3 text-gray-400 font-medium">Preview</th>
+                <th className="text-left px-4 py-3 text-gray-400 font-medium">Impact</th>
+                <th className="text-left px-4 py-3 text-gray-400 font-medium">Confidence</th>
                 <th className="text-left px-4 py-3 text-gray-400 font-medium">Money</th>
-                <th className="text-left px-4 py-3 text-gray-400 font-medium">Date</th>
                 <th className="text-left px-4 py-3 text-gray-400 font-medium">Actions</th>
               </tr>
             </thead>
@@ -135,14 +228,14 @@ export default function GrowthPage() {
               {loading ? (
                 Array.from({ length: PAGE_SIZE }).map((_, i) => (
                   <tr key={i} className="border-b border-gray-800/50">
-                    {Array.from({ length: 5 }).map((__, j) => (
+                    {Array.from({ length: 6 }).map((__, j) => (
                       <td key={j} className="px-4 py-3"><div className="h-4 bg-gray-800 rounded animate-pulse w-3/4" /></td>
                     ))}
                   </tr>
                 ))
               ) : result?.data.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-4 py-16 text-center text-gray-500">
+                  <td colSpan={6} className="px-4 py-16 text-center text-gray-500">
                     <div className="flex flex-col items-center gap-2">
                       <span className="text-3xl">🚀</span>
                       <span>No growth actions yet</span>
@@ -153,17 +246,32 @@ export default function GrowthPage() {
               ) : (
                 result?.data.map(item => (
                   <tr key={item.id} className="border-b border-gray-800/50 hover:bg-white/[0.02] cursor-pointer" onClick={() => setSelected(item)}>
+                    <td className="px-4 py-3">
+                      {item.priority_rank ? (
+                        <span className="text-xs bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 px-2 py-0.5 rounded-full font-bold">
+                          #{item.priority_rank}
+                        </span>
+                      ) : "—"}
+                    </td>
                     <td className="px-4 py-3 text-white font-medium max-w-[180px]">
                       <span className="truncate block">{item.opportunity_type ?? "—"}</span>
                     </td>
-                    <td className="px-4 py-3 text-gray-400 text-xs max-w-[300px]">
-                      <span className="truncate block">{item.recommendation?.substring(0, 80)}...</span>
+                    <td className="px-4 py-3">
+                      {item.impact_score ? (
+                        <span className={`text-xs px-2 py-0.5 rounded-full border ${getImpactColor(item.impact_score)}`}>
+                          {item.impact_score}
+                        </span>
+                      ) : "—"}
+                    </td>
+                    <td className="px-4 py-3">
+                      {item.confidence_score ? (
+                        <span className={`text-sm font-bold ${getConfidenceColor(item.confidence_score)}`}>
+                          {item.confidence_score}%
+                        </span>
+                      ) : "—"}
                     </td>
                     <td className="px-4 py-3 text-yellow-400 text-xs max-w-[150px]">
                       <span className="truncate block">{item.monetization_potential ?? "—"}</span>
-                    </td>
-                    <td className="px-4 py-3 text-gray-400 text-xs whitespace-nowrap">
-                      {item.created_at ? new Date(item.created_at).toLocaleDateString() : "—"}
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex gap-2">
