@@ -1,8 +1,8 @@
 ﻿import { NextRequest, NextResponse } from "next/server";
-import OpenAI from "openai";
+import Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@supabase/supabase-js";
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 function getSupabase(authHeader: string | null) {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -281,12 +281,11 @@ Published Date: ${scraped.published_at ?? "N/A"}
 Days Since Published: ${scraped.published_at ? Math.floor((Date.now() - new Date(scraped.published_at).getTime()) / (1000 * 60 * 60 * 24)) + " days ago" : "Unknown"}`
       : "URL could not be scraped. Use provided details only.";
 
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      temperature: 0.5,
+    const completion = await anthropic.messages.create({
+      model: "claude-haiku-4-5",
       max_tokens: 4000,
+      system: SYSTEM_PROMPT,
       messages: [
-        { role: "system", content: SYSTEM_PROMPT },
         {
           role: "user",
           content: `Coach this creator/seller with specific organic growth strategy.
@@ -338,7 +337,7 @@ Show the math. Show the timeline. Be specific. Return ONLY JSON.`
       ],
     });
 
-    const rawText = completion.choices[0]?.message?.content ?? "";
+    const rawText = completion.content[0]?.type === "text" ? completion.content[0].text : "";
     let analysis: Record<string, unknown>;
     try {
       const cleaned = rawText.replace(/^```json\s*/i, "").replace(/^```\s*/i, "").replace(/```\s*$/i, "").trim();
@@ -428,6 +427,10 @@ Show the math. Show the timeline. Be specific. Return ONLY JSON.`
     return NextResponse.json({ error: "Internal server error", details: message }, { status: 500 });
   }
 }
+
+
+
+
 
 
 
