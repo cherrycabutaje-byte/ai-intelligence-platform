@@ -31,7 +31,7 @@ export function useJarvis() {
           Authorization: `Bearer ${session?.access_token ?? ""}`,
         },
         body: JSON.stringify({
-          source_id: source.id,
+         source_id: source.id ?? source.sourceUrl ?? "",
           url: source.url,
           platform: source.platform,
           name: source.name,
