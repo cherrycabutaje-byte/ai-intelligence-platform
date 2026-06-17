@@ -141,5 +141,7 @@ export interface GrowthOpportunity {
   forecast_low: string | null;
   forecast_expected: string | null;
   forecast_high: string | null;
-  forecast_confidence: number | null;
+forecast_confidence: number | null;
+  execution_status: string | null;
+  completed_at: string | null;
 }
