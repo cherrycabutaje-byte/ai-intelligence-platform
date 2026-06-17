@@ -396,7 +396,7 @@ Show the math. Show the timeline. Be specific. Return ONLY JSON.`
       ceo_decision: analysis.ceo_decision,
       ceo_reasoning: analysis.ceo_reasoning,
       status: "active",
-    });
+    }).select();
 
     await supabase.from("product_analysis").insert({
       user_id: user.id,
@@ -463,6 +463,7 @@ Show the math. Show the timeline. Be specific. Return ONLY JSON.`
     return NextResponse.json({ error: "Internal server error", details: message }, { status: 500 });
   }
 }
+
 
 
 
