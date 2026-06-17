@@ -113,8 +113,8 @@ ${videoContext}
     setAnalyzingId(jarvisSource.id);
     setJarvisSource(null);
     const result = await analyze({
-      id: String(jarvisSource.id),
-      url: jarvisSource.asset_url!,
+      sourceUrl: source.asset_url ?? "",
+      url: source.asset_url,
       platform: jarvisSource.platform,
       name: jarvisSource.asset_name,
       niche: jarvisSource.niche ?? undefined,
