@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useState, useCallback } from 'react';
 import type { Source } from '@/types/database';
@@ -8,7 +8,7 @@ import { exportToCSV } from '@/lib/exportCSV';
 import AddSourceModal from '@/components/sources/AddSourceModal';
 import EditSourceModal from '@/components/sources/EditSourceModal';
 import DeleteSourceModal from '@/components/sources/DeleteSourceModal';
-import { useJarvis } from '../../src/hooks/useJarvis';
+import { useJarvis } from '@/hooks/useJarvis';
 
 const PAGE_SIZE = 10;
 
