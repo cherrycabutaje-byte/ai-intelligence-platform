@@ -42,6 +42,7 @@ export default function GrowthPage() {
   const updateStatus = async (id: number, status: string) => {
     setUpdatingId(id);
     const supabase = createClient();
+    const { data: { session } } = await supabase.auth.getSession();
     const { error } = await supabase
       .from("growth_opportunities")
       .update({
@@ -49,6 +50,7 @@ export default function GrowthPage() {
         completed_at: status === "completed" ? new Date().toISOString() : null,
       })
       .eq("id", id);
+    console.log("[updateStatus] id:", id, "status:", status, "session:", !!session, "error:", error);
     setUpdatingId(null);
     if (error) {
       showToast("Update failed: " + error.message);
