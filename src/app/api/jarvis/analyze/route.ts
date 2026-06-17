@@ -344,6 +344,7 @@ Show the math. Show the timeline. Be specific. Return ONLY JSON.`
     });
 
     const rawText = completion.content[0]?.type === "text" ? completion.content[0].text : "";
+    console.log("RAW CLAUDE RESPONSE:", rawText.substring(0, 500));
     let analysis: Record<string, unknown>;
     try {
       const cleaned = rawText.replace(/^```json\s*/i, "").replace(/^```\s*/i, "").replace(/```\s*$/i, "").trim();
@@ -439,6 +440,7 @@ Show the math. Show the timeline. Be specific. Return ONLY JSON.`
     return NextResponse.json({ error: "Internal server error", details: message }, { status: 500 });
   }
 }
+
 
 
 
