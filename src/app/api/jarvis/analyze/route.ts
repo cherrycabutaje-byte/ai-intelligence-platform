@@ -450,7 +450,7 @@ Show the math. Show the timeline. Be specific. Return ONLY JSON.`
           ...(authHeader ? { Authorization: authHeader } : {}),
         },
         body: JSON.stringify({
-          content_analysis_id: contentInsert?.[0]?.id,
+          analysisId: contentInsert?.[0]?.id,
           platform: platform ?? "YouTube",
           niche: niche ?? "",
           title: scraped.title ?? name ?? "",
