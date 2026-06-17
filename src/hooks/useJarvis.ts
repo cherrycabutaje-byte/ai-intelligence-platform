@@ -47,17 +47,21 @@ export function useJarvis() {
 
       // After main analysis — call viral formula API
       try {
+        // Wait a moment for the DB to commit
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
         const { data: latestAnalysis } = await supabase
           .from("content_analysis")
-          .select("id, seo_tags")
+          .select("id")
           .eq("source_id", source.id)
           .order("created_at", { ascending: false })
           .limit(1)
           .single();
 
         console.log("Latest analysis found:", latestAnalysis?.id, "for source:", source.id);
+        
         if (latestAnalysis?.id) {
-          await fetch("/api/jarvis/viral", {
+          const viralResponse = await fetch("/api/jarvis/viral", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -75,6 +79,10 @@ export function useJarvis() {
                 : "",
             }),
           });
+          const viralData = await viralResponse.json();
+          console.log("Viral API response:", viralData);
+        } else {
+          console.log("No analysis ID found for source:", source.id);
         }
       } catch (viralError) {
         console.log("Viral API error:", viralError);
@@ -91,5 +99,6 @@ export function useJarvis() {
   }
   return { analyze, loading, error };
 }
+
 
 
