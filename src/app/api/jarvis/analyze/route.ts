@@ -189,12 +189,11 @@ Cost of waiting: [specific loss per day]"
 Schema:
 {
   "executive_summary": "string",
-  "emotion_trigger": "Identify the PRIMARY emotion that drives their audience (aspiration, fear, curiosity, anger, joy). Give 3 specific examples of how to trigger this emotion in their content with exact words and phrases.",
-  "viral_formula": "The complete viral formula for their specific niche. Hook formula with example, thumbnail formula with colors and text, posting frequency, best time to post, content style that works in their niche.",
-  "comment_trigger": "The EXACT comment to pin that will generate the most debate for their niche. Give 3 alternative comment options with explanation of why each works.",
-  "launch_strategy": "For product sellers: Week -2 tease, Week -1 anticipation, Launch day urgency, Week +1 social proof. For creators: How to launch a series to maximize initial views.",
-  "sales_funnel": "Complete funnel: Awareness content idea, Interest content idea, Desire mention strategy, Action exact CTA words, Retention follow up, Referral strategy.",
-  "compound_growth_plan": "Show the MATH: current vs recommended posting frequency. Subscriber projections at 1x, 2x, 4x per week. Revenue at each level. The tipping point where growth becomes exponential.",
+fear, curiosity, anger, joy). Give 3 specific examples of how to trigger this emotion in their content with exact words and phrases.",
+thumbnail formula with colors and text, posting frequency, best time to post, content style that works in their niche.",
+"launch_strategy": "For product sellers: Week -2 tease, Week -1 anticipation, Launch day urgency, Week +1 social proof. For creators: How to launch a series to maximize initial views.",
+Interest content idea, Desire mention strategy, Action exact CTA words, Retention follow up, Referral strategy.",
+2x, 4x per week. Revenue at each level. The tipping point where growth becomes exponential.",
   "opportunity_score": 0,
   "confidence": 0,
   "viral_score": 0,
@@ -215,10 +214,8 @@ Schema:
   "viral_drivers": "string",
   "content_blueprint": "string",
   "content_roadmap": "Week 1: [Topic] | Week 2: [Topic] | Week 3: [Topic] | Week 4: [Topic]",
-  "posting_schedule": "string",
-  "next_4_titles": "Title 1: [title] | Title 2: [title] | Title 3: [title] | Title 4: [title]",
-  "series_strategy": "string",
-  "consistency_score": "string",
+"next_4_titles": "Title 1: [title] | Title 2: [title] | Title 3: [title] | Title 4: [title]",
+"consistency_score": "string",
   "content_action_plan": "THIS WEEK: [actions] | NEXT WEEK: [actions] | WEEK 3: [actions]",
   "monetization_opportunity": "string",
   "content_report": "string",
@@ -465,6 +462,7 @@ Show the math. Show the timeline. Be specific. Return ONLY JSON.`
     return NextResponse.json({ error: "Internal server error", details: message }, { status: 500 });
   }
 }
+
 
 
 
