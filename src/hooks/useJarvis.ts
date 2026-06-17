@@ -9,7 +9,8 @@ export function useJarvis() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   async function analyze(source: {
-    id: string;
+    id?: string;
+    sourceUrl?: string;
     url: string;
     platform?: string;
     name?: string;
