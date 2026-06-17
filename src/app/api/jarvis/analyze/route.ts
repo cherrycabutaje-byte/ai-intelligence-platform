@@ -356,7 +356,7 @@ Show the math. Show the timeline. Be specific. Return ONLY JSON.`
 
     await supabase.from("sources").update({ status: "active" }).eq("id", source_id).eq("user_id", user.id);
 
-    await supabase.from("content_analysis").insert({
+    const { data: contentInsert } = await supabase.from("content_analysis").insert({
       user_id: user.id,
       source_id,
       platform: platform ?? null,
@@ -435,12 +435,37 @@ Show the math. Show the timeline. Be specific. Return ONLY JSON.`
       );
     }
 
+    // Call viral formula API separately
+    try {
+      const viralRes = await fetch(`${baseUrl}/api/jarvis/viral`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(authHeader ? { Authorization: authHeader } : {}),
+        },
+        body: JSON.stringify({
+          content_analysis_id: contentInsert?.[0]?.id,
+          platform: platform ?? "YouTube",
+          niche: niche ?? "",
+          title: scraped.title ?? name ?? "",
+          views: scraped.views ?? "",
+          subscribers: scraped.subscribers ?? "",
+          days_since_posted: scraped.published_at ? Math.floor((Date.now() - new Date(scraped.published_at).getTime()) / (1000 * 60 * 60 * 24)) : "",
+        }),
+      });
+    } catch {
+      // Viral formula failed silently - main analysis still succeeds
+    }
+
     return NextResponse.json({ success: true, source_id, analysis, scraped });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Unknown error";
     return NextResponse.json({ error: "Internal server error", details: message }, { status: 500 });
   }
 }
+
+
+
 
 
 
