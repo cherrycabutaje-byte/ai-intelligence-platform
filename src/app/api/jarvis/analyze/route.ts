@@ -233,16 +233,16 @@ Return the complete JSON now.`
       priority: string;
       estimated_impact: string;
       monetization_potential: string;
-      priority_rank?: number;
-      confidence_score?: number;
-      confidence_level?: string;
-      evidence?: string;
-      impact_score?: string;
-      effort_level?: string;
-      forecast_low?: string;
-      forecast_expected?: string;
-      forecast_high?: string;
-      forecast_confidence?: number;
+     priority_rank: number | undefined;
+      confidence_score: number | undefined;
+      confidence_level: string | undefined;
+      evidence: string | undefined;
+      impact_score: string | undefined;
+      effort_level: string | undefined;
+      forecast_low: string | undefined;
+      forecast_expected: string | undefined;
+      forecast_high: string | undefined;
+      forecast_confidence: number | undefined;
     }>;
 
     if (Array.isArray(growthRows) && growthRows.length > 0) {
