@@ -243,7 +243,7 @@ Return the complete JSON now.`
       forecast_expected: string;
       forecast_high: string;
       forecast_confidence: number;
-    }>;
+   };
 
     if (Array.isArray(growthRows) && growthRows.length > 0) {
       await supabase.from("growth_opportunities").insert(
