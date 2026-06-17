@@ -21,6 +21,7 @@ export async function POST(req: NextRequest) {
     if (authError || !user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const { content_analysis_id, platform, niche, title, views, subscribers, days_since_posted } = await req.json();
+    console.log("Viral API received content_analysis_id:", content_analysis_id);
 
     const prompt = `You are JARVIS — expert viral content strategist with 20 years experience.
 
@@ -76,4 +77,5 @@ Return ONLY this JSON with NO extra text:
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
+
 
