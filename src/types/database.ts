@@ -1,5 +1,4 @@
 ﻿// src/types/database.ts
-
 export type SourceStatus = 'active' | 'inactive' | 'pending';
 export type SourceType = 'organic' | 'paid' | 'referral' | 'direct' | 'social';
 export type AssetType = 'video' | 'blog' | 'product' | 'channel' | 'store' | 'other';
@@ -12,6 +11,8 @@ export type Platform =
   | 'Etsy'
   | 'Twitter'
   | 'LinkedIn'
+  | 'Facebook'
+  | 'Pinterest'
   | 'Other';
 
 export interface Source {
@@ -65,17 +66,17 @@ export interface ContentAnalysis {
   collaboration_playbook: string | null;
   organic_growth_playbook: string | null;
   title_options: string | null;
-  content_roadmap: string | null
-  posting_schedule: string | null
-  next_4_titles: string | null
-  series_strategy: string | null
-  consistency_score: string | null
-  viral_formula: string | null
-  emotion_trigger: string | null
-  comment_trigger: string | null
-  launch_strategy: string | null
-  sales_funnel: string | null
-  compound_growth_plan: string | null
+  content_roadmap: string | null;
+  posting_schedule: string | null;
+  next_4_titles: string | null;
+  series_strategy: string | null;
+  consistency_score: string | null;
+  viral_formula: string | null;
+  emotion_trigger: string | null;
+  comment_trigger: string | null;
+  launch_strategy: string | null;
+  sales_funnel: string | null;
+  compound_growth_plan: string | null;
   revenue_projection_30: string | null;
   revenue_projection_60: string | null;
   revenue_projection_90: string | null;
@@ -104,20 +105,6 @@ export interface ProductAnalysis {
   source_id: number | null;
   status: string | null;
   user_id: string | null;
-}
-
-  created_at: string;
-  product_title: string | null;
-  platform: string | null;
-  market_score: number | null;
-  opportunity_score: number | null;
-  product_gap: string | null;
-  next_product_idea: string | null;
-  growth_opportunities: string | null;
-  monetization_opportunities: string | null;
-  action_plan: string | null;
-  report: string | null;
-  source_url: string | null;
 }
 
 export interface FeedItem {
@@ -156,4 +143,3 @@ export interface GrowthOpportunity {
   forecast_high: string | null;
   forecast_confidence: number | null;
 }
-
