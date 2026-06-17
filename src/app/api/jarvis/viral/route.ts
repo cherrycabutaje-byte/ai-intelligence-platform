@@ -1,81 +1,68 @@
-﻿import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@supabase/supabase-js";
 
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! });
+const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
 
-function getSupabase(authHeader: string | null) {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-  const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-  const token = authHeader?.replace("Bearer ", "") ?? anon;
-  return createClient(url, anon, {
-    global: { headers: { Authorization: `Bearer ${token}` } },
-  });
+function extractJSON(raw: string): Record<string, unknown> {
+  try { return JSON.parse(raw); } catch (_) {}
+  const s = raw.indexOf("{");
+  const e = raw.lastIndexOf("}");
+  if (s !== -1 && e > s) {
+    try { return JSON.parse(raw.slice(s, e + 1)); } catch (_) {}
+  }
+  throw new Error("JSON_PARSE_FAILED: " + raw.slice(0, 300));
 }
 
 export async function POST(req: NextRequest) {
   try {
-    const authHeader = req.headers.get("authorization");
-    const supabase = getSupabase(authHeader);
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    if (authError || !user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const body = await req.json();
+    const { analysisId, channelName, videoTitle, niche, viewCount, subscriberCount } = body;
+    console.log("[JARVIS viral] analysisId:", analysisId);
+    if (!analysisId) return NextResponse.json({ error: "analysisId is required" }, { status: 400 });
 
-    const { content_analysis_id, platform, niche, title, views, subscribers, days_since_posted } = await req.json();
-    console.log("Viral API received content_analysis_id:", content_analysis_id);
-
-    const prompt = `You are JARVIS — expert viral content strategist with 20 years experience.
-
-Analyze this creator and give the VIRAL FORMULA:
-
-Platform: ${platform ?? "YouTube"}
-Niche: ${niche ?? "General"}
-Video Title: ${title ?? "Unknown"}
-Views: ${views ?? "Unknown"}
-Subscribers: ${subscribers ?? "Unknown"}
-Days Since Posted: ${days_since_posted ?? "Unknown"}
-
-Return ONLY this JSON with NO extra text:
-{
-  "emotion_trigger": "The PRIMARY emotion driving this audience (aspiration/fear/curiosity/anger/joy). Give 3 SPECIFIC examples with exact words to use in content.",
-  "viral_formula": "The complete viral formula: hook formula with example, thumbnail formula with exact colors and text, best posting time, content style that works in this niche.",
-  "comment_trigger": "The EXACT comment to pin to generate maximum debate. Give 3 alternative options. Explain why each works for this specific audience.",
-  "launch_strategy": "Week -2 tease strategy, Week -1 anticipation building, Launch day urgency tactics, Week +1 social proof amplification. All specific to this niche.",
-  "sales_funnel": "Awareness content idea, Interest content idea, Desire trigger strategy, Action CTA exact words, Retention follow up, Referral strategy. All specific to this creator.",
-  "compound_growth_plan": "Current posting frequency vs recommended. Subscriber projections at 1x, 2x, 4x per week with specific numbers. Revenue at each level. The exact month when growth becomes exponential."
-}`;
-
-    const completion = await anthropic.messages.create({
-      model: "claude-sonnet-4-6",
-      max_tokens: 3000,
-      messages: [{ role: "user", content: prompt }],
+    const message = await anthropic.messages.create({
+      model: "claude-haiku-4-5-20251001",
+      max_tokens: 2000,
+      system: "You are JARVIS Viral Intelligence. Respond ONLY with valid JSON. No prose. No markdown. Raw JSON only.",
+      messages: [{
+        role: "user",
+        content: "Analyze viral potential for " + channelName + ", video: " + videoTitle + ", niche: " + niche + ", subs: " + subscriberCount + ". Return JSON with exactly these keys: emotion_trigger, viral_formula, comment_trigger, launch_strategy, sales_funnel, compound_growth_plan. All must be detailed strings specific to this creator."
+      }],
     });
 
-    const rawText = completion.content[0]?.type === "text" ? completion.content[0].text : "";
-    
-    let viral: Record<string, unknown>;
-    try {
-      const cleaned = rawText.replace(/^```json\s*/i, "").replace(/^```\s*/i, "").replace(/```\s*$/i, "").trim();
-      viral = JSON.parse(cleaned);
-    } catch {
-      return NextResponse.json({ error: "Malformed JSON", raw: rawText }, { status: 500 });
+    const rawText = message.content
+      .filter((c) => c.type === "text")
+      .map((c) => (c as { type: "text"; text: string }).text)
+      .join("");
+
+    const parsed = extractJSON(rawText);
+
+    const { data, error } = await supabase
+      .from("content_analysis")
+      .update({
+        emotion_trigger: parsed.emotion_trigger || null,
+        viral_formula: parsed.viral_formula || null,
+        comment_trigger: parsed.comment_trigger || null,
+        launch_strategy: parsed.launch_strategy || null,
+        sales_funnel: parsed.sales_funnel || null,
+        compound_growth_plan: parsed.compound_growth_plan || null,
+      })
+      .eq("id", analysisId)
+      .select()
+      .single();
+
+    if (error) {
+      console.error("[JARVIS viral] DB error:", error);
+      return NextResponse.json({ success: false, dbError: error.message }, { status: 500 });
     }
 
-    if (content_analysis_id) {
-      await supabase.from("content_analysis").update({
-        emotion_trigger: viral.emotion_trigger,
-        viral_formula: viral.viral_formula,
-        comment_trigger: viral.comment_trigger,
-        launch_strategy: viral.launch_strategy,
-        sales_funnel: viral.sales_funnel,
-        compound_growth_plan: viral.compound_growth_plan,
-      }).eq("id", content_analysis_id).eq("user_id", user.id);
-    }
+    console.log("[JARVIS viral] Updated row:", data?.id);
+    return NextResponse.json({ success: true, id: data?.id, viral: parsed });
 
-    return NextResponse.json({ success: true, viral });
-  } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : "Unknown error";
-    return NextResponse.json({ error: message }, { status: 500 });
+  } catch (err) {
+    console.error("[JARVIS viral] ERROR:", err);
+    return NextResponse.json({ error: String(err) }, { status: 500 });
   }
 }
-
-
