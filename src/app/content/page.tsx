@@ -100,13 +100,14 @@ export default function ContentPage() {
     return "text-red-400";
   };
 
-  const tabs = [
+ const tabs = [
     { id: "overview", label: "Overview" },
     { id: "seo", label: "SEO" },
     { id: "content", label: "Content" },
     { id: "growth", label: "Growth" },
     { id: "money", label: "Money" },
     { id: "viral", label: "Viral Formula" },
+    { id: "readiness", label: "🎯 Readiness" },
   ];
 
   return (
@@ -314,6 +315,91 @@ export default function ContentPage() {
                     <Section label="Launch Strategy" value={selected.launch_strategy} color="yellow" copyable />
                     <Section label="Content To Sales Funnel" value={selected.sales_funnel} color="cyan" copyable />
                     <Section label="Compound Growth Plan — The Math" value={selected.compound_growth_plan} color="green" copyable />
+                  </>
+                )}
+
+              {activeTab === "readiness" && (
+                  <>
+                    {selected.readiness_scores && (
+                      <div className="space-y-3">
+                        <p className="text-xs text-gray-500 uppercase tracking-wide font-semibold">Monetization Readiness</p>
+                        <div className="grid grid-cols-2 gap-3">
+                          {[
+                            { key: "sponsorship_readiness", notes: "sponsorship_notes", label: "Sponsorship", color: "cyan" },
+                            { key: "email_funnel_readiness", notes: "email_funnel_notes", label: "Email Funnel", color: "purple" },
+                            { key: "monetization_readiness", notes: "monetization_notes", label: "Monetization", color: "green" },
+                            { key: "product_launch_readiness", notes: "product_launch_notes", label: "Product Launch", color: "yellow" },
+                          ].map(({ key, notes, label, color }) => {
+                            const scores = selected.readiness_scores as Record<string, unknown>;
+                            const score = scores?.[key] as number;
+                            const note = scores?.[notes] as string;
+                            if (!score) return null;
+                            const colorMap: Record<string, string> = {
+                              cyan: "border-cyan-500/30 bg-cyan-500/10",
+                              purple: "border-purple-500/30 bg-purple-500/10",
+                              green: "border-green-500/30 bg-green-500/10",
+                              yellow: "border-yellow-500/30 bg-yellow-500/10",
+                            };
+                            const textMap: Record<string, string> = {
+                              cyan: "text-cyan-400",
+                              purple: "text-purple-400",
+                              green: "text-green-400",
+                              yellow: "text-yellow-400",
+                            };
+                            return (
+                              <div key={key} className={`rounded-xl border p-4 ${colorMap[color]}`}>
+                                <div className="flex items-center justify-between mb-2">
+                                  <p className={`text-xs font-semibold uppercase ${textMap[color]}`}>{label}</p>
+                                  <p className={`text-2xl font-bold ${textMap[color]}`}>{score}%</p>
+                                </div>
+                                <div className="w-full bg-gray-800 rounded-full h-1.5 mb-2">
+                                  <div className={`h-1.5 rounded-full ${color === 'cyan' ? 'bg-cyan-500' : color === 'purple' ? 'bg-purple-500' : color === 'green' ? 'bg-green-500' : 'bg-yellow-500'}`} style={{ width: `${score}%` }} />
+                                </div>
+                                {note && <p className="text-xs text-gray-400">{note}</p>}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+                    {selected.platform_fit && (
+                      <div className="space-y-3 mt-4">
+                        <p className="text-xs text-gray-500 uppercase tracking-wide font-semibold">Platform Fit Scores</p>
+                        <div className="grid grid-cols-2 gap-3">
+                          {[
+                            { key: "tiktok_fit", notes: "tiktok_notes", label: "TikTok", emoji: "🎵" },
+                            { key: "instagram_fit", notes: null, label: "Instagram", emoji: "📸" },
+                            { key: "youtube_shorts_fit", notes: "shorts_notes", label: "YouTube Shorts", emoji: "▶️" },
+                            { key: "pinterest_fit", notes: null, label: "Pinterest", emoji: "📌" },
+                          ].map(({ key, notes, label, emoji }) => {
+                            const fits = selected.platform_fit as Record<string, unknown>;
+                            const score = fits?.[key] as number;
+                            const note = notes ? fits?.[notes] as string : null;
+                            if (!score) return null;
+                            const scoreColor = score >= 75 ? "text-green-400" : score >= 50 ? "text-yellow-400" : "text-red-400";
+                            const barColor = score >= 75 ? "bg-green-500" : score >= 50 ? "bg-yellow-500" : "bg-red-500";
+                            return (
+                              <div key={key} className="rounded-xl border border-gray-700 bg-gray-800/30 p-4">
+                                <div className="flex items-center justify-between mb-2">
+                                  <p className="text-xs font-semibold text-gray-300">{emoji} {label}</p>
+                                  <p className={`text-2xl font-bold ${scoreColor}`}>{score}</p>
+                                </div>
+                                <div className="w-full bg-gray-700 rounded-full h-1.5 mb-2">
+                                  <div className={`h-1.5 rounded-full ${barColor}`} style={{ width: `${score}%` }} />
+                                </div>
+                                {note && <p className="text-xs text-gray-400">{note}</p>}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+                    {!selected.readiness_scores && !selected.platform_fit && (
+                      <div className="text-center py-12 text-gray-500">
+                        <p className="text-3xl mb-2">🎯</p>
+                        <p>Readiness scores will appear in new analyses</p>
+                      </div>
+                    )}
                   </>
                 )}
 

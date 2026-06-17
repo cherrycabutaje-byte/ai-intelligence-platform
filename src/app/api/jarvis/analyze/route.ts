@@ -89,12 +89,12 @@ RESPONSE FORMAT — RETURN THIS EXACT JSON STRUCTURE:
   },
   "growth_opportunities": [
     {
- "opportunity_type": "Fix Video Title",
+      "priority_rank": 1,
+      "opportunity_type": "Fix Video Title",
       "recommendation": "STEP 1: [action] STEP 2: [action] STEP 3: [action] Time: 10 min Expected: +500 views Cost of waiting: 30 views/day lost",
       "priority": "high",
       "estimated_impact": "From X views to Y views in 7 days",
       "monetization_potential": "$X-Y AdSense in 30 days",
-      "priority_rank": 1,
       "confidence_score": 85,
       "confidence_level": "High",
       "evidence": "reason 1 | reason 2 | reason 3",
