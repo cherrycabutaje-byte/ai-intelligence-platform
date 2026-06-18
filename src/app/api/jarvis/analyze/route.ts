@@ -252,18 +252,8 @@ Return the complete JSON now.`
       const jsonOnly = cleaned.slice(jsonStart, jsonEnd + 1);
       console.log("CLEANED START:", jsonOnly.substring(0, 100));
       analysis = JSON.parse(jsonOnly);
-  } catch (parseErr) {
-      console.log("PARSE ERROR:", String(parseErr));
-      const start = rawText.indexOf("{");
-      const end = rawText.lastIndexOf("}");
-      if (start !== -1 && end > start) {
-        try {
-          analysis = JSON.parse(rawText.slice(start, end + 1));
-     return NextResponse.json({ error: "Malformed JSON", raw: rawText.slice(0, 200) }, { status: 500 });
-        }
-      } else {
-        return NextResponse.json({ error: "No JSON found in response", raw: rawText }, { status: 500 });
-      }
+  } catch {
+      return NextResponse.json({ error: "Malformed JSON" }, { status: 500 });
     }
 
     await supabase.from("sources").update({ status: "active" }).eq("id", source_id).eq("user_id", user.id);
