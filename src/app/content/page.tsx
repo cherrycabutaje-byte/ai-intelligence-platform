@@ -267,6 +267,12 @@ export default function ContentPage() {
 
                 {activeTab === "overview" && (
                   <>
+                    {selected.content_gap && (
+                      <div className="bg-gradient-to-r from-cyan-500/20 to-purple-500/20 border border-cyan-500/30 rounded-xl p-4">
+                        <p className="text-xs font-bold text-cyan-400 uppercase tracking-wide mb-1">⚡ Do This In The Next 10 Minutes</p>
+                        <p className="text-white text-sm leading-relaxed">{selected.content_gap}</p>
+                      </div>
+                    )}
                     <Section label="Coaching Report" value={selected.report} color="gray" />
                     <Section label="Content Gap" value={selected.content_gap} color="cyan" />
                     <Section label="Next Content Idea" value={selected.next_content_idea} color="purple" copyable />
