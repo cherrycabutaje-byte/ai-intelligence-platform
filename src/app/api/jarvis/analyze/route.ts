@@ -177,7 +177,7 @@ Niche: ${niche ?? "Not specified"}
 URL: ${url}
 ${scrapeContext}
 
-Return the complete JSON now. IMPORTANT: Keep all string values under 200 characters. Use pipe | to separate items instead of quotes or newlines inside strings. Never use apostrophes or special characters inside JSON strings.`
+Return the complete JSON now. CRITICAL JSON RULES: 1) Maximum 100 words per field 2) No apostrophes - use "you are" not "you're" 3) No special characters inside strings 4) Use pipe | not newlines inside strings 5) Total response must be under 15000 characters`
         },
       ],
     });
