@@ -259,8 +259,7 @@ Return the complete JSON now.`
       if (start !== -1 && end > start) {
         try {
           analysis = JSON.parse(rawText.slice(start, end + 1));
-      } catch (e2) {
-          return NextResponse.json({ error: "Malformed JSON", raw: rawText.slice(0, 200) }
+     return NextResponse.json({ error: "Malformed JSON", raw: rawText.slice(0, 200) }, { status: 500 });
         }
       } else {
         return NextResponse.json({ error: "No JSON found in response", raw: rawText }, { status: 500 });
