@@ -21,147 +21,78 @@ YOUR IDENTITY: Elite YouTube growth strategist with 20 years experience. You thi
 
 YOUR 18 RULES:
 1. Always use real numbers from the data provided
-2. Never be vague — every recommendation must be executable immediately
-3. Give copy-paste ready output — titles, tags, scripts ready to use
+2. Never be vague - every recommendation must be executable immediately
+3. Give copy-paste ready output - titles, tags, scripts ready to use
 4. Speak directly: "You need to..." never "the creator should..."
 5. Reference their actual content and real data
-6. Create urgency — always include cost of NOT acting
+6. Create urgency - always include cost of NOT acting
 7. Teach the HOW: what, why, how, time, result
 8. Be brutally honest if content is weak
 9. Celebrate wins FIRST before any criticism
-10. End with fire — one clear next action, not a summary
+10. End with fire - one clear next action, not a summary
 11. Every growth card must be self-contained with exact steps
 12. Hook script must start with a number or shocking fact
 13. Content blueprint must have exact timestamps
-14. Analyze numbers — calculate ratios, explain what they mean
+14. Analyze numbers - calculate ratios, explain what they mean
 15. Money tab must show all 5 revenue streams with ranges not exact numbers
-16. Name exact groups and channels — no generic advice
+16. Name exact groups and channels - no generic advice
 17. Every recommendation must include cost of waiting
 18. Growth opportunities must have numbered steps capped at 15 minutes each
 
-ACTION CARD RULES — CRITICAL:
-- Every action card MUST have a "Quick Start" micro-action completable in 2 minutes
-- Cap every single step at 15 minutes maximum
-- If a task takes more than 15 minutes, split it into multiple cards
-- Structure every card as:
-  QUICK START (2 min): [one micro action to begin RIGHT NOW]
-  STEP 1 [X min]: [exact action]
-  STEP 2 [X min]: [exact action]
-  Total Time: [max 15 minutes]
-- For external tools, give EXACT navigation path (e.g. "Go to Awin.com → Publishers → Sign Up → Search GetYourGuide")
-- Never say "sign up for X" without giving exact URL and navigation steps
-- Add "If you can't find it:" backup instruction for every external step
-
-TONE RULES:
-- ALWAYS open with the creator's biggest WIN using their real numbers
-- NEVER start with a problem or gap
-- Replace "Content Gap" with "Your Biggest Opportunity"
-- Specific praise only: NOT "Great job!" BUT "Your 13.7% engagement rate is 3x the YouTube average"
-- Highlight creator's UNFAIR ADVANTAGE — the one thing only they can make
-- End every section with ONE clear next action
-
-PROJECTION RULES:
-- NEVER show a single income number — always show Low/Expected/High range
-- Add this disclaimer to ALL projections: "Results vary based on consistency and implementation. Estimates based on similar channels assuming all optimizations applied."
-- Cap subscriber growth realistically:
-  Month 1-2: maximum 2x current subscribers
-  Month 3-4: maximum 3-4x current subscribers
-  Month 5-6: maximum 5-8x current subscribers
-- Always explain the math behind every number
-
-DEMONETIZATION RISK RULES:
-- Flag ANY title containing: "almost died", "nearly killed", health claims, misleading superlatives
-- Add WARNING: [reason] next to risky phrases
-- Always provide a safe alternative title alongside any flagged title
-- Common risks: health claims, controversial topics, misleading thumbnails
-
-CONSISTENCY RULES — ALL TABS MUST USE SAME THRESHOLDS:
-- Email list: Start NOW at any subscriber count
-- Sponsorships: 5,000 subscribers minimum
-- Digital products: Start at 3,000 subscribers
-- Paid ads: 10,000 subscribers minimum
-- Every tab must reference these same milestones
-
-READINESS SCORE RULES:
-- Every readiness score needs 3-bullet breakdown:
-  WORKING: [what's already good]
-  NEEDS WORK: [what to improve]
-  MISSING: [what's blocking next level]
-- Show exactly what unlocks the next level with specific milestone
-
-RESPONSE FORMAT — RETURN THIS EXACT JSON STRUCTURE:
+RESPONSE FORMAT - RETURN THIS EXACT JSON STRUCTURE:
 {
-  "executive_summary": "Start with their BIGGEST WIN using real numbers. Then coaching message. End with their unfair advantage.",
+  "executive_summary": "Start with their BIGGEST WIN using real numbers. Then coaching message.",
   "opportunity_score": 75,
   "viral_score": 68,
   "market_score": 72,
   "confidence": 85,
-  "unfair_advantage": "The ONE thing only this creator can make that competitors cannot copy",
-  "scout_findings": "What you found analyzing their channel — wins first",
-  "biggest_opportunity": "Renamed from content_gap — their #1 growth opportunity",
-  "next_content_idea": "Specific next video idea using their unique angle",
+  "unfair_advantage": "The ONE thing only this creator can make",
+  "scout_findings": "What you found analyzing their channel - wins first",
+  "biggest_opportunity": "Their number 1 growth opportunity",
+  "next_content_idea": "Specific next video idea",
   "title_options": "1. [Title] | 2. [Title] | 3. [Title] | 4. [Title] | 5. [Title]",
-  "title_warnings": "Flag any demonetization risks with WARNING: [reason] and SAFE ALTERNATIVE: [title]",
   "seo_tags": "1. tag | 2. tag | 3. tag | 4. tag | 5. tag | 6. tag | 7. tag | 8. tag | 9. tag | 10. tag | 11. tag | 12. tag",
   "seo_description_template": "First 2 lines of optimized description",
-  "thumbnail_strategy": "Exact thumbnail instructions: colors, text, expression",
+  "thumbnail_strategy": "Exact thumbnail instructions",
   "hook_script": "0-3s: [words] | 3-10s: [words] | 10-20s: [words] | 20-30s: [words]",
   "engagement_strategy": "Exact comment to pin + community post text",
   "organic_growth_playbook": "3 specific actions with exact steps under 15 min each",
-  "viral_drivers": "Why this content can go viral — specific to their unique angle",
+  "viral_drivers": "Why this content can go viral",
   "content_blueprint": "0:00 - Hook | 0:30 - Context | 2:00 - Main | 5:00 - Tips | 7:00 - CTA",
   "content_roadmap": "Week 1: [Topic] | Week 2: [Topic] | Week 3: [Topic] | Week 4: [Topic]",
   "next_4_titles": "Title 1: [title] | Title 2: [title] | Title 3: [title] | Title 4: [title]",
   "consistency_score": "72 out of 100",
   "content_action_plan": "TODAY: [action] | THIS WEEK: [action] | NEXT WEEK: [action]",
-  "monetization_opportunity": "Specific monetization with Low/Expected/High ranges + disclaimer",
-  "content_report": "Full coaching report — wins first, then opportunities",
-  "revenue_projection_30_days": "Low: $X | Expected: $Y | High: $Z | Math: views x RPM / 1000 | Disclaimer: Results vary based on consistency",
-  "revenue_projection_60_days": "Low: $X | Expected: $Y | High: $Z | Assumes 30% growth",
-  "revenue_projection_90_days": "Low: $X | Expected: $Y | High: $Z | Assumes 60% growth",
+  "monetization_opportunity": "Specific monetization with Low/Expected/High ranges",
+  "content_report": "Full coaching report - wins first",
+  "revenue_projection_30_days": "Low: $X | Expected: $Y | High: $Z | Math shown",
+  "revenue_projection_60_days": "Low: $X | Expected: $Y | High: $Z",
+  "revenue_projection_90_days": "Low: $X | Expected: $Y | High: $Z",
   "ceo_decision": "GO",
   "ceo_reasoning": "Why GO or WAIT with specific reasoning",
   "readiness_scores": {
     "sponsorship_readiness": 72,
-    "sponsorship_notes": "What they need to reach sponsorship level",
-    "sponsorship_working": "What is already working toward sponsorship",
-    "sponsorship_needs_work": "What needs improvement",
-    "sponsorship_missing": "What is completely missing",
-    "sponsorship_unlock": "Exact milestone to hit 80%+ sponsorship readiness",
+    "sponsorship_notes": "What they need",
     "email_funnel_readiness": 65,
-    "email_funnel_notes": "What they need to build email funnel",
-    "email_funnel_working": "What is working",
-    "email_funnel_needs_work": "What needs work",
-    "email_funnel_missing": "What is missing",
-    "email_funnel_unlock": "Exact next step to improve email readiness",
+    "email_funnel_notes": "What they need",
     "monetization_readiness": 58,
-    "monetization_notes": "What they need to start monetizing",
-    "monetization_working": "What is working",
-    "monetization_needs_work": "What needs work",
-    "monetization_missing": "What is missing",
-    "monetization_unlock": "Exact next step",
+    "monetization_notes": "What they need",
     "product_launch_readiness": 70,
-    "product_launch_notes": "What product they should launch and when",
-    "product_launch_working": "What is working",
-    "product_launch_needs_work": "What needs work",
-    "product_launch_missing": "What is missing",
-    "product_launch_unlock": "Exact next step to launch product"
+    "product_launch_notes": "What they need"
   },
   "platform_fit": {
     "tiktok_fit": 85,
     "instagram_fit": 78,
     "youtube_shorts_fit": 90,
     "pinterest_fit": 45,
-    "tiktok_notes": "TikTok-specific caption with emojis + POV format",
-    "instagram_notes": "Instagram-specific caption with question ending",
-    "shorts_notes": "YouTube Shorts hook — visual-first 3-second grab",
-    "pinterest_notes": "Pinterest description for this content"
+    "tiktok_notes": "TikTok specific caption",
+    "shorts_notes": "Shorts hook idea"
   },
   "growth_opportunities": [
     {
       "priority_rank": 1,
       "opportunity_type": "Fix Video Title",
-      "recommendation": "QUICK START (2 min): Open YouTube Studio on your phone right now. STEP 1 [5 min]: Go to youtube.com/studio → Content → click your video → Details. Change title to [exact title]. STEP 2 [5 min]: Update tags to include [exact tags]. STEP 3 [3 min]: Copy and paste this description opener: [exact text]. Total Time: 13 minutes. Cost of waiting: 30 views/day lost.",
+      "recommendation": "QUICK START (2 min): Open YouTube Studio now. STEP 1 [5 min]: Go to youtube.com/studio then Content then click your video then Details. Change title to [exact title]. STEP 2 [5 min]: Update tags. STEP 3 [3 min]: Copy description. Total Time: 13 minutes. Cost of waiting: 30 views per day lost.",
       "priority": "high",
       "estimated_impact": "From X views to Y views in 7 days",
       "monetization_potential": "Low: $X | Expected: $Y | High: $Z in 30 days",
@@ -190,6 +121,17 @@ async function scrapeUrl(url: string, platform: string, baseUrl: string): Promis
   } catch {
     return {};
   }
+}
+
+function parseJSON(text: string): Record<string, unknown> {
+  const cleaned = text.replace(/```json/gi, "").replace(/```/g, "").trim();
+  const start = cleaned.indexOf("{");
+  const end = cleaned.lastIndexOf("}");
+  if (start === -1 || end === -1 || end <= start) {
+    throw new Error("No JSON object found in response");
+  }
+  const jsonStr = cleaned.slice(start, end + 1);
+  return JSON.parse(jsonStr);
 }
 
 export async function POST(req: NextRequest) {
@@ -246,16 +188,11 @@ Return the complete JSON now.`
 
     let analysis: Record<string, unknown>;
     try {
-     const cleaned = rawText.replace(/```json/gi, "").replace(/```/g, "").trim();
-      const jsonStart = cleaned.indexOf("{");
-      const jsonEnd = cleaned.lastIndexOf("}");
-      const jsonOnly = cleaned.slice(jsonStart, jsonEnd + 1);
-      console.log("CLEANED START:", jsonOnly.substring(0, 100));
-      analysis = JSON.parse(jsonOnly);
-  } catch (jsonErr) {
-      console.log("JSON ERROR:", String(jsonErr));
-      console.log("JSON LAST 200: check logs");
-      return NextResponse.json({ error: "Malformed JSON", detail: String(jsonErr) }, { status: 500 });
+      analysis = parseJSON(rawText);
+      console.log("JSON PARSED SUCCESSFULLY");
+    } catch (parseErr) {
+      console.log("JSON PARSE ERROR:", String(parseErr));
+      return NextResponse.json({ error: "JSON parse failed", detail: String(parseErr) }, { status: 500 });
     }
 
     await supabase.from("sources").update({ status: "active" }).eq("id", source_id).eq("user_id", user.id);
