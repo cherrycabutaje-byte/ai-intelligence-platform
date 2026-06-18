@@ -246,9 +246,12 @@ Return the complete JSON now.`
 
     let analysis: Record<string, unknown>;
     try {
-      const cleaned = rawText.replace(/```json/gi, "").replace(/```/g, "").trim();
-      console.log("CLEANED START:", cleaned.substring(0, 100));
-      analysis = JSON.parse(cleaned);
+     const cleaned = rawText.replace(/```json/gi, "").replace(/```/g, "").trim();
+      const jsonStart = cleaned.indexOf("{");
+      const jsonEnd = cleaned.lastIndexOf("}");
+      const jsonOnly = cleaned.slice(jsonStart, jsonEnd + 1);
+      console.log("CLEANED START:", jsonOnly.substring(0, 100));
+      analysis = JSON.parse(jsonOnly);
     } catch {
       const start = rawText.indexOf("{");
       const end = rawText.lastIndexOf("}");
