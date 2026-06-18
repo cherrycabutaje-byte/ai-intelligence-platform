@@ -254,7 +254,7 @@ Return the complete JSON now.`
       analysis = JSON.parse(jsonOnly);
   } catch (jsonErr) {
       console.log("JSON ERROR:", String(jsonErr));
-      console.log("JSON LAST 200:", jsonOnly.slice(-200));
+      console.log("JSON LAST 200:", cleaned.slice(-200));
       return NextResponse.json({ error: "Malformed JSON", detail: String(jsonErr) }, { status: 500 });
     }
 
