@@ -252,14 +252,15 @@ Return the complete JSON now.`
       const jsonOnly = cleaned.slice(jsonStart, jsonEnd + 1);
       console.log("CLEANED START:", jsonOnly.substring(0, 100));
       analysis = JSON.parse(jsonOnly);
-    } catch {
+  } catch (parseErr) {
+      console.log("PARSE ERROR:", String(parseErr));
       const start = rawText.indexOf("{");
       const end = rawText.lastIndexOf("}");
       if (start !== -1 && end > start) {
         try {
           analysis = JSON.parse(rawText.slice(start, end + 1));
         } catch {
-          return NextResponse.json({ error: "Malformed JSON", raw: rawText }, { status: 500 });
+          return NextResponse.json({ error: "Malformed JSON", raw: rawText.slice(0, 200) }
         }
       } else {
         return NextResponse.json({ error: "No JSON found in response", raw: rawText }, { status: 500 });
