@@ -104,6 +104,16 @@ async function fetchYouTubeData(url: string): Promise<Record<string, string | nu
         data.og_image = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
         data.video_id = videoId;
 
+        // Fetch transcript
+        try {
+          const transcript = await fetchTranscript(videoId);
+          if (transcript) {
+            data.transcript = transcript.slice(0, 3000);
+          }
+        } catch {
+          data.transcript = null;
+        }
+
         // Also get channel data
         channelId = video.snippet?.channelId ?? null;
       }
@@ -131,6 +141,40 @@ async function fetchYouTubeData(url: string): Promise<Record<string, string | nu
     data.platform = "YouTube";
 
     return Object.keys(data).length > 2 ? data : null;
+  } catch {
+    return null;
+  }
+}
+
+async function fetchTranscript(videoId: string): Promise<string | null> {
+  try {
+    const response = await fetch(
+      `https://www.youtube.com/watch?v=${videoId}`,
+      {
+        headers: {
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+          "Accept-Language": "en-US,en;q=0.9",
+        },
+      }
+    );
+    const html = await response.text();
+    const captionMatch = html.match(/"captionTracks":\s*(\[.*?\])/);
+    if (!captionMatch) return null;
+    const captions = JSON.parse(captionMatch[1]);
+    const englishTrack = captions.find((c: Record<string, unknown>) =>
+      (c.languageCode === "en" || c.vssId === ".en" || c.vssId === "a.en")
+    ) ?? captions[0];
+    if (!englishTrack?.baseUrl) return null;
+    const transcriptRes = await fetch(englishTrack.baseUrl);
+    const transcriptXml = await transcriptRes.text();
+    const text = transcriptXml
+      .replace(/<[^>]+>/g, " ")
+      .replace(/&amp;/g, "&")
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      .replace(/\s+/g, " ")
+      .trim();
+    return text || null;
   } catch {
     return null;
   }
