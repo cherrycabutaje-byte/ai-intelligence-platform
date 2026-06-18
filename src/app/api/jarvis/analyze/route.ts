@@ -157,7 +157,8 @@ Likes: ${scraped.likes ?? "N/A"}
 Comments: ${scraped.comments ?? "N/A"}
 Subscribers: ${scraped.subscribers ?? "N/A"}
 Channel Name: ${scraped.channel_name ?? "N/A"}
-Published: ${scraped.published_at ?? "N/A"}`
+Published: ${scraped.published_at ?? "N/A"}
+Video Transcript (first 3000 chars): ${scraped.transcript ?? "No transcript available"}`
       : "URL could not be scraped. Use provided details only.";
 
     const completion = await anthropic.messages.create({
