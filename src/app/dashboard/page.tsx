@@ -75,8 +75,8 @@ export default function DashboardPage() {
       notes: form.notes || null,
     });
     setSaving(false);
-    if (error) { showToast("❌ Failed to save: " + error.message); }
-    else { showToast("✅ Stats saved!"); setShowInput(false); fetchStats(); }
+    if (error) { showToast("Failed to save: " + error.message); }
+    else { showToast("Stats saved!"); setShowInput(false); fetchStats(); }
   };
 
   const isContent = ["YouTube", "TikTok", "Instagram", "Twitter", "LinkedIn"].includes(selectedSource?.platform ?? "");
@@ -110,24 +110,18 @@ export default function DashboardPage() {
 
       <div className="max-w-7xl mx-auto px-6 py-8 space-y-6">
 
-        {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-white">📊 Growth Dashboard</h1>
+            <h1 className="text-2xl font-bold text-white">Growth Dashboard</h1>
             <p className="text-gray-400 text-sm mt-1">Track your progress and see Jarvis working</p>
           </div>
-          <button
-            onClick={() => setShowInput(true)}
-            className="bg-cyan-500 hover:bg-cyan-400 text-black font-semibold px-4 py-2 rounded-lg text-sm"
-          >
-            <button onClick={() => setShowFeedback(true)} className="bg-[#1a1d27] hover:bg-gray-800 text-gray-300 border border-gray-700 font-medium px-4 py-2 rounded-lg text-sm">
-              ⭐ Give Feedback
-            </button>
-            + Update Stats Today
-          </button>
+          <div className="flex items-center gap-2">
+            <a href="/coach" className="bg-[#1a1d27] hover:bg-gray-800 text-gray-300 border border-gray-700 font-medium px-4 py-2 rounded-lg text-sm">Growth Coach</a>
+            <button onClick={() => setShowFeedback(true)} className="bg-[#1a1d27] hover:bg-gray-800 text-gray-300 border border-gray-700 font-medium px-4 py-2 rounded-lg text-sm">Give Feedback</button>
+            <button onClick={() => setShowInput(true)} className="bg-cyan-500 hover:bg-cyan-400 text-black font-semibold px-4 py-2 rounded-lg text-sm">+ Update Stats Today</button>
+          </div>
         </div>
 
-        {/* Source Selector */}
         {sources.length > 0 && (
           <div className="flex gap-2 flex-wrap">
             {sources.map(s => (
@@ -136,7 +130,7 @@ export default function DashboardPage() {
                 onClick={() => setSelectedSource(s)}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${selectedSource?.id === s.id ? "bg-cyan-500 text-black" : "bg-[#1a1d27] text-gray-400 hover:text-white border border-gray-700"}`}
               >
-                {s.asset_name} • {s.platform}
+                {s.asset_name} - {s.platform}
               </button>
             ))}
           </div>
@@ -144,7 +138,7 @@ export default function DashboardPage() {
 
         {stats.length === 0 ? (
           <div className="bg-[#1a1d27] border border-gray-800 rounded-xl px-6 py-16 text-center">
-            <div className="text-4xl mb-3">📈</div>
+            <div className="text-4xl mb-3">+</div>
             <h3 className="text-white font-semibold text-lg mb-2">No stats yet for {selectedSource?.asset_name}</h3>
             <p className="text-gray-400 text-sm mb-6">Start tracking your growth by adding Stats Today. Takes 2 minutes!</p>
             <button onClick={() => setShowInput(true)} className="bg-cyan-500 hover:bg-cyan-400 text-black font-semibold px-6 py-2 rounded-lg text-sm">
@@ -153,7 +147,6 @@ export default function DashboardPage() {
           </div>
         ) : (
           <>
-            {/* Growth Cards */}
             {growth && (
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 {isContent && <>
@@ -171,12 +164,10 @@ export default function DashboardPage() {
               </div>
             )}
 
-            {/* Charts */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Subscribers/Followers Chart */}
               <div className="bg-[#1a1d27] border border-gray-800 rounded-xl p-5">
                 <h3 className="text-sm font-semibold text-white mb-4">
-                  {isContent ? "📈 Subscribers Growth" : "📈 Sales Growth"}
+                  {isContent ? "Subscribers Growth" : "Sales Growth"}
                 </h3>
                 <ResponsiveContainer width="100%" height={200}>
                   <LineChart data={stats.map(s => ({
@@ -192,10 +183,9 @@ export default function DashboardPage() {
                 </ResponsiveContainer>
               </div>
 
-              {/* Views/Revenue Chart */}
               <div className="bg-[#1a1d27] border border-gray-800 rounded-xl p-5">
                 <h3 className="text-sm font-semibold text-white mb-4">
-                  {isContent ? "👀 Daily Views" : "💰 Monthly Revenue"}
+                  {isContent ? "Daily Views" : "Monthly Revenue"}
                 </h3>
                 <ResponsiveContainer width="100%" height={200}>
                   <BarChart data={stats.map(s => ({
@@ -212,20 +202,19 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* Milestones */}
             {milestones.length > 0 && (
               <div className="bg-[#1a1d27] border border-gray-800 rounded-xl p-5">
-                <h3 className="text-sm font-semibold text-white mb-4">🎯 Milestones</h3>
+                <h3 className="text-sm font-semibold text-white mb-4">Milestones</h3>
                 <div className="space-y-3">
                   {milestones.slice(0, 6).map((m, i) => (
                     <div key={i} className="flex items-center gap-3">
                       <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs shrink-0 ${m.achieved ? "bg-green-500 text-white" : "bg-gray-700 text-gray-400"}`}>
-                        {m.achieved ? "✓" : "○"}
+                        {m.achieved ? "v" : "o"}
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center justify-between mb-1">
                           <span className={`text-xs font-medium ${m.achieved ? "text-green-400" : "text-gray-400"}`}>
-                            {m.label} {m.special && <span className="text-yellow-400 ml-1">⭐ {m.special}</span>}
+                            {m.label} {m.special && <span className="text-yellow-400 ml-1">{m.special}</span>}
                           </span>
                           <span className="text-xs text-gray-500">{m.current.toLocaleString()} / {m.target.toLocaleString()}</span>
                         </div>
@@ -246,16 +235,15 @@ export default function DashboardPage() {
 
         {showFeedback && <FeedbackModal onClose={() => setShowFeedback(false)} />}
 
-        {/* Stats Input Modal */}
         {showInput && (
           <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <div className="bg-[#1a1d27] border border-cyan-500/30 rounded-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
               <div className="flex items-center justify-between px-6 py-4 border-b border-gray-800">
                 <div>
-                  <h2 className="text-lg font-semibold text-white">📊 Stats Today</h2>
-                  <p className="text-xs text-gray-400">{selectedSource?.asset_name} • {new Date().toLocaleDateString()}</p>
+                  <h2 className="text-lg font-semibold text-white">Stats Today</h2>
+                  <p className="text-xs text-gray-400">{selectedSource?.asset_name} - {new Date().toLocaleDateString()}</p>
                 </div>
-                <button onClick={() => setShowInput(false)} className="text-gray-400 hover:text-white text-xl">✕</button>
+                <button onClick={() => setShowInput(false)} className="text-gray-400 hover:text-white text-xl">X</button>
               </div>
               <div className="px-6 py-4 space-y-4">
                 {isContent && (
@@ -323,7 +311,7 @@ export default function DashboardPage() {
                   />
                 </div>
                 <div className="bg-cyan-500/10 border border-cyan-500/20 rounded-lg px-4 py-3">
-                  <p className="text-xs text-cyan-300">💡 Update daily for the most accurate growth charts and milestone tracking.</p>
+                  <p className="text-xs text-cyan-300">Update daily for the most accurate growth charts and milestone tracking.</p>
                 </div>
               </div>
               <div className="flex gap-3 justify-end px-6 py-4 border-t border-gray-800">
@@ -340,10 +328,3 @@ export default function DashboardPage() {
     </div>
   );
 }
-
-
-
-
-
-
-
