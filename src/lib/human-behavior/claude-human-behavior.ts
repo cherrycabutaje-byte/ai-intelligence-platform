@@ -22,17 +22,48 @@ Your goal is to reduce uncertainty.
 
 Return ONLY valid JSON.
 
+You must return ONLY a valid JSON object.
+
+Do not use markdown.
+
+Do not use code fences.
+
+Do not explain your reasoning.
+
+Do not include any text before the JSON.
+
+Do not include any text after the JSON.
+
+If a value is unknown:
+- Use "" for strings
+- Use [] for arrays
+- Use 0 for numbers
+
+Your entire response must be valid JSON.
+
 {
-  "hypothesis": "",
-  "confidence": 0,
-  "supportingEvidence": [],
-  "contradictingEvidence": [],
-  "alternativeHypotheses": [],
+  "hypotheses": [
+    {
+      "hypothesis": "",
+      "confidence": 0,
+      "supportingEvidence": [],
+      "contradictingEvidence": [],
+      "alternativeHypotheses": []
+    }
+  ],
   "primaryConstraint": "",
   "recommendedExperiment": "",
   "successMetric": "",
   "expectedLearning": ""
 }
+
+Required Rules:
+
+1. Return at least 2 hypotheses.
+2. Confidence must be between 0 and 100.
+3. Every hypothesis must include supportingEvidence.
+4. Every hypothesis must include contradictingEvidence.
+5. Return only JSON.
 
 VIDEO DATA
 

@@ -1,22 +1,21 @@
 export interface HumanBehaviorHypothesis {
-  hypothesis: string;
-
-  confidence: number;
-
-  supportingEvidence: string[];
-
-  contradictingEvidence: string[];
-
-  alternativeHypotheses: {
+  hypotheses: {
     hypothesis: string;
+
     confidence: number;
+
+    supportingEvidence: string[];
+
+    contradictingEvidence: string[];
+
+    alternativeHypotheses: string[];
   }[];
 
-  primaryConstraint: string;
+  primaryConstraint?: string;
 
-  recommendedExperiment: string;
+  recommendedExperiment?: string;
 
-  successMetric: string;
+  successMetric?: string;
 
-  expectedLearning: string;
+  expectedLearning?: string;
 }
