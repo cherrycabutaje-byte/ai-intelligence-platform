@@ -1,16 +1,26 @@
-import { NextResponse } from 'next/server';
+﻿import { NextResponse } from 'next/server';
 import { getLearningsByCreator }
   from '@/lib/human-behavior/creator-learning-repository';
 import { rankLearnings }
   from '@/lib/coaching/learning-ranker';
-import { selectPrimaryLearning }
-  from '@/lib/coaching/primary-learning-selector';
+import { selectTopLearnings }
+  from '@/lib/coaching/top-learning-selector';
 import { generateCoachDirective }
   from '@/lib/coaching/coach-directive-generator';
 import { explainDirective }
   from '@/lib/coaching/directive-explainer';
-import { recommendExperiment }
-  from '@/lib/coaching/experiment-recommender';
+import { generateActionPlan }
+  from '@/lib/coaching/action-plan-generator';
+import { synthesizeExperiment }
+  from '@/lib/coaching/experiment-synthesizer';
+import { estimateImpact }
+  from '@/lib/coaching/impact-estimator';
+import { buildOpportunity }
+  from '@/lib/coaching/opportunity-builder';
+import { prioritizeOpportunities }
+  from '@/lib/coaching/opportunity-prioritizer';
+import { generateRoadmap }
+  from '@/lib/coaching/roadmap-generator';
 
 export async function GET(req: Request) {
   const { searchParams } =
@@ -47,16 +57,45 @@ export async function GET(req: Request) {
   const ranked =
     rankLearnings(learnings);
 
-  const primary =
-    selectPrimaryLearning(ranked);
+  const top =
+    selectTopLearnings(ranked);
+
+  const primary = top[0];
+
+  const supporting = top.slice(1);
+
+  const opportunities =
+    top.map(
+      (ranked, index) =>
+        buildOpportunity(ranked, index + 1)
+    );
+
+  const prioritized =
+    prioritizeOpportunities(opportunities);
+
+  const roadmap =
+    generateRoadmap(prioritized);
 
   return NextResponse.json({
     success: true,
-    directive:
+    primaryConstraint:
       generateCoachDirective(primary),
-    explanation:
+    supportingInsights:
+      supporting.map(
+        r => r.learning.statement
+      ),
+    why:
       explainDirective(primary),
+    actionPlan:
+      generateActionPlan(top),
     experiment:
-      recommendExperiment(primary)
+      synthesizeExperiment(top),
+    expectedImpact:
+      estimateImpact(primary),
+    highestOpportunity:
+      prioritized.highestOpportunity,
+    secondaryOpportunities:
+      prioritized.secondaryOpportunities,
+    roadmap
   });
 }
