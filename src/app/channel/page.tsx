@@ -345,7 +345,7 @@ export default function ChannelPage() {
                 </div>
                 <div className="p-6 space-y-3">
                   {result.diagnosis.audienceLoves.map((item, i) => (
-                    <div key={item} className="flex items-center gap-3">
+                    <div key={`love-${i}`} className="flex items-center gap-3">
                       <span className="text-green-400 font-bold text-xs w-6">#{i + 1}</span>
                       <p className="text-white text-sm">{item}</p>
                     </div>
@@ -359,7 +359,7 @@ export default function ChannelPage() {
                 </div>
                 <div className="p-6 space-y-3">
                   {result.diagnosis.audienceIgnores.map((item, i) => (
-                    <div key={item} className="flex items-center gap-3">
+                    <div key={`love-${i}`} className="flex items-center gap-3">
                       <span className="text-red-400 font-bold text-xs w-6">#{i + 1}</span>
                       <p className="text-white text-sm">{item}</p>
                     </div>
@@ -426,6 +426,8 @@ export default function ChannelPage() {
     </div>
   );
 }
+
+
 
 
 
