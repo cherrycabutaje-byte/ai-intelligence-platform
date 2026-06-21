@@ -191,7 +191,20 @@ function BlockerCard({ blocker }: { blocker: Blocker }) {
 
 export default function ChannelPage() {
   const [channelId, setChannelId] = useState("");
-  const [creatorId] = useState("christine");
+  const [creatorId, setCreatorId] = useState("christine");
+  const [userId, setUserId] = useState("christine");
+
+  useEffect(() => {
+    async function loadUser() {
+      try {
+        const { createClient } = await import("@/lib/supabase");
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user?.id) setUserId(user.id);
+      } catch {}
+    }
+    loadUser();
+  }, []);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<DiagnosisResult | null>(null);
@@ -201,7 +214,7 @@ export default function ChannelPage() {
     async function loadExisting() {
       try {
         const res = await fetch(
-          `/api/jarvis/channel-intelligence?userId=${creatorId}`
+          `/api/jarvis/channel-intelligence?userId=${userId}`
         );
         const data = await res.json();
         if (data.success) setResult(data);
@@ -614,3 +627,4 @@ export default function ChannelPage() {
     </div>
   );
 }
+

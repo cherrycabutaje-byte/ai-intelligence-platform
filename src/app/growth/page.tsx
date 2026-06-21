@@ -44,8 +44,12 @@ export default function GrowthPage() {
   useEffect(() => {
     async function loadBlockers() {
       try {
+        const { createClient } = await import("@/lib/supabase");
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        const uid = user?.id ?? "christine";
         const res = await fetch(
-          '/api/jarvis/channel-intelligence?userId=christine'
+          `/api/jarvis/channel-intelligence?userId=${uid}`
         );
         const data = await res.json();
         if (data.success && data.blockers) {
@@ -267,3 +271,5 @@ export default function GrowthPage() {
     </div>
   );
 }
+
+
