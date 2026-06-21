@@ -61,7 +61,7 @@ export async function GET(req: Request) {
   const pdfBuffer =
     await renderViralBriefPDF(brief);
 
-  return new NextResponse(pdfBuffer, {
+  return new NextResponse(new Uint8Array(pdfBuffer), {
     headers: {
       'Content-Type': 'application/pdf',
       'Content-Disposition':
@@ -69,4 +69,5 @@ export async function GET(req: Request) {
     }
   });
 }
+
 
