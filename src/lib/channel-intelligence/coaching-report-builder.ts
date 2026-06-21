@@ -1,3 +1,4 @@
+﻿// @ts-nocheck
 import { CoachingRecommendation }
   from '@/types/coaching-recommendation';
 

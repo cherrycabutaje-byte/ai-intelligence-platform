@@ -8,5 +8,6 @@ export interface PatternMatch {
   alignmentScore: number;
   gapScore: number;
   severity: GapSeverity;
+  matchedSignals: string[];
   recommendationConfidence: number;
 }

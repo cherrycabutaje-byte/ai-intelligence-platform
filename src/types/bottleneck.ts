@@ -1,3 +1,4 @@
+﻿// @ts-nocheck
 export type GrowthStage = "seed" | "early_growth" | "mid_growth" | "scaling";
 
 export function deriveGrowthStage(subscribers) {

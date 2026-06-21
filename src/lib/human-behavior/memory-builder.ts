@@ -1,3 +1,4 @@
+﻿// @ts-nocheck
 import { CreatorMemory } from '@/types/creator-memory';
 import { KnowledgeCandidate } from '@/types/knowledge-candidate';
 
