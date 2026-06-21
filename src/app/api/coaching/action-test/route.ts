@@ -1,22 +1,24 @@
-import { NextResponse } from 'next/server';
+﻿import { NextResponse } from 'next/server';
 import { generateAction }
   from '@/lib/coaching/action-generator';
 
 export async function GET() {
   const mockLearning = {
-    id: '1',
-    statement:
-      'Transformation titles outperform travel titles',
-    confidence: 84,
-    status: 'tentative' as const,
-    supportingEvidenceCount: 4,
-    contradictingEvidenceCount: 0,
-    origin: {
-      hypothesis:
-        'Audience prefers transformation content'
+    learning: {
+      id: '1',
+      statement:
+        'Transformation titles outperform travel titles',
+      confidence: 84,
+      status: 'tentative' as const,
+      supportingEvidenceCount: 4,
+      contradictingEvidenceCount: 0,
+      origin: {
+        hypothesis:
+          'Audience prefers transformation content'
+      },
+      createdAt: new Date().toISOString(),
+      lastUpdated: new Date().toISOString()
     },
-    createdAt: new Date().toISOString(),
-    lastUpdated: new Date().toISOString(),
     priorityScore: 88
   };
 
