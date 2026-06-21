@@ -1,5 +1,5 @@
 ﻿"use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 
 interface VideoStats {
@@ -9,42 +9,28 @@ interface VideoStats {
   publishedAt: string;
 }
 
-interface ChannelDiagnosis {
-  channelId: string;
-  creatorId: string;
-  generatedAt: string;
-  channelStats: {
-    channelTitle: string;
-    description: string;
-    subscribers: number;
-    totalVideos: number;
-    channelStartDate: string;
-  };
-  topVideos: VideoStats[];
-  bottomVideos: VideoStats[];
-  averageViews: number;
-  gapRatio: number;
-  recentVideos: VideoStats[];
-  driftAlignmentScore: number;
-  historicalAlignmentScore: number;
-  diagnosis: {
+interface DiagnosisResult {
+  channelName: string;
+  subscribers: number;
+  totalVideos: number;
+  lastUploadDays: number;
+  overallHealth: string;
+  oneLineSummary: string;
+  savedAt: string;
+  truths: {
+    whyPeopleFollowYou: string;
+    creatorDNA: { creatorType: string; interpretation: string };
     channelPositioning: {
       whatYouSayYouAre: string;
       whatAudienceRespondsTo: string;
       alignmentScore: number;
       interpretation: string;
     };
-    creatorDNA: {
-      creatorType: string;
-      interpretation: string;
-    };
-    topPerformers: { pattern: string; interpretation: string };
-    bottomPerformers: { pattern: string; interpretation: string };
+    topVideos: VideoStats[];
+    bottomVideos: VideoStats[];
     audienceLoves: string[];
     audienceIgnores: string[];
     channelDrift: { detected: boolean; explanation: string };
-    whyPeopleFollowYou: string;
-    contentAudienceRejects: Array<{ topic: string; averageViews: number; reason: string }>;
     costOfDrift: {
       alignedAverageViews: number;
       misalignedAverageViews: number;
@@ -52,33 +38,81 @@ interface ChannelDiagnosis {
       interpretation: string;
     };
     biggestOpportunity: string;
+    averageViews: number;
+    gapRatio: number;
   };
+  blockers: Array<{
+    number: number;
+    name: string;
+    severity: string;
+    whatIsBroken: string;
+    whyItMatters: string;
+    cost: string;
+    estimatedImpact: string;
+    confidence: number;
+  }>;
+}
+
+function HealthBadge({ health }: { health: string }) {
+  const colors: Record<string, string> = {
+    'At Risk': 'bg-red-500/20 text-red-400 border-red-500/30',
+    'Needs Attention': 'bg-orange-500/20 text-orange-400 border-orange-500/30',
+    'Room to Improve': 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
+    'On Track': 'bg-green-500/20 text-green-400 border-green-500/30',
+  };
+  return (
+    <span className={`text-xs px-3 py-1 rounded-full border font-bold ${colors[health] ?? colors['Needs Attention']}`}>
+      {health}
+    </span>
+  );
+}
+
+function SeverityDot({ severity }: { severity: string }) {
+  if (severity === 'Critical') return <span className="text-red-400">🔴</span>;
+  if (severity === 'High') return <span className="text-orange-400">🟠</span>;
+  if (severity === 'Medium') return <span className="text-yellow-400">🟡</span>;
+  return <span className="text-blue-400">🔵</span>;
 }
 
 export default function ChannelPage() {
   const [channelId, setChannelId] = useState("");
-  const [creatorId, setCreatorId] = useState("");
+  const [creatorId, setCreatorId] = useState("christine");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [result, setResult] = useState<ChannelDiagnosis | null>(null);
+  const [result, setResult] = useState<DiagnosisResult | null>(null);
+  const [loadingExisting, setLoadingExisting] = useState(true);
+
+  // Load existing diagnosis on mount
+  useEffect(() => {
+    async function loadExisting() {
+      try {
+        const res = await fetch(
+          `/api/jarvis/channel-intelligence?userId=${creatorId}`
+        );
+        const data = await res.json();
+        if (data.success) setResult(data);
+      } catch {}
+      finally { setLoadingExisting(false); }
+    }
+    loadExisting();
+  }, []);
 
   const handleDiagnose = async () => {
-    if (!channelId || !creatorId) {
-      setError("Channel ID and Creator ID are required.");
+    if (!channelId) {
+      setError("Please enter your YouTube Channel ID.");
       return;
     }
     setLoading(true);
     setError(null);
-    setResult(null);
     try {
-      const res = await fetch("/api/jarvis/diagnose", {
+      const res = await fetch("/api/jarvis/channel-intelligence", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ channelId, creatorId })
       });
       const data = await res.json();
       if (!data.success) throw new Error(data.message ?? "Diagnosis failed");
-      setResult(data.diagnosis);
+      setResult(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
@@ -92,11 +126,13 @@ export default function ChannelPage() {
     return "text-red-400";
   };
 
-  const alignmentBg = (score: number) => {
-    if (score >= 70) return "border-green-500/30";
-    if (score >= 40) return "border-yellow-500/30";
-    return "border-red-500/30";
-  };
+  if (loadingExisting) {
+    return (
+      <div className="min-h-screen bg-[#0f1117] flex items-center justify-center">
+        <div className="text-gray-400 text-sm animate-pulse">Loading your diagnosis...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#0f1117] text-white">
@@ -113,7 +149,7 @@ export default function ChannelPage() {
           </p>
         </div>
 
-        {/* Input Form */}
+        {/* Input Form — only show if no result */}
         {!result && !loading && (
           <div className="bg-[#1a1d27] border border-gray-800 rounded-2xl p-6 space-y-5">
             <div className="space-y-2">
@@ -127,19 +163,8 @@ export default function ChannelPage() {
                 className="w-full bg-[#0f1117] border border-gray-700 rounded-xl px-4 py-3 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-cyan-500/50"
               />
               <p className="text-xs text-gray-600">
-                YouTube Studio → Settings → Channel → Advanced settings
+                YouTube Studio → Settings → Channel → Advanced settings → Channel ID
               </p>
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm text-gray-300 font-medium">
-                Your Creator Name <span className="text-red-400">*</span>
-              </label>
-              <input
-                value={creatorId}
-                onChange={e => setCreatorId(e.target.value)}
-                placeholder="e.g. Cherry Vibes or your name"
-                className="w-full bg-[#0f1117] border border-gray-700 rounded-xl px-4 py-3 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-cyan-500/50"
-              />
             </div>
             {error && (
               <div className="bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-3 text-red-400 text-sm">
@@ -148,8 +173,7 @@ export default function ChannelPage() {
             )}
             <button
               onClick={handleDiagnose}
-              disabled={loading}
-              className="w-full bg-cyan-500 hover:bg-cyan-400 disabled:opacity-50 text-black font-bold py-3 rounded-xl transition-colors"
+              className="w-full bg-cyan-500 hover:bg-cyan-400 text-black font-bold py-3 rounded-xl transition-colors"
             >
               Run Channel Diagnosis →
             </button>
@@ -162,7 +186,8 @@ export default function ChannelPage() {
             <div className="text-4xl animate-pulse">🧬</div>
             <p className="text-white font-semibold text-lg">Diagnosing your channel...</p>
             <p className="text-gray-400 text-sm">
-              Fetching your videos, analyzing patterns, applying five intelligence lenses. About 20 seconds.
+              Fetching your videos, running 10 diagnostic rules, applying five intelligence lenses.
+              About 30 seconds.
             </p>
           </div>
         )}
@@ -175,34 +200,70 @@ export default function ChannelPage() {
             <div className="bg-[#1a1d27] border border-gray-800 rounded-2xl p-6">
               <div className="flex items-start justify-between flex-wrap gap-4">
                 <div>
-                  <h2 className="text-2xl font-bold text-white">{result.channelStats.channelTitle}</h2>
-                  <p className="text-gray-400 text-sm mt-1">
-                    {result.channelStats.subscribers.toLocaleString()} subscribers
-                    · {result.channelStats.totalVideos} total videos
+                  <div className="flex items-center gap-3 mb-1">
+                    <h2 className="text-2xl font-bold text-white">{result.channelName}</h2>
+                    <HealthBadge health={result.overallHealth} />
+                  </div>
+                  <p className="text-gray-400 text-sm">
+                    {result.subscribers.toLocaleString()} subscribers
+                    · {result.totalVideos} total videos
+                    · Last upload: {result.lastUploadDays} days ago
+                  </p>
+                  <p className="text-white text-sm mt-2 italic">
+                    "{result.oneLineSummary}"
                   </p>
                 </div>
-                <div className="flex gap-6">
+                <div className="flex gap-6 shrink-0">
                   <div className="text-center">
                     <p className="text-xs text-gray-500">Avg views</p>
-                    <p className="text-2xl font-bold text-white">{result.averageViews}</p>
+                    <p className="text-2xl font-bold text-white">
+                      {result.truths.averageViews}
+                    </p>
                   </div>
                   <div className="text-center">
                     <p className="text-xs text-gray-500">Gap ratio</p>
-                    <p className="text-2xl font-bold text-yellow-400">{result.gapRatio}x</p>
+                    <p className="text-2xl font-bold text-yellow-400">
+                      {result.truths.gapRatio}x
+                    </p>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Why People Follow You — FIRST */}
-            <div className="bg-[#1a1d27] border border-yellow-500/30 rounded-2xl overflow-hidden">
+            {/* Blockers Preview */}
+            {result.blockers.length > 0 && (
+              <div className="bg-red-500/5 border border-red-500/20 rounded-2xl p-5 space-y-3">
+                <div className="flex items-center justify-between">
+                  <p className="text-red-400 font-semibold text-sm uppercase tracking-wide">
+                    {result.blockers.filter(b => b.severity === 'Critical').length} Critical Issues Found
+                  </p>
+                  <Link href="/growth" className="text-xs text-cyan-400 hover:text-cyan-300">
+                    See all blockers in Growth →
+                  </Link>
+                </div>
+                {result.blockers.slice(0, 2).map(b => (
+                  <div key={b.number} className="flex items-start gap-3">
+                    <SeverityDot severity={b.severity} />
+                    <div>
+                      <p className="text-white text-sm font-medium">{b.name}</p>
+                      <p className="text-gray-400 text-xs">{b.cost}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Why People Follow You */}
+            <div className="bg-[#1a1d27] border border-yellow-500/20 rounded-2xl overflow-hidden">
               <div className="px-6 py-4 border-b border-yellow-500/20">
                 <p className="text-yellow-400 font-semibold text-sm uppercase tracking-wide">
                   Why People Follow You
                 </p>
               </div>
               <div className="p-6">
-                <p className="text-white text-sm leading-relaxed">{result.diagnosis.whyPeopleFollowYou}</p>
+                <p className="text-white text-sm leading-relaxed">
+                  {result.truths.whyPeopleFollowYou}
+                </p>
               </div>
             </div>
 
@@ -211,46 +272,60 @@ export default function ChannelPage() {
               <div className="px-6 py-4 border-b border-cyan-500/20">
                 <p className="text-cyan-400 font-semibold text-sm uppercase tracking-wide">Creator DNA</p>
               </div>
-              <div className="p-6 space-y-4">
+              <div className="p-6 space-y-3">
                 <div className="inline-block bg-cyan-500/10 border border-cyan-500/20 rounded-xl px-6 py-3">
-                  <p className="text-cyan-400 font-bold text-xl">{result.diagnosis.creatorDNA.creatorType}</p>
+                  <p className="text-cyan-400 font-bold text-xl">
+                    {result.truths.creatorDNA.creatorType}
+                  </p>
                 </div>
-                <p className="text-gray-300 text-sm leading-relaxed">{result.diagnosis.creatorDNA.interpretation}</p>
+                <p className="text-gray-300 text-sm leading-relaxed">
+                  {result.truths.creatorDNA.interpretation}
+                </p>
               </div>
             </div>
 
             {/* Channel Positioning */}
-            <div className={`bg-[#1a1d27] border rounded-2xl overflow-hidden ${alignmentBg(result.diagnosis.channelPositioning.alignmentScore)}`}>
+            <div className="bg-[#1a1d27] border border-gray-800 rounded-2xl overflow-hidden">
               <div className="px-6 py-4 border-b border-gray-800">
-                <p className="text-white font-semibold text-sm uppercase tracking-wide">Channel Positioning</p>
+                <p className="text-white font-semibold text-sm uppercase tracking-wide">
+                  Channel Positioning
+                </p>
               </div>
               <div className="p-6 space-y-4">
                 <div className="grid md:grid-cols-3 gap-4">
-                  <div className="bg-[#0f1117] rounded-xl p-4 space-y-1">
-                    <p className="text-xs text-gray-500 uppercase tracking-wide">What you say you are</p>
-                    <p className="text-white font-medium text-sm mt-2">{result.diagnosis.channelPositioning.whatYouSayYouAre}</p>
+                  <div className="bg-[#0f1117] rounded-xl p-4">
+                    <p className="text-xs text-gray-500 uppercase mb-2">What you say you are</p>
+                    <p className="text-white text-sm font-medium">
+                      {result.truths.channelPositioning.whatYouSayYouAre}
+                    </p>
                   </div>
-                  <div className="bg-[#0f1117] rounded-xl p-4 space-y-1">
-                    <p className="text-xs text-gray-500 uppercase tracking-wide">What audience responds to</p>
-                    <p className="text-white font-medium text-sm mt-2">{result.diagnosis.channelPositioning.whatAudienceRespondsTo}</p>
+                  <div className="bg-[#0f1117] rounded-xl p-4">
+                    <p className="text-xs text-gray-500 uppercase mb-2">What audience responds to</p>
+                    <p className="text-white text-sm font-medium">
+                      {result.truths.channelPositioning.whatAudienceRespondsTo}
+                    </p>
                   </div>
                   <div className="bg-[#0f1117] rounded-xl p-4 text-center">
-                    <p className="text-xs text-gray-500 uppercase tracking-wide mb-2">Alignment</p>
-                    <p className={`text-4xl font-bold ${alignmentColor(result.diagnosis.channelPositioning.alignmentScore)}`}>
-                      {result.diagnosis.channelPositioning.alignmentScore}%
+                    <p className="text-xs text-gray-500 uppercase mb-2">Alignment</p>
+                    <p className={`text-4xl font-bold ${alignmentColor(result.truths.channelPositioning.alignmentScore)}`}>
+                      {result.truths.channelPositioning.alignmentScore}%
                     </p>
                   </div>
                 </div>
-                <p className="text-gray-300 text-sm leading-relaxed">{result.diagnosis.channelPositioning.interpretation}</p>
+                <p className="text-gray-300 text-sm leading-relaxed">
+                  {result.truths.channelPositioning.interpretation}
+                </p>
               </div>
             </div>
 
             {/* Cost of Drift */}
-            <div className="bg-[#1a1d27] border border-red-500/30 rounded-2xl overflow-hidden">
+            <div className="bg-[#1a1d27] border border-red-500/20 rounded-2xl overflow-hidden">
               <div className="px-6 py-4 border-b border-red-500/20 flex items-center justify-between">
-                <p className="text-red-400 font-semibold text-sm uppercase tracking-wide">Cost of Drift</p>
+                <p className="text-red-400 font-semibold text-sm uppercase tracking-wide">
+                  Cost of Drift
+                </p>
                 <span className="text-xs bg-red-500/20 text-red-400 border border-red-500/30 px-3 py-1 rounded-full font-bold">
-                  -{result.diagnosis.costOfDrift.performanceLossPercent}% performance loss
+                  -{result.truths.costOfDrift.performanceLossPercent}% performance
                 </span>
               </div>
               <div className="p-6 space-y-4">
@@ -258,50 +333,32 @@ export default function ChannelPage() {
                   <div className="bg-[#0f1117] rounded-xl p-4 text-center">
                     <p className="text-xs text-gray-500 mb-1">When aligned</p>
                     <p className="text-3xl font-bold text-green-400">
-                      {result.diagnosis.costOfDrift.alignedAverageViews}
+                      {result.truths.costOfDrift.alignedAverageViews}
                     </p>
                     <p className="text-xs text-gray-500 mt-1">avg views</p>
                   </div>
                   <div className="bg-[#0f1117] rounded-xl p-4 text-center">
                     <p className="text-xs text-gray-500 mb-1">When misaligned</p>
                     <p className="text-3xl font-bold text-red-400">
-                      {result.diagnosis.costOfDrift.misalignedAverageViews}
+                      {result.truths.costOfDrift.misalignedAverageViews}
                     </p>
                     <p className="text-xs text-gray-500 mt-1">avg views</p>
                   </div>
                 </div>
-                <p className="text-gray-300 text-sm leading-relaxed">{result.diagnosis.costOfDrift.interpretation}</p>
+                <p className="text-gray-300 text-sm leading-relaxed">
+                  {result.truths.costOfDrift.interpretation}
+                </p>
               </div>
             </div>
 
-            {/* Channel Drift */}
-            <div className={`bg-[#1a1d27] border rounded-2xl overflow-hidden ${result.diagnosis.channelDrift.detected ? 'border-red-500/30' : 'border-green-500/30'}`}>
-              <div className="px-6 py-4 border-b border-gray-800 flex items-center justify-between">
-                <p className="text-white font-semibold text-sm uppercase tracking-wide">Channel Drift</p>
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-2 text-sm">
-                    <span className="text-green-400 font-bold">{result.historicalAlignmentScore}%</span>
-                    <span className="text-gray-500">→</span>
-                    <span className={`font-bold ${alignmentColor(result.driftAlignmentScore)}`}>{result.driftAlignmentScore}%</span>
-                  </div>
-                  <span className={`text-xs px-3 py-1 rounded-full font-bold ${result.diagnosis.channelDrift.detected ? 'bg-red-500/20 text-red-400 border border-red-500/30' : 'bg-green-500/20 text-green-400 border border-green-500/30'}`}>
-                    {result.diagnosis.channelDrift.detected ? '⚠️ CRITICAL DRIFT' : '✅ ON TRACK'}
-                  </span>
-                </div>
-              </div>
-              <div className="p-6">
-                <p className="text-gray-300 text-sm leading-relaxed">{result.diagnosis.channelDrift.explanation}</p>
-              </div>
-            </div>
-
-            {/* Top + Bottom Performers */}
+            {/* Top + Bottom Videos */}
             <div className="grid md:grid-cols-2 gap-6">
               <div className="bg-[#1a1d27] border border-gray-800 rounded-2xl overflow-hidden">
                 <div className="px-6 py-4 border-b border-gray-800">
                   <p className="text-white font-semibold text-sm uppercase tracking-wide">Top 3 Videos</p>
                 </div>
                 <div className="p-6 space-y-3">
-                  {result.topVideos.map((v, i) => (
+                  {result.truths.topVideos.map((v, i) => (
                     <div key={v.videoId} className="flex items-start gap-3">
                       <span className="text-cyan-400 font-bold text-sm w-5 shrink-0">#{i + 1}</span>
                       <div className="flex-1 min-w-0">
@@ -310,18 +367,14 @@ export default function ChannelPage() {
                       </div>
                     </div>
                   ))}
-                  <div className="pt-3 border-t border-gray-800">
-                    <p className="text-gray-400 text-xs leading-relaxed italic">{result.diagnosis.topPerformers.pattern}</p>
-                  </div>
                 </div>
               </div>
-
               <div className="bg-[#1a1d27] border border-gray-800 rounded-2xl overflow-hidden">
                 <div className="px-6 py-4 border-b border-gray-800">
                   <p className="text-white font-semibold text-sm uppercase tracking-wide">Bottom 3 Videos</p>
                 </div>
                 <div className="p-6 space-y-3">
-                  {result.bottomVideos.map((v, i) => (
+                  {result.truths.bottomVideos.map((v, i) => (
                     <div key={v.videoId} className="flex items-start gap-3">
                       <span className="text-red-400 font-bold text-sm w-5 shrink-0">#{i + 1}</span>
                       <div className="flex-1 min-w-0">
@@ -330,9 +383,6 @@ export default function ChannelPage() {
                       </div>
                     </div>
                   ))}
-                  <div className="pt-3 border-t border-gray-800">
-                    <p className="text-gray-400 text-xs leading-relaxed italic">{result.diagnosis.bottomPerformers.pattern}</p>
-                  </div>
                 </div>
               </div>
             </div>
@@ -344,23 +394,28 @@ export default function ChannelPage() {
                   <p className="text-white font-semibold text-sm uppercase tracking-wide">❤️ Audience Loves</p>
                 </div>
                 <div className="p-6 space-y-3">
-                  {result.diagnosis.audienceLoves.map((item, i) => (
-                    <div key={`love-${i}`} className="flex items-center gap-3">
-                      <span className="text-green-400 font-bold text-xs w-6">#{i + 1}</span>
+                  {(Array.isArray(result.truths.audienceLoves)
+                    ? result.truths.audienceLoves
+                    : String(result.truths.audienceLoves).split('\n').filter(Boolean)
+                  ).map((item, i) => (
+                    <div key={i} className="flex items-center gap-3">
+                      <span className="text-green-400 font-bold text-xs">#{i + 1}</span>
                       <p className="text-white text-sm">{item}</p>
                     </div>
                   ))}
                 </div>
               </div>
-
               <div className="bg-[#1a1d27] border border-gray-800 rounded-2xl overflow-hidden">
                 <div className="px-6 py-4 border-b border-gray-800">
                   <p className="text-white font-semibold text-sm uppercase tracking-wide">❌ Audience Ignores</p>
                 </div>
                 <div className="p-6 space-y-3">
-                  {result.diagnosis.audienceIgnores.map((item, i) => (
-                    <div key={`love-${i}`} className="flex items-center gap-3">
-                      <span className="text-red-400 font-bold text-xs w-6">#{i + 1}</span>
+                  {(Array.isArray(result.truths.audienceIgnores)
+                    ? result.truths.audienceIgnores
+                    : String(result.truths.audienceIgnores).split('\n').filter(Boolean)
+                  ).map((item, i) => (
+                    <div key={i} className="flex items-center gap-3">
+                      <span className="text-red-400 font-bold text-xs">#{i + 1}</span>
                       <p className="text-white text-sm">{item}</p>
                     </div>
                   ))}
@@ -368,57 +423,68 @@ export default function ChannelPage() {
               </div>
             </div>
 
-            {/* Content Audience Rejects */}
-            <div className="bg-[#1a1d27] border border-gray-800 rounded-2xl overflow-hidden">
-              <div className="px-6 py-4 border-b border-gray-800">
-                <p className="text-white font-semibold text-sm uppercase tracking-wide">
-                  Content The Audience Rejects
-                </p>
+            {/* Channel Drift */}
+            <div className={`bg-[#1a1d27] border rounded-2xl overflow-hidden ${result.truths.channelDrift.detected ? 'border-red-500/30' : 'border-green-500/30'}`}>
+              <div className="px-6 py-4 border-b border-gray-800 flex items-center justify-between">
+                <p className="text-white font-semibold text-sm uppercase tracking-wide">Channel Drift</p>
+                <span className={`text-xs px-3 py-1 rounded-full font-bold ${result.truths.channelDrift.detected ? 'bg-red-500/20 text-red-400 border border-red-500/30' : 'bg-green-500/20 text-green-400 border border-green-500/30'}`}>
+                  {result.truths.channelDrift.detected ? '⚠️ CRITICAL DRIFT' : '✅ ON TRACK'}
+                </span>
               </div>
-              <div className="p-6 space-y-4">
-                {result.diagnosis.contentAudienceRejects.map(item => (
-                  <div key={item.topic} className="flex items-start gap-4 bg-[#0f1117] rounded-xl p-4">
-                    <div className="text-center shrink-0">
-                      <p className="text-red-400 font-bold text-lg">{item.averageViews}</p>
-                      <p className="text-xs text-gray-500">avg views</p>
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-white font-medium text-sm">✗ {item.topic}</p>
-                      <p className="text-gray-400 text-xs mt-1">{item.reason}</p>
-                    </div>
-                  </div>
-                ))}
+              <div className="p-6">
+                <p className="text-gray-300 text-sm leading-relaxed">
+                  {result.truths.channelDrift.explanation}
+                </p>
               </div>
             </div>
 
             {/* Biggest Opportunity */}
             <div className="bg-[#1a1d27] border border-purple-500/20 rounded-2xl overflow-hidden">
               <div className="px-6 py-4 border-b border-purple-500/20">
-                <p className="text-purple-400 font-semibold text-sm uppercase tracking-wide">Biggest Opportunity</p>
+                <p className="text-purple-400 font-semibold text-sm uppercase tracking-wide">
+                  Biggest Opportunity
+                </p>
               </div>
               <div className="p-6">
-                <p className="text-white text-sm leading-relaxed">{result.diagnosis.biggestOpportunity}</p>
+                <p className="text-white text-sm leading-relaxed">
+                  {result.truths.biggestOpportunity}
+                </p>
               </div>
             </div>
 
-            {/* Ask JARVIS CTA */}
+            {/* CTA */}
             <div className="bg-[#1a1d27] border border-cyan-500/20 rounded-2xl p-6 text-center space-y-3">
               <p className="text-white font-bold text-lg">Now you know who you are.</p>
-              <p className="text-gray-400 text-sm">Ask JARVIS what to do about it.</p>
-              <Link
-                href="/jarvis"
-                className="inline-block bg-cyan-500 hover:bg-cyan-400 text-black font-bold px-8 py-3 rounded-xl transition-colors"
-              >
-                Ask JARVIS What To Do Next →
-              </Link>
+              <p className="text-gray-400 text-sm">
+                See what is blocking your growth — then ask JARVIS to fix it.
+              </p>
+              <div className="flex gap-3 justify-center flex-wrap">
+                <Link
+                  href="/growth"
+                  className="inline-block bg-red-500 hover:bg-red-400 text-white font-bold px-6 py-3 rounded-xl transition-colors"
+                >
+                  See Growth Blockers →
+                </Link>
+                <Link
+                  href="/jarvis"
+                  className="inline-block bg-cyan-500 hover:bg-cyan-400 text-black font-bold px-6 py-3 rounded-xl transition-colors"
+                >
+                  Ask JARVIS →
+                </Link>
+              </div>
             </div>
 
+            {/* Run Again */}
             <button
-              onClick={() => { setResult(null); setChannelId(""); }}
+              onClick={() => setResult(null)}
               className="w-full text-gray-500 hover:text-gray-300 text-sm py-2 transition-colors"
             >
-              Diagnose a different channel
+              Run diagnosis for a different channel
             </button>
+
+            <p className="text-center text-xs text-gray-600">
+              Last diagnosed: {new Date(result.savedAt).toLocaleDateString()}
+            </p>
 
           </div>
         )}
@@ -426,8 +492,3 @@ export default function ChannelPage() {
     </div>
   );
 }
-
-
-
-
-
