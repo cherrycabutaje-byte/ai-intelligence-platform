@@ -8,15 +8,26 @@ export async function GET(req: Request) {
   return NextResponse.json({
     totalVideosAnalyzed: evidence.totalVideosAnalyzed,
     averageViews: evidence.averageViews,
+    averageLikes: evidence.averageLikes,
+    averageEngagementRate: evidence.averageEngagementRate,
     topPerformerAverage: evidence.topPerformerAverage,
     recentPerformerAverage: evidence.recentPerformerAverage,
     driftScore: evidence.driftScore,
     daysSinceLastUpload: evidence.daysSinceLastUpload,
+    uploadFrequencyDays: evidence.uploadFrequencyDays,
     gapRatio: evidence.gapRatio,
+    shortFormCount: evidence.shortFormCount,
+    longFormCount: evidence.longFormCount,
+    avgDurationSeconds: evidence.avgDurationSeconds,
+    channelKeywords: evidence.channelKeywords,
+    topTags: evidence.topTags,
+    allTagsCount: evidence.allTags.length,
+    allCategories: evidence.allCategories,
     topVideoTitles: evidence.topVideoTitles,
     bottomVideoTitles: evidence.bottomVideoTitles,
     recentVideoTitles: evidence.recentVideoTitles,
-    allVideosCount: evidence.allVideos.length,
-    sampleViews: evidence.allVideos.slice(0, 5).map(v => ({ title: v.title.slice(0, 30), views: v.views }))
+    topVideoDescriptions: evidence.topVideoDescriptions,
+    channelDescription: evidence.channelDescription.slice(0, 150),
+    recentVideosPublishedAt: evidence.recentVideos.map(v => v.publishedAt)
   });
 }
