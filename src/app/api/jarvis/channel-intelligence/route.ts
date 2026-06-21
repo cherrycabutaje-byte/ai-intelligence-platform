@@ -85,15 +85,20 @@ export async function POST(req: Request) {
       whyPeopleFollowYou: fiveBrain.diagnosis.whyPeopleFollowYou,
       creatorDNA: fiveBrain.diagnosis.creatorDNA,
       channelPositioning: fiveBrain.diagnosis.channelPositioning,
-      topVideos: fiveBrain.topVideos,
-      bottomVideos: fiveBrain.bottomVideos,
+      topVideos: evidence.topVideos,
+      bottomVideos: evidence.bottomVideos,
       audienceLoves: fiveBrain.diagnosis.audienceLoves,
       audienceIgnores: fiveBrain.diagnosis.audienceIgnores,
       channelDrift: fiveBrain.diagnosis.channelDrift,
-      costOfDrift: fiveBrain.diagnosis.costOfDrift,
+      costOfDrift: {
+        alignedAverageViews: evidence.topPerformerAverage,
+        misalignedAverageViews: evidence.recentPerformerAverage,
+        performanceLossPercent: Math.round((1 - evidence.recentPerformerAverage / Math.max(evidence.topPerformerAverage, 1)) * 100),
+        interpretation: fiveBrain.diagnosis.costOfDrift?.interpretation ?? ""
+      },
       biggestOpportunity: fiveBrain.diagnosis.biggestOpportunity,
-      averageViews: fiveBrain.averageViews,
-      gapRatio: fiveBrain.gapRatio
+      averageViews: evidence.averageViews,
+      gapRatio: evidence.gapRatio
     };
 
     // Save to Supabase
@@ -218,5 +223,7 @@ export async function GET(req: Request) {
     );
   }
 }
+
+
 
 
