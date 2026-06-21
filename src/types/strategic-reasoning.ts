@@ -12,9 +12,11 @@ export interface PrimaryGap {
 
 export interface StrategicReasoning {
   creatorHasHistory: boolean;
+  topStrength: string;
   evidenceReasonings: EvidenceReasoning[];
   patternMatches: PatternMatch[];
   primaryGap: PrimaryGap | null;
   alignmentSummary: string;
   overallRecommendationConfidence: number;
+  promptContext: string;
 }
