@@ -31,71 +31,38 @@ import { renderAuditPDF }
 export async function GET(req: Request) {
   const { searchParams } =
     new URL(req.url);
-
   const creatorId =
     searchParams.get('creatorId');
-
   if (!creatorId) {
     return NextResponse.json(
-      {
-        success: false,
-        message: 'creatorId is required'
-      },
+      { success: false, message: 'creatorId is required' },
       { status: 400 }
     );
   }
-
   const learnings =
-    await getLearningsByCreator(
-      creatorId
-    );
-
+    await getLearningsByCreator(creatorId);
   if (!learnings || learnings.length === 0) {
     return NextResponse.json(
-      {
-        success: false,
-        message: 'No learnings found for creator'
-      },
+      { success: false, message: 'No learnings found for creator' },
       { status: 404 }
     );
   }
-
-  const ranked =
-    rankLearnings(learnings);
-
-  const top =
-    selectTopLearnings(ranked);
-
+  const ranked = rankLearnings(learnings);
+  const top = selectTopLearnings(ranked);
   const primary = top[0];
   const supporting = top.slice(1);
-
   const opportunities =
-    top.map(
-      (r, index) =>
-        buildOpportunity(r, index + 1)
-    );
-
+    top.map((r, index) => buildOpportunity(r, index + 1));
   const prioritized =
     prioritizeOpportunities(opportunities);
-
-  const roadmap =
-    generateRoadmap(prioritized);
-
+  const roadmap = generateRoadmap(prioritized);
   const coaching = {
-    primaryConstraint:
-      generateCoachDirective(primary),
-    supportingInsights:
-      supporting.map(
-        r => r.learning.statement
-      ),
-    why:
-      explainDirective(primary),
-    actionPlan:
-      generateActionPlan(top),
-    experiment:
-      synthesizeExperiment(top),
-    expectedImpact:
-      estimateImpact(primary),
+    primaryConstraint: generateCoachDirective(primary),
+    supportingInsights: supporting.map(r => r.learning.statement),
+    why: explainDirective(primary),
+    actionPlan: generateActionPlan(top),
+    experiment: synthesizeExperiment(top),
+    expectedImpact: estimateImpact(primary),
     highestOpportunity:
       prioritized.highestOpportunity ?? {
         statement: '',
@@ -104,21 +71,12 @@ export async function GET(req: Request) {
       },
     roadmap
   };
+  const score = scoreAudit(ranked);
+  const audit = buildAudit(creatorId, coaching, score);
+  const pdfBuffer = await renderAuditPDF(audit);
 
-  const score =
-    scoreAudit(ranked);
-
-  const audit =
-    buildAudit(
-      creatorId,
-      coaching,
-      score
-    );
-
-  const pdfBuffer =
-    await renderAuditPDF(audit);
-
-  return new Response(pdfBuffer, {
+  return new NextResponse(pdfBuffer, {
+    status: 200,
     headers: {
       'Content-Type': 'application/pdf',
       'Content-Disposition':

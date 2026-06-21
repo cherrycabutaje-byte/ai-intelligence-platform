@@ -58,7 +58,7 @@ export async function GET() {
   const buffer =
     await renderAuditPDF(mockAudit);
 
-  return new Response(buffer, {
+  return new NextResponse(buffer, {
     headers: {
       'Content-Type': 'application/pdf',
       'Content-Disposition':
@@ -66,3 +66,4 @@ export async function GET() {
     }
   });
 }
+

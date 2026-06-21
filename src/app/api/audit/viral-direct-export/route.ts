@@ -59,7 +59,7 @@ export async function POST(req: Request) {
   const pdfBuffer =
     await renderViralBriefPDF(brief);
 
-  return new Response(pdfBuffer, {
+  return new NextResponse(pdfBuffer, {
     headers: {
       'Content-Type': 'application/pdf',
       'Content-Disposition':
@@ -67,3 +67,4 @@ export async function POST(req: Request) {
     }
   });
 }
+
