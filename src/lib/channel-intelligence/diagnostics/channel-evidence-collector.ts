@@ -6,33 +6,34 @@
 } from '@/lib/youtube/channel-video-collector';
 
 export interface ChannelEvidence {
-  // Channel overview
   channelStats: ChannelStats;
-
-  // Performance
   allVideos: VideoStats[];
   topVideos: VideoStats[];
   bottomVideos: VideoStats[];
   recentVideos: VideoStats[];
   averageViews: number;
+  averageLikes: number;
+  averageEngagementRate: number;
   gapRatio: number;
-
-  // Posting behavior
   daysSinceLastUpload: number;
   uploadFrequencyDays: number;
   totalVideosAnalyzed: number;
-
-  // Topic patterns
   topVideoTitles: string[];
   bottomVideoTitles: string[];
   recentVideoTitles: string[];
+  allTags: string[];
+  topTags: string[];
   channelDescription: string;
-
-  // Performance gaps
+  channelKeywords: string[];
   topPerformerAverage: number;
   bottomPerformerAverage: number;
   recentPerformerAverage: number;
   driftScore: number;
+  avgDurationSeconds: number;
+  shortFormCount: number;
+  longFormCount: number;
+  topVideoDescriptions: string[];
+  allCategories: string[];
 }
 
 function calculateAverageViews(videos: VideoStats[]): number {
@@ -40,6 +41,24 @@ function calculateAverageViews(videos: VideoStats[]): number {
   return Math.round(
     videos.reduce((sum, v) => sum + v.views, 0) / videos.length
   );
+}
+
+function calculateAverageLikes(videos: VideoStats[]): number {
+  if (videos.length === 0) return 0;
+  return Math.round(
+    videos.reduce((sum, v) => sum + v.likes, 0) / videos.length
+  );
+}
+
+function calculateEngagementRate(videos: VideoStats[]): number {
+  if (videos.length === 0) return 0;
+  const rates = videos
+    .filter(v => v.views > 0)
+    .map(v => (v.likes + v.comments) / v.views * 100);
+  if (rates.length === 0) return 0;
+  return Math.round(
+    rates.reduce((sum, r) => sum + r, 0) / rates.length * 10
+  ) / 10;
 }
 
 function calculateDaysSince(dateString: string): number {
@@ -73,6 +92,19 @@ function calculateDriftScore(
   return Math.round((1 - ratio) * 100);
 }
 
+function extractTopTags(videos: VideoStats[], limit = 10): string[] {
+  const tagCount: Record<string, number> = {};
+  videos.forEach(v => {
+    v.tags.forEach(tag => {
+      tagCount[tag] = (tagCount[tag] ?? 0) + v.views;
+    });
+  });
+  return Object.entries(tagCount)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, limit)
+    .map(([tag]) => tag);
+}
+
 export async function collectChannelEvidence(
   channelId: string
 ): Promise<ChannelEvidence> {
@@ -81,35 +113,43 @@ export async function collectChannelEvidence(
     fetchVideoStats(channelId)
   ]);
 
-  if (allVideos.length === 0) {
-    return {
-      channelStats,
-      allVideos: [],
-      topVideos: [],
-      bottomVideos: [],
-      recentVideos: [],
-      averageViews: 0,
-      gapRatio: 0,
-      daysSinceLastUpload: 0,
-      uploadFrequencyDays: 0,
-      totalVideosAnalyzed: 0,
-      topVideoTitles: [],
-      bottomVideoTitles: [],
-      recentVideoTitles: [],
-      channelDescription: channelStats.description,
-      topPerformerAverage: 0,
-      bottomPerformerAverage: 0,
-      recentPerformerAverage: 0,
-      driftScore: 0
-    };
-  }
+  const empty: ChannelEvidence = {
+    channelStats,
+    allVideos: [],
+    topVideos: [],
+    bottomVideos: [],
+    recentVideos: [],
+    averageViews: 0,
+    averageLikes: 0,
+    averageEngagementRate: 0,
+    gapRatio: 0,
+    daysSinceLastUpload: 0,
+    uploadFrequencyDays: 0,
+    totalVideosAnalyzed: 0,
+    topVideoTitles: [],
+    bottomVideoTitles: [],
+    recentVideoTitles: [],
+    allTags: [],
+    topTags: [],
+    channelDescription: channelStats.description,
+    channelKeywords: channelStats.keywords,
+    topPerformerAverage: 0,
+    bottomPerformerAverage: 0,
+    recentPerformerAverage: 0,
+    driftScore: 0,
+    avgDurationSeconds: 0,
+    shortFormCount: 0,
+    longFormCount: 0,
+    topVideoDescriptions: [],
+    allCategories: []
+  };
 
-  // Sort by views
+  if (allVideos.length === 0) return empty;
+
   const sortedByViews = [...allVideos].sort((a, b) => b.views - a.views);
   const topVideos = sortedByViews.slice(0, 3);
   const bottomVideos = sortedByViews.slice(-3).reverse();
 
-  // Sort by date for recent
   const sortedByDate = [...allVideos].sort(
     (a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
   );
@@ -119,6 +159,8 @@ export async function collectChannelEvidence(
   const topPerformerAverage = calculateAverageViews(topVideos);
   const bottomPerformerAverage = calculateAverageViews(bottomVideos);
   const recentPerformerAverage = calculateAverageViews(recentVideos);
+  const averageLikes = calculateAverageLikes(allVideos);
+  const averageEngagementRate = calculateEngagementRate(allVideos);
 
   const gapRatio = bottomPerformerAverage > 0
     ? Math.round(topPerformerAverage / bottomPerformerAverage)
@@ -129,8 +171,17 @@ export async function collectChannelEvidence(
     : 0;
 
   const uploadFrequencyDays = calculateUploadFrequency(allVideos);
-
   const driftScore = calculateDriftScore(recentVideos, topVideos);
+
+  const allTags = [...new Set(allVideos.flatMap(v => v.tags))];
+  const topTags = extractTopTags(topVideos);
+
+  const avgDurationSeconds = Math.round(
+    allVideos.reduce((sum, v) => sum + v.durationSeconds, 0) / allVideos.length
+  );
+  const shortFormCount = allVideos.filter(v => v.durationSeconds <= 60).length;
+  const longFormCount = allVideos.filter(v => v.durationSeconds > 300).length;
+  const allCategories = [...new Set(allVideos.map(v => v.categoryId).filter(Boolean))];
 
   return {
     channelStats,
@@ -139,6 +190,8 @@ export async function collectChannelEvidence(
     bottomVideos,
     recentVideos,
     averageViews,
+    averageLikes,
+    averageEngagementRate,
     gapRatio,
     daysSinceLastUpload,
     uploadFrequencyDays,
@@ -146,10 +199,18 @@ export async function collectChannelEvidence(
     topVideoTitles: topVideos.map(v => v.title),
     bottomVideoTitles: bottomVideos.map(v => v.title),
     recentVideoTitles: recentVideos.map(v => v.title),
+    allTags,
+    topTags,
     channelDescription: channelStats.description,
+    channelKeywords: channelStats.keywords,
     topPerformerAverage,
     bottomPerformerAverage,
     recentPerformerAverage,
-    driftScore
+    driftScore,
+    avgDurationSeconds,
+    shortFormCount,
+    longFormCount,
+    topVideoDescriptions: topVideos.map(v => v.description),
+    allCategories
   };
 }

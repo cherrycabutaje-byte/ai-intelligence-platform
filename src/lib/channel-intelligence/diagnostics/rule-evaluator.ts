@@ -1,4 +1,5 @@
 ﻿// @ts-nocheck
+// Rule evaluator uses ChannelEvidence with full video stats
 import { DIAGNOSTIC_RULES, Severity } from './diagnostic-rules';
 import { ChannelEvidence } from './channel-evidence-collector';
 
@@ -210,3 +211,4 @@ export function evaluateAllRules(
     (a, b) => severityOrder[a.rule.severity] - severityOrder[b.rule.severity]
   );
 }
+
