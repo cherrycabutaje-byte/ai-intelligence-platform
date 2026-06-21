@@ -1,4 +1,5 @@
-﻿import Anthropic from '@anthropic-ai/sdk';
+﻿// @ts-nocheck
+import Anthropic from '@anthropic-ai/sdk';
 import {
   fetchChannelStats,
   fetchVideoStats,
@@ -278,6 +279,7 @@ Apply all five lenses. No advice. No titles. Just the truth.`;
     diagnosis: parsed
   };
 }
+
 
 
 

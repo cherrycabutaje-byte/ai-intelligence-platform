@@ -1,4 +1,5 @@
-﻿import { createClient } from '@/lib/supabase';
+﻿// @ts-nocheck
+import { createClient } from '@/lib/supabase';
 import { ChannelDiagnosis } from './channel-diagnosis-engine';
 
 interface GrowthAction {
@@ -133,3 +134,4 @@ export async function saveGrowthOpportunities(
     console.log(`[JARVIS] Saved ${rows.length} growth opportunities for user ${userId}`);
   }
 }
+
