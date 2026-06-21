@@ -1,10 +1,10 @@
 ﻿import Anthropic from '@anthropic-ai/sdk';
-import { RankedLearning }
-  from '@/types/ranked-learning';
-import { AuditScore }
-  from '@/lib/coaching/audit-scorer';
-import { ViralBrief }
-  from '@/types/viral-brief';
+import { RankedLearning } from '@/types/ranked-learning';
+import { AuditScore } from '@/lib/coaching/audit-scorer';
+import { ViralBrief } from '@/types/viral-brief';
+import { StrategicReasoning } from '@/types/strategic-reasoning';
+import { buildWhyJarvisBelievesThis }
+  from '@/lib/coaching/why-jarvis-builder';
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY
@@ -31,47 +31,36 @@ PATTERN 5 — Identity Challenge: "I was wrong about everything I believed about
 THE STAKES CODE (MrBeast)
 MrBeast's core belief: nobody cares about content — people care about what is at risk.
 - Title formula: EXTREME ACTION + CLEAR STAKES
-- Hook formula: open with stakes immediately — what is at risk, who might lose, what could change
-- Retention formula: viewer investment moments every 2-3 minutes — raise the stakes unexpectedly
-- Payoff formula: always over-deliver — promise X, deliver X plus an emotional moment
+- Hook formula: open with stakes immediately
+- Retention formula: viewer investment moments every 2-3 minutes
+- Payoff formula: always over-deliver
 
-MrBeast title patterns:
-PATTERN 1 — The Extreme Challenge: "I Survived X Days in Y"
-PATTERN 2 — The Personal Bet: "I bet everything on X — here is what happened"
-PATTERN 3 — The Transformation Stakes: "I spent 30 days doing X — my life is different now"
-
-THE COMBINED FORMULA (maximum virality):
-PERSONAL STAKES + UNEXPECTED OUTCOME + UNRESOLVED TENSION
-
-Example:
-"I bet my entire routine on these 10 lucky plants — here is what happened on day 30"
-Personal stakes = "I bet my entire routine"
-Unexpected outcome = implied
-Unresolved tension = "what happened on day 30"
+THE COMBINED FORMULA: PERSONAL STAKES + UNEXPECTED OUTCOME + UNRESOLVED TENSION
 
 THE VIRAL SCORE
 Score every piece of content from 0 to 10 across six dimensions:
-- titleCuriosity: 0-2 (does title open a question using Jenny formula?)
-- hookCuriosity: 0-2 (does hook drop into peak moment?)
-- stakesPresent: 0-2 (is something real at stake?)
-- viewerInvestment: 0-2 (does viewer care about the outcome?)
-- timeBombs: 0-1 (are time bombs planted every 60 seconds?)
-- investmentMoments: 0-1 (are investment moments happening every 2-3 minutes?)
+- titleCuriosity: 0-2
+- hookCuriosity: 0-2
+- stakesPresent: 0-2
+- viewerInvestment: 0-2
+- timeBombs: 0-1
+- investmentMoments: 0-1
 
-Score labels:
-0-3 = Low — the algorithm will not push this
-4-6 = Medium — some people will find it but growth is slow
-7-8 = High — the algorithm will start recommending this
-9-10 = Maximum — this has real viral potential
+CRITICAL — CREATOR HISTORY GROUNDING:
+When creator history is provided you MUST ground every recommendation in that history.
+Do NOT give generic creator advice.
+Every recommendation must reference which creator pattern supports it.
+When recommending a change explain which historical learning it connects to.
+If the creator's strongest pattern is transformation and this video lacks transformation — say so explicitly and connect every major recommendation back to that gap.
+The creator's own data is more persuasive than any general advice.
 
 YOUR RULES:
-- Use simple everyday words — write like texting a smart friend
+- Use simple everyday words
 - Every diagnosis must have a concrete before and after example
 - Quote exactly from the transcript when diagnosing problems
-- hookScript must be exact words ready to record — no placeholders
-- titleFormula must use THE CONTENT CODE — Jenny formula, MrBeast formula, and combined formula
-- stakesDiagnosis must identify what is currently at stake and how to raise it
-- viralScore must be honest — most creators score 1-3, be real not encouraging
+- hookScript must be exact words ready to record
+- titleFormula must use THE CONTENT CODE formulas
+- viralScore must be honest — most creators score 1-3
 - shareableLine must come from a real moment in the content
 - Never be vague. Be specific. Be kind. Be honest.
 
@@ -88,50 +77,51 @@ Return exactly this structure:
     "investmentMoments": 0,
     "total": 0,
     "label": "Low",
-    "gap": "What is the single biggest reason the score is not higher"
+    "gap": "single biggest reason the score is not higher"
   },
-  "verdict": "One sentence. The most important thing about this content right now.",
-  "creatorVoice": "Two to three sentences capturing what makes this creator unique. Make them feel seen.",
-  "audienceFeelingDiagnosis": "What does the audience feel right now? What bigger feeling could this content give them?",
+  "verdict": "One sentence. Most important thing about this content. Reference creator history if available.",
+  "creatorVoice": "Two to three sentences capturing what makes this creator unique.",
+  "audienceFeelingDiagnosis": "What does the audience feel now? What bigger feeling could this give them?",
   "mostInterestingMoment": {
     "quote": "Most interesting sentence from transcript copied exactly",
-    "whyItMatters": "Why this is the most interesting moment and what it could do as a hook"
+    "whyItMatters": "Why this is the most interesting moment"
   },
-  "superpower": "The ONE thing they are doing right that they do not realize is their advantage.",
+  "superpower": "The ONE thing they are doing right. Reference creator history if available.",
   "curiosityDiagnosis": {
-    "title": "CURRENT: [actual title] PROBLEM: [why it fails Jenny formula] FIXED: [rewrite using Jenny formula]",
-    "hook": "CURRENT: [quote actual opening] PROBLEM: [why this kills curiosity] FIXED: [exact words to open with instead]",
-    "retention": "MISSING: [what is not happening] ADD THIS: [exact time bomb line to plant at 60 seconds]",
+    "title": "CURRENT: [actual title] PROBLEM: [why it fails] FIXED: [rewrite using Jenny formula]",
+    "hook": "CURRENT: [quote actual opening] PROBLEM: [why this kills curiosity] FIXED: [exact words to open with]",
+    "retention": "MISSING: [what is not happening] ADD THIS: [exact time bomb line]",
     "payoff": "CURRENT: [quote actual ending] PROBLEM: [resolution vs revelation] FIX: [exact revelation ending]"
   },
   "stakesDiagnosis": {
-    "whatIsAtStake": "What is currently at stake in this content? If nothing — say so directly.",
-    "doesViewerCare": "Does the viewer have a reason to care about the outcome? Why or why not?",
-    "howToRaiseStakes": "Exactly how to add real stakes to this content. Give the specific line to say.",
+    "whatIsAtStake": "What is currently at stake. Reference creator history gap if relevant.",
+    "doesViewerCare": "Does the viewer have a reason to care about the outcome?",
+    "howToRaiseStakes": "Exactly how to add real stakes. Give the specific line to say.",
     "investmentMoments": "Where to plant viewer investment moments. Give exact lines.",
-    "overDeliver": "What promise is being made and how to over-deliver on it with an emotional moment."
+    "overDeliver": "What promise is being made and how to over-deliver with an emotional moment."
   },
   "titleFormula": [
     "Jenny formula title — UNEXPECTED OUTCOME + UNRESOLVED TENSION",
     "MrBeast formula title — EXTREME ACTION + CLEAR STAKES",
     "Combined formula title — PERSONAL STAKES + UNEXPECTED OUTCOME + UNRESOLVED TENSION"
   ],
-  "hookScript": "Exact words for the first 10 seconds using THE CONTENT CODE. Drop into the peak. Raise the stakes. No greeting. No setup. Ready to record now.",
+  "hookScript": "Exact words for the first 10 seconds using THE CONTENT CODE. No greeting. No setup. Ready to record now.",
   "openLoops": [
-    "Time bomb to plant at 60 seconds — based on real content",
-    "Time bomb to plant at 2 minutes — based on real content"
+    "Time bomb to plant at 60 seconds",
+    "Time bomb to plant at 2 minutes"
   ],
-  "shareableLine": "One sentence so honest and specific someone would screenshot it. From or inspired by the real content.",
-  "viralBet": "The one experiment for 30 days using THE CONTENT CODE. EXPERIMENT: [what to test] TITLE TO USE: [exact title using combined formula]",
-  "stopDoing": "The one thing to stop immediately. CURRENT: [quote what they are doing] BETTER: [the Content Code version]",
+  "shareableLine": "One sentence so honest and specific someone would screenshot it.",
+  "viralBet": "One experiment for 30 days. EXPERIMENT: [what to test] TITLE TO USE: [exact title]",
+  "stopDoing": "One thing to stop immediately. CURRENT: [quote] BETTER: [Content Code version]",
   "winCondition": "What winning looks like in 30 days. Simple. Human. One sentence.",
-  "coachingSignOff": "The last thing a great coach says before you walk out the door. Warm. True. Simple. Make them feel ready to create."
+  "coachingSignOff": "Last thing a great coach says before you walk out the door. Warm. True. Simple."
 }`;
 
 function buildUserPrompt(
   creatorId: string,
   learnings: RankedLearning[],
   score: AuditScore,
+  reasoning: StrategicReasoning,
   topic?: string,
   videoTitle?: string,
   transcript?: string
@@ -140,20 +130,22 @@ function buildUserPrompt(
   const supporting = learnings.slice(1, 3);
 
   const topicSection = topic
-    ? `\nNEXT VIDEO TOPIC: ${topic}`
-    : '';
+    ? `\nNEXT VIDEO TOPIC: ${topic}` : '';
 
   const videoSection = videoTitle && transcript
     ? `\nACTUAL VIDEO TITLE:\n${videoTitle}\n\nACTUAL VIDEO TRANSCRIPT:\n${transcript.slice(0, 8000)}`
     : videoTitle
-    ? `\nACTUAL VIDEO TITLE:\n${videoTitle}`
-    : '';
+    ? `\nACTUAL VIDEO TITLE:\n${videoTitle}` : '';
+
+  const historySection = reasoning.creatorHasHistory
+    ? `\n\n${reasoning.promptContext}` : '\n\nNo creator history available.';
 
   return `Here is what we know about this creator:
 
 Creator: ${creatorId}
 ${topicSection}
 ${videoSection}
+${historySection}
 
 WHAT THEIR DATA SHOWS:
 
@@ -161,7 +153,7 @@ Strongest learning (most evidence):
 ${primary.learning.statement}
 Confidence: ${primary.learning.confidence}% — backed by ${primary.learning.supportingEvidenceCount} real data points
 
-Other patterns we know:
+Other patterns:
 ${supporting.map(r => `- ${r.learning.statement}`).join('\n')}
 
 Channel score: ${score.overallScore} / 100 — ${score.scoreLabel}
@@ -170,8 +162,7 @@ Now apply THE CONTENT CODE.
 Think like Jenny Hoyos for the curiosity diagnosis.
 Think like MrBeast for the stakes diagnosis.
 Score the content honestly using the viral score.
-Most content scores 1-3. Be real.
-Find the most interesting moment in the transcript.
+Ground every recommendation in the creator history provided above.
 Quote exactly from the transcript.
 Write the hook script as if you are the creator.
 Simple words. Real examples. Write like you care about this person.`;
@@ -181,6 +172,7 @@ export async function generateViralBrief(
   creatorId: string,
   learnings: RankedLearning[],
   score: AuditScore,
+  reasoning: StrategicReasoning,
   topic?: string,
   videoTitle?: string,
   transcript?: string
@@ -189,6 +181,7 @@ export async function generateViralBrief(
     creatorId,
     learnings,
     score,
+    reasoning,
     topic,
     videoTitle,
     transcript
@@ -198,15 +191,12 @@ export async function generateViralBrief(
     model: 'claude-sonnet-4-6',
     max_tokens: 2500,
     system: SYSTEM_PROMPT,
-    messages: [
-      { role: 'user', content: userPrompt }
-    ]
+    messages: [{ role: 'user', content: userPrompt }]
   });
 
   const rawText =
     response.content[0]?.type === 'text'
-      ? response.content[0].text
-      : '{}';
+      ? response.content[0].text : '{}';
 
   const cleaned = rawText
     .replace(/```json/gi, '')
@@ -215,6 +205,9 @@ export async function generateViralBrief(
 
   const parsed = JSON.parse(cleaned);
 
+  const whyJarvisBelievesThis =
+    buildWhyJarvisBelievesThis(reasoning);
+
   return {
     auditVersion: '9.0',
     creatorId,
@@ -222,47 +215,34 @@ export async function generateViralBrief(
     overallScore: score.overallScore,
     scoreLabel: score.scoreLabel,
     viralScore: {
-      titleCuriosity:
-        parsed.viralScore?.titleCuriosity ?? 0,
-      hookCuriosity:
-        parsed.viralScore?.hookCuriosity ?? 0,
-      stakesPresent:
-        parsed.viralScore?.stakesPresent ?? 0,
-      viewerInvestment:
-        parsed.viralScore?.viewerInvestment ?? 0,
-      timeBombs:
-        parsed.viralScore?.timeBombs ?? 0,
-      investmentMoments:
-        parsed.viralScore?.investmentMoments ?? 0,
+      titleCuriosity: parsed.viralScore?.titleCuriosity ?? 0,
+      hookCuriosity: parsed.viralScore?.hookCuriosity ?? 0,
+      stakesPresent: parsed.viralScore?.stakesPresent ?? 0,
+      viewerInvestment: parsed.viralScore?.viewerInvestment ?? 0,
+      timeBombs: parsed.viralScore?.timeBombs ?? 0,
+      investmentMoments: parsed.viralScore?.investmentMoments ?? 0,
       total: parsed.viralScore?.total ?? 0,
       label: parsed.viralScore?.label ?? 'Low',
       gap: parsed.viralScore?.gap ?? ''
     },
+    whyJarvisBelievesThis,
     verdict: parsed.verdict ?? '',
     creatorVoice: parsed.creatorVoice ?? '',
-    audienceFeelingDiagnosis:
-      parsed.audienceFeelingDiagnosis ?? '',
-    mostInterestingMoment:
-      parsed.mostInterestingMoment ?? '',
+    audienceFeelingDiagnosis: parsed.audienceFeelingDiagnosis ?? '',
+    mostInterestingMoment: parsed.mostInterestingMoment ?? '',
     superpower: parsed.superpower ?? '',
     curiosityDiagnosis: {
       title: parsed.curiosityDiagnosis?.title ?? '',
       hook: parsed.curiosityDiagnosis?.hook ?? '',
-      retention:
-        parsed.curiosityDiagnosis?.retention ?? '',
+      retention: parsed.curiosityDiagnosis?.retention ?? '',
       payoff: parsed.curiosityDiagnosis?.payoff ?? ''
     },
     stakesDiagnosis: {
-      whatIsAtStake:
-        parsed.stakesDiagnosis?.whatIsAtStake ?? '',
-      doesViewerCare:
-        parsed.stakesDiagnosis?.doesViewerCare ?? '',
-      howToRaiseStakes:
-        parsed.stakesDiagnosis?.howToRaiseStakes ?? '',
-      investmentMoments:
-        parsed.stakesDiagnosis?.investmentMoments ?? '',
-      overDeliver:
-        parsed.stakesDiagnosis?.overDeliver ?? ''
+      whatIsAtStake: parsed.stakesDiagnosis?.whatIsAtStake ?? '',
+      doesViewerCare: parsed.stakesDiagnosis?.doesViewerCare ?? '',
+      howToRaiseStakes: parsed.stakesDiagnosis?.howToRaiseStakes ?? '',
+      investmentMoments: parsed.stakesDiagnosis?.investmentMoments ?? '',
+      overDeliver: parsed.stakesDiagnosis?.overDeliver ?? ''
     },
     titleFormula: parsed.titleFormula ?? [],
     hookScript: parsed.hookScript ?? '',

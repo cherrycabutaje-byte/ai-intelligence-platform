@@ -6,23 +6,16 @@ function bufferFromStream(
 ): Promise<Buffer> {
   return new Promise((resolve, reject) => {
     const chunks: Buffer[] = [];
-    doc.on('data', (chunk: Buffer) =>
-      chunks.push(chunk)
-    );
-    doc.on('end', () =>
-      resolve(Buffer.concat(chunks))
-    );
+    doc.on('data', (chunk: Buffer) => chunks.push(chunk));
+    doc.on('end', () => resolve(Buffer.concat(chunks)));
     doc.on('error', reject);
   });
 }
 
 function drawDivider(doc: PDFKit.PDFDocument) {
   doc.moveDown(0.5);
-  doc
-    .moveTo(50, doc.y)
-    .lineTo(545, doc.y)
-    .strokeColor('#cccccc')
-    .stroke();
+  doc.moveTo(50, doc.y).lineTo(545, doc.y)
+    .strokeColor('#cccccc').stroke();
   doc.moveDown(0.5);
 }
 
@@ -31,11 +24,8 @@ function drawSectionTitle(
   title: string
 ) {
   drawDivider(doc);
-  doc
-    .fontSize(11)
-    .font('Helvetica-Bold')
-    .fillColor('#333333')
-    .text(title.toUpperCase());
+  doc.fontSize(11).font('Helvetica-Bold')
+    .fillColor('#333333').text(title.toUpperCase());
   doc.moveDown(0.3);
   doc.font('Helvetica').fillColor('#000000');
 }
@@ -46,336 +36,238 @@ function drawScoreBar(
   score: number,
   max: number
 ) {
-  doc
-    .fontSize(10)
-    .font('Helvetica')
-    .text(`${label}: ${score}/${max}`, {
-      continued: false
+  doc.fontSize(10).font('Helvetica')
+    .text(`${label}: ${score}/${max}`);
+}
+
+function renderWhyJarvisBelievesThis(
+  doc: PDFKit.PDFDocument,
+  brief: ViralBrief
+) {
+  const why = brief.whyJarvisBelievesThis;
+  drawSectionTitle(doc, 'Why JARVIS Believes This');
+
+  if (!why.creatorHasHistory) {
+    doc.fontSize(10).font('Helvetica')
+      .fillColor('#000000')
+      .text('No creator history available yet.');
+    doc.moveDown(0.3);
+    doc.text(
+      'This analysis is based on the current video only.'
+    );
+    doc.moveDown(0.3);
+    doc.text(
+      'Submit more videos to build your creator profile and unlock personalized pattern intelligence.'
+    );
+    return;
+  }
+
+  // Strongest learning
+  doc.fontSize(10).font('Helvetica-Bold')
+    .text('Strongest Historical Learning');
+  doc.moveDown(0.2);
+  doc.font('Helvetica').fontSize(10)
+    .text(why.strongestLearning);
+  doc.moveDown(0.4);
+
+  // Confidence + Evidence
+  doc.font('Helvetica-Bold').text(
+    `Confidence: ${why.confidence}%`,
+    { continued: true }
+  );
+  doc.font('Helvetica').text(
+    `   Evidence Points: ${why.evidencePoints}`
+  );
+  doc.moveDown(0.4);
+
+  // Current video alignment
+  doc.font('Helvetica-Bold')
+    .text('Current Video Alignment:');
+  doc.font('Helvetica').fontSize(14)
+    .fillColor('#000000')
+    .text(`${why.currentVideoAlignment}%`);
+  doc.fontSize(10);
+  doc.moveDown(0.4);
+
+  // Missing signals
+  if (why.missingSignals && why.missingSignals.length > 0) {
+    doc.font('Helvetica-Bold').text('Missing Signals:');
+    doc.moveDown(0.2);
+    doc.font('Helvetica');
+    why.missingSignals.forEach(signal => {
+      doc.text(`• ${signal}`);
     });
+    doc.moveDown(0.4);
+  }
+
+  // Gap severity
+  doc.font('Helvetica-Bold')
+    .text(`Gap Severity: ${why.gapSeverity}`);
+  doc.moveDown(0.4);
+
+  // Overall recommendation confidence
+  doc.font('Helvetica-Bold')
+    .text(`Recommendation Confidence: ${why.overallRecommendationConfidence}%`);
+  doc.moveDown(0.4);
+
+  // Conclusion
+  doc.font('Helvetica-Bold').text('Conclusion:');
+  doc.moveDown(0.2);
+  doc.font('Helvetica').text(why.conclusion);
 }
 
 export async function renderViralBriefPDF(
   brief: ViralBrief
 ): Promise<Buffer> {
-  const doc = new PDFDocument({
-    margin: 50,
-    size: 'A4'
-  });
-
+  const doc = new PDFDocument({ margin: 50, size: 'A4' });
   const bufferPromise = bufferFromStream(doc);
 
   // Cover
-  doc
-    .fontSize(22)
-    .font('Helvetica-Bold')
+  doc.fontSize(22).font('Helvetica-Bold')
     .fillColor('#000000')
-    .text('JARVIS Content Code Brief', {
-      align: 'center'
-    });
-
+    .text('JARVIS Content Code Brief', { align: 'center' });
   doc.moveDown(0.3);
-
-  doc
-    .fontSize(10)
-    .font('Helvetica')
-    .fillColor('#666666')
-    .text(`Creator: ${brief.creatorId}`, {
-      align: 'center'
-    })
-    .text(
-      `Generated: ${new Date(
-        brief.generatedAt
-      ).toUTCString()}`,
-      { align: 'center' }
-    )
-    .text(
-      `Version: ${brief.auditVersion}`,
-      { align: 'center' }
-    );
-
+  doc.fontSize(10).font('Helvetica').fillColor('#666666')
+    .text(`Creator: ${brief.creatorId}`, { align: 'center' })
+    .text(`Generated: ${new Date(brief.generatedAt).toUTCString()}`, { align: 'center' })
+    .text(`Version: ${brief.auditVersion}`, { align: 'center' });
   doc.moveDown(0.5);
-
-  doc
-    .fontSize(28)
-    .font('Helvetica-Bold')
+  doc.fontSize(28).font('Helvetica-Bold')
     .fillColor('#000000')
-    .text(
-      `${brief.overallScore} / 100`,
-      { align: 'center' }
-    );
-
-  doc
-    .fontSize(14)
-    .font('Helvetica')
-    .fillColor('#444444')
-    .text(brief.scoreLabel, {
-      align: 'center'
-    });
+    .text(`${brief.overallScore} / 100`, { align: 'center' });
+  doc.fontSize(14).font('Helvetica').fillColor('#444444')
+    .text(brief.scoreLabel, { align: 'center' });
 
   // Viral Score
-  drawSectionTitle(
-    doc,
+  drawSectionTitle(doc,
     `Viral Score: ${brief.viralScore.total}/10 — ${brief.viralScore.label}`
   );
-
   doc.fontSize(10).font('Helvetica');
-  drawScoreBar(
-    doc,
-    'Title Curiosity (Jenny)',
-    brief.viralScore.titleCuriosity,
-    2
-  );
-  drawScoreBar(
-    doc,
-    'Hook Curiosity (Jenny)',
-    brief.viralScore.hookCuriosity,
-    2
-  );
-  drawScoreBar(
-    doc,
-    'Stakes Present (MrBeast)',
-    brief.viralScore.stakesPresent,
-    2
-  );
-  drawScoreBar(
-    doc,
-    'Viewer Investment (MrBeast)',
-    brief.viralScore.viewerInvestment,
-    2
-  );
-  drawScoreBar(
-    doc,
-    'Time Bombs (Jenny)',
-    brief.viralScore.timeBombs,
-    1
-  );
-  drawScoreBar(
-    doc,
-    'Investment Moments (MrBeast)',
-    brief.viralScore.investmentMoments,
-    1
-  );
-
+  drawScoreBar(doc, 'Title Curiosity (Jenny)', brief.viralScore.titleCuriosity, 2);
+  drawScoreBar(doc, 'Hook Curiosity (Jenny)', brief.viralScore.hookCuriosity, 2);
+  drawScoreBar(doc, 'Stakes Present (MrBeast)', brief.viralScore.stakesPresent, 2);
+  drawScoreBar(doc, 'Viewer Investment (MrBeast)', brief.viralScore.viewerInvestment, 2);
+  drawScoreBar(doc, 'Time Bombs (Jenny)', brief.viralScore.timeBombs, 1);
+  drawScoreBar(doc, 'Investment Moments (MrBeast)', brief.viralScore.investmentMoments, 1);
   doc.moveDown(0.3);
-  doc
-    .font('Helvetica-Bold')
-    .text(`Biggest gap: ${brief.viralScore.gap}`);
+  doc.font('Helvetica-Bold').text(`Biggest gap: ${brief.viralScore.gap}`);
 
   // Verdict
   drawSectionTitle(doc, 'The Verdict');
-  doc
-    .fontSize(12)
-    .font('Helvetica-Bold')
-    .fillColor('#000000')
-    .text(brief.verdict);
+  doc.fontSize(12).font('Helvetica-Bold')
+    .fillColor('#000000').text(brief.verdict);
+
+  // WHY JARVIS BELIEVES THIS — after verdict, before creator voice
+  renderWhyJarvisBelievesThis(doc, brief);
 
   // Creator Voice
   drawSectionTitle(doc, 'Your Creator Voice');
-  doc
-    .fontSize(10)
-    .font('Helvetica')
-    .text(brief.creatorVoice);
+  doc.fontSize(10).font('Helvetica').text(brief.creatorVoice);
 
   // Audience Feeling
-  drawSectionTitle(
-    doc,
-    'What Your Audience Feels'
-  );
-  doc
-    .fontSize(10)
-    .font('Helvetica')
+  drawSectionTitle(doc, 'What Your Audience Feels');
+  doc.fontSize(10).font('Helvetica')
     .text(brief.audienceFeelingDiagnosis);
 
   // Most Interesting Moment
-  drawSectionTitle(
-    doc,
-    'Your Most Interesting Moment'
-  );
+  drawSectionTitle(doc, 'Your Most Interesting Moment');
   if (
-    typeof brief.mostInterestingMoment ===
-      'object' &&
+    typeof brief.mostInterestingMoment === 'object' &&
     brief.mostInterestingMoment !== null &&
     'quote' in brief.mostInterestingMoment
   ) {
-    doc
-      .fontSize(11)
-      .font('Helvetica-Bold')
-      .text(
-        `"${brief.mostInterestingMoment.quote}"`
-      );
+    doc.fontSize(11).font('Helvetica-Bold')
+      .text(`"${brief.mostInterestingMoment.quote}"`);
     doc.moveDown(0.3);
-    doc
-      .fontSize(10)
-      .font('Helvetica')
-      .text(
-        brief.mostInterestingMoment.whyItMatters
-      );
+    doc.fontSize(10).font('Helvetica')
+      .text(brief.mostInterestingMoment.whyItMatters);
   } else {
-    doc
-      .fontSize(10)
-      .font('Helvetica')
+    doc.fontSize(10).font('Helvetica')
       .text(String(brief.mostInterestingMoment));
   }
 
   // Superpower
   drawSectionTitle(doc, 'Your Superpower');
-  doc
-    .fontSize(10)
-    .font('Helvetica')
-    .text(brief.superpower);
+  doc.fontSize(10).font('Helvetica').text(brief.superpower);
 
-  // Curiosity Code Diagnosis
-  drawSectionTitle(
-    doc,
-    'The Curiosity Code — Jenny Hoyos Framework'
-  );
+  // Curiosity Code
+  drawSectionTitle(doc, 'The Curiosity Code — Jenny Hoyos Framework');
   doc.fontSize(10).font('Helvetica-Bold').text('TITLE');
-  doc.font('Helvetica').text(
-    brief.curiosityDiagnosis.title
-  );
+  doc.font('Helvetica').text(brief.curiosityDiagnosis.title);
   doc.moveDown(0.4);
   doc.font('Helvetica-Bold').text('HOOK');
-  doc.font('Helvetica').text(
-    brief.curiosityDiagnosis.hook
-  );
+  doc.font('Helvetica').text(brief.curiosityDiagnosis.hook);
   doc.moveDown(0.4);
   doc.font('Helvetica-Bold').text('RETENTION');
-  doc.font('Helvetica').text(
-    brief.curiosityDiagnosis.retention
-  );
+  doc.font('Helvetica').text(brief.curiosityDiagnosis.retention);
   doc.moveDown(0.4);
   doc.font('Helvetica-Bold').text('PAYOFF');
-  doc.font('Helvetica').text(
-    brief.curiosityDiagnosis.payoff
-  );
+  doc.font('Helvetica').text(brief.curiosityDiagnosis.payoff);
 
-  // Stakes Code Diagnosis
-  drawSectionTitle(
-    doc,
-    'The Stakes Code — MrBeast Framework'
-  );
-  doc
-    .fontSize(10)
-    .font('Helvetica-Bold')
-    .text('WHAT IS AT STAKE');
-  doc.font('Helvetica').text(
-    brief.stakesDiagnosis.whatIsAtStake
-  );
+  // Stakes Code
+  drawSectionTitle(doc, 'The Stakes Code — MrBeast Framework');
+  doc.fontSize(10).font('Helvetica-Bold').text('WHAT IS AT STAKE');
+  doc.font('Helvetica').text(brief.stakesDiagnosis.whatIsAtStake);
   doc.moveDown(0.4);
-  doc
-    .font('Helvetica-Bold')
-    .text('DOES THE VIEWER CARE');
-  doc.font('Helvetica').text(
-    brief.stakesDiagnosis.doesViewerCare
-  );
+  doc.font('Helvetica-Bold').text('DOES THE VIEWER CARE');
+  doc.font('Helvetica').text(brief.stakesDiagnosis.doesViewerCare);
   doc.moveDown(0.4);
-  doc
-    .font('Helvetica-Bold')
-    .text('HOW TO RAISE THE STAKES');
-  doc.font('Helvetica').text(
-    brief.stakesDiagnosis.howToRaiseStakes
-  );
+  doc.font('Helvetica-Bold').text('HOW TO RAISE THE STAKES');
+  doc.font('Helvetica').text(brief.stakesDiagnosis.howToRaiseStakes);
   doc.moveDown(0.4);
-  doc
-    .font('Helvetica-Bold')
-    .text('INVESTMENT MOMENTS');
-  doc.font('Helvetica').text(
-    brief.stakesDiagnosis.investmentMoments
-  );
+  doc.font('Helvetica-Bold').text('INVESTMENT MOMENTS');
+  doc.font('Helvetica').text(brief.stakesDiagnosis.investmentMoments);
   doc.moveDown(0.4);
   doc.font('Helvetica-Bold').text('OVER DELIVER');
-  doc.font('Helvetica').text(
-    brief.stakesDiagnosis.overDeliver
-  );
+  doc.font('Helvetica').text(brief.stakesDiagnosis.overDeliver);
 
   // Title Formula
-  drawSectionTitle(
-    doc,
-    'Title Formula — The Content Code'
-  );
-  const titleLabels = [
-    'Jenny Formula',
-    'MrBeast Formula',
-    'Combined Formula'
-  ];
+  drawSectionTitle(doc, 'Title Formula — The Content Code');
+  const titleLabels = ['Jenny Formula', 'MrBeast Formula', 'Combined Formula'];
   brief.titleFormula.forEach((title, index) => {
-    doc
-      .fontSize(10)
-      .font('Helvetica-Bold')
+    doc.fontSize(10).font('Helvetica-Bold')
       .text(`${titleLabels[index] ?? index + 1}:`);
     doc.font('Helvetica').text(title);
     doc.moveDown(0.3);
   });
 
   // Hook Script
-  drawSectionTitle(
-    doc,
-    'Hook Script — Record This Now'
-  );
-  doc
-    .fontSize(10)
-    .font('Helvetica')
-    .text(brief.hookScript);
+  drawSectionTitle(doc, 'Hook Script — Record This Now');
+  doc.fontSize(10).font('Helvetica').text(brief.hookScript);
 
-  // Open Loops
-  drawSectionTitle(
-    doc,
-    'Time Bombs — Drop These In'
-  );
+  // Time Bombs
+  drawSectionTitle(doc, 'Time Bombs — Drop These In');
   brief.openLoops.forEach((loop, index) => {
-    doc
-      .fontSize(10)
-      .font('Helvetica')
+    doc.fontSize(10).font('Helvetica')
       .text(`${index + 1}. ${loop}`);
     doc.moveDown(0.3);
   });
 
   // Shareable Line
-  drawSectionTitle(
-    doc,
-    'The Line They Will Screenshot'
-  );
-  doc
-    .fontSize(12)
-    .font('Helvetica-Bold')
+  drawSectionTitle(doc, 'The Line They Will Screenshot');
+  doc.fontSize(12).font('Helvetica-Bold')
     .text(`"${brief.shareableLine}"`);
 
   // Viral Bet
   drawSectionTitle(doc, 'The Viral Bet');
-  doc
-    .fontSize(10)
-    .font('Helvetica-Bold')
-    .text(brief.viralBet);
+  doc.fontSize(10).font('Helvetica-Bold').text(brief.viralBet);
 
   // Stop Doing
   drawSectionTitle(doc, 'Stop Doing This');
-  doc
-    .fontSize(10)
-    .font('Helvetica')
-    .text(brief.stopDoing);
+  doc.fontSize(10).font('Helvetica').text(brief.stopDoing);
 
   // Win Condition
   drawSectionTitle(doc, 'How You Win');
-  doc
-    .fontSize(12)
-    .font('Helvetica-Bold')
-    .text(brief.winCondition);
+  doc.fontSize(12).font('Helvetica-Bold').text(brief.winCondition);
 
   // Coaching Sign Off
   drawDivider(doc);
-  doc
-    .fontSize(11)
-    .font('Helvetica-Bold')
-    .fillColor('#333333')
-    .text('A NOTE FROM JARVIS');
+  doc.fontSize(11).font('Helvetica-Bold')
+    .fillColor('#333333').text('A NOTE FROM JARVIS');
   doc.moveDown(0.3);
-  doc
-    .fontSize(11)
-    .font('Helvetica')
-    .fillColor('#000000')
-    .text(brief.coachingSignOff);
+  doc.fontSize(11).font('Helvetica')
+    .fillColor('#000000').text(brief.coachingSignOff);
 
   doc.end();
-
   return bufferPromise;
 }

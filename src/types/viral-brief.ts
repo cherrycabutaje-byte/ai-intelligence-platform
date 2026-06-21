@@ -30,12 +30,17 @@ export interface MostInterestingMoment {
   whyItMatters: string;
 }
 
-export interface TrendSignal {
-  urgency: string;
-  topic: string;
-  whyNow: string;
-  videoTitle: string;
-  postBy: string;
+export interface WhyJarvisBelievesThis {
+  creatorHasHistory: boolean;
+  strongestLearning: string;
+  confidence: number;
+  evidencePoints: number;
+  currentVideoAlignment: number;
+  gapSeverity: string;
+  missingSignals: string[];
+  conclusion: string;
+  topStrength: string;
+  overallRecommendationConfidence: number;
 }
 
 export interface ViralBrief {
@@ -45,6 +50,7 @@ export interface ViralBrief {
   overallScore: number;
   scoreLabel: string;
   viralScore: ViralScore;
+  whyJarvisBelievesThis: WhyJarvisBelievesThis;
   verdict: string;
   creatorVoice: string;
   audienceFeelingDiagnosis: string;

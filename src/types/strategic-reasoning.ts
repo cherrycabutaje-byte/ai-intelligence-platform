@@ -8,6 +8,7 @@ export interface PrimaryGap {
   gapScore: number;
   severity: string;
   recommendation: string;
+  missingSignals: string[];
 }
 
 export interface StrategicReasoning {
