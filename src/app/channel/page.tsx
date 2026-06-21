@@ -414,7 +414,7 @@ export default function ChannelPage() {
             </div>
 
             <button
-              onClick={() => { setResult(null); setChannelId(""); setCreatorId(""); }}
+              onClick={() => { setResult(null); setChannelId(""); }}
               className="w-full text-gray-500 hover:text-gray-300 text-sm py-2 transition-colors"
             >
               Diagnose a different channel
@@ -426,3 +426,5 @@ export default function ChannelPage() {
     </div>
   );
 }
+
+

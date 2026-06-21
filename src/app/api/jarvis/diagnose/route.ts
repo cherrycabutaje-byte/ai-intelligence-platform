@@ -7,12 +7,21 @@ export async function POST(req: Request) {
 
   if (!channelId || !creatorId) {
     return NextResponse.json(
-      { success: false, message: 'channelId and creatorId are required' },
+      {
+        success: false,
+        message: 'channelId and creatorId are required'
+      },
       { status: 400 }
     );
   }
 
-  const diagnosis = await runChannelDiagnosis(channelId, creatorId);
+  const diagnosis = await runChannelDiagnosis(
+    channelId,
+    creatorId
+  );
 
-  return NextResponse.json({ success: true, diagnosis });
+  return NextResponse.json({
+    success: true,
+    diagnosis
+  });
 }
