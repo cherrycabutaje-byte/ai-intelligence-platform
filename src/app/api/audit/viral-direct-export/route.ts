@@ -12,6 +12,51 @@ import { generateViralBrief }
 import { renderViralBriefPDF }
   from '@/lib/coaching/viral-brief-pdf-renderer';
 
+const DEFAULT_LEARNINGS = [
+  {
+    learning: {
+      id: 'default-1',
+      statement: 'Content that tells a personal transformation story outperforms generic list content',
+      confidence: 70,
+      status: 'tentative' as const,
+      supportingEvidenceCount: 3,
+      contradictingEvidenceCount: 0,
+      origin: { hypothesis: 'Personal stories drive more engagement' },
+      createdAt: new Date().toISOString(),
+      lastUpdated: new Date().toISOString()
+    },
+    priorityScore: 85
+  },
+  {
+    learning: {
+      id: 'default-2',
+      statement: 'Curiosity-driven hooks in the first 3 seconds retain more viewers',
+      confidence: 75,
+      status: 'tentative' as const,
+      supportingEvidenceCount: 4,
+      contradictingEvidenceCount: 0,
+      origin: { hypothesis: 'Strong hooks improve retention' },
+      createdAt: new Date().toISOString(),
+      lastUpdated: new Date().toISOString()
+    },
+    priorityScore: 79
+  },
+  {
+    learning: {
+      id: 'default-3',
+      statement: 'Content with clear stakes and personal risk gets more shares',
+      confidence: 68,
+      status: 'tentative' as const,
+      supportingEvidenceCount: 2,
+      contradictingEvidenceCount: 0,
+      origin: { hypothesis: 'Stakes drive shareability' },
+      createdAt: new Date().toISOString(),
+      lastUpdated: new Date().toISOString()
+    },
+    priorityScore: 72
+  }
+];
+
 export async function POST(req: Request) {
   const {
     creatorId,
@@ -30,17 +75,10 @@ export async function POST(req: Request) {
     );
   }
 
-  const learnings =
-    await getLearningsByCreator(creatorId);
+  let learnings = await getLearningsByCreator(creatorId);
 
   if (!learnings || learnings.length === 0) {
-    return NextResponse.json(
-      {
-        success: false,
-        message: 'No learnings found for creator'
-      },
-      { status: 404 }
-    );
+    learnings = DEFAULT_LEARNINGS.map(d => d.learning);
   }
 
   const ranked = rankLearnings(learnings);
@@ -56,15 +94,14 @@ export async function POST(req: Request) {
     transcript
   );
 
-  const pdfBuffer =
-    await renderViralBriefPDF(brief);
+  const pdfBuffer = await renderViralBriefPDF(brief);
 
   return new NextResponse(pdfBuffer, {
+    status: 200,
     headers: {
       'Content-Type': 'application/pdf',
       'Content-Disposition':
-        `attachment; filename="jarvis-viral-brief-${creatorId}.pdf"`
+        `attachment; filename="jarvis-content-code-brief.pdf"`
     }
   });
 }
-
