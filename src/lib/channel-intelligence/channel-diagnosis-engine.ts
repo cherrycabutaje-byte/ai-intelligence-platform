@@ -84,6 +84,13 @@ Return exactly this structure — add whyPeopleFollowYou before biggestOpportuni
     "explanation": "2-4 sentences. What the drift data shows."
   },
   "whyPeopleFollowYou": "2-3 sentences. The real reason the audience follows this creator. Not the surface reason. The emotional truth underneath. Start with what people think they follow this creator for. Then reveal what they actually follow them for.",
+  "contentAudienceRejects": [{"topic": "topic name", "averageViews": 0, "reason": "one sentence why this fails with this audience"}],
+  "costOfDrift": {
+    "alignedAverageViews": 0,
+    "misalignedAverageViews": 0,
+    "performanceLossPercent": 0,
+    "interpretation": "one sentence about what this gap means"
+  },
   "biggestOpportunity": "3-5 sentences. The most important truth about this channel right now. No advice. No titles. Just the truth."
 }`;
 
@@ -125,6 +132,13 @@ export interface ChannelDiagnosis {
       explanation: string;
     };
     whyPeopleFollowYou: string;
+    contentAudienceRejects: Array<{ topic: string; averageViews: number; reason: string }>;
+    costOfDrift: {
+      alignedAverageViews: number;
+      misalignedAverageViews: number;
+      performanceLossPercent: number;
+      interpretation: string;
+    };
     biggestOpportunity: string;
   };
 }
@@ -264,6 +278,8 @@ Apply all five lenses. No advice. No titles. Just the truth.`;
     diagnosis: parsed
   };
 }
+
+
 
 
 
