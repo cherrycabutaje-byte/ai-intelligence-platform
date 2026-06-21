@@ -2,26 +2,16 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 
-interface VideoStats {
-  videoId: string;
-  title: string;
-  views: number;
-  publishedAt: string;
-}
-
 interface Blocker {
   number: number;
   name: string;
   severity: string;
-  category: string;
   whatIsBroken: string;
   whyItMatters: string;
   whatItMeansForYou: string;
   cost: string;
-  estimatedImpact: string;
   confidence: number;
   evidencePoints: string[] | string;
-  recommendedAction: string;
 }
 
 interface DiagnosisResult {
@@ -76,152 +66,86 @@ function HealthBadge({ health }: { health: string }) {
 function SeverityIcon({ severity }: { severity: string }) {
   if (severity === 'Critical') return <span>🔴</span>;
   if (severity === 'High') return <span>🟠</span>;
-  if (severity === 'Medium') return <span>🟡</span>;
-  return <span>🔵</span>;
+  return <span>🟡</span>;
 }
 
 function BlockerCard({ blocker }: { blocker: Blocker }) {
-  const [expanded, setExpanded] = useState(false);
-
   const borderColor = blocker.severity === 'Critical'
-    ? 'border-red-500/30'
+    ? 'border-red-500/20'
     : blocker.severity === 'High'
-    ? 'border-orange-500/30'
+    ? 'border-orange-500/20'
     : 'border-gray-700';
 
-  const evidenceArray = Array.isArray(blocker.evidencePoints)
-    ? blocker.evidencePoints
-    : typeof blocker.evidencePoints === 'string'
-    ? blocker.evidencePoints.split('\n').filter(Boolean)
-    : [];
-
   return (
-    <div className={`bg-[#1a1d27] border ${borderColor} rounded-2xl overflow-hidden`}>
-      {/* Header — always visible */}
-      <div
-        className="px-6 py-5 cursor-pointer"
-        onClick={() => setExpanded(!expanded)}
-      >
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex items-start gap-3 flex-1">
-            <SeverityIcon severity={blocker.severity} />
-            <div className="flex-1">
-              <div className="flex items-center gap-2 flex-wrap">
-                <p className="text-white font-bold">
-                  #{blocker.number} {blocker.name}
-                </p>
-                <span className={`text-xs px-2 py-0.5 rounded-full border font-medium ${
-                  blocker.severity === 'Critical'
-                    ? 'bg-red-500/20 text-red-400 border-red-500/30'
-                    : 'bg-orange-500/20 text-orange-400 border-orange-500/30'
-                }`}>
-                  {blocker.severity}
-                </span>
-              </div>
-              <p className="text-gray-400 text-sm mt-1">
-                {blocker.whatIsBroken}
-              </p>
-            </div>
-          </div>
-          <span className="text-gray-500 shrink-0">
-            {expanded ? '▲' : '▼'}
+    <div className={`bg-[#1a1d27] border ${borderColor} rounded-2xl p-6 space-y-4`}>
+
+      {/* Header */}
+      <div className="flex items-start gap-3">
+        <SeverityIcon severity={blocker.severity} />
+        <div>
+          <p className="text-white font-bold">
+            Problem #{blocker.number} — {blocker.name}
+          </p>
+          <span className={`text-xs font-medium ${
+            blocker.severity === 'Critical' ? 'text-red-400' : 'text-orange-400'
+          }`}>
+            {blocker.severity}
           </span>
         </div>
       </div>
 
-      {/* Expanded — five brain analysis */}
-      {expanded && (
-        <div className="border-t border-gray-800 p-6 space-y-5">
+      {/* What JARVIS Found */}
+      <div>
+        <p className="text-white text-sm leading-relaxed font-medium">
+          {blocker.whatIsBroken}
+        </p>
+      </div>
 
-          {/* Why This Is Happening — THE FIVE BRAINS */}
-          <div className="space-y-2">
-            <p className="text-xs text-cyan-400 uppercase tracking-wide font-bold">
-              Why This Is Happening
-            </p>
-            <p className="text-gray-200 text-sm leading-relaxed whitespace-pre-line">
-              {blocker.whyItMatters}
-            </p>
-          </div>
+      {/* Why This Is Happening */}
+      <div className="space-y-1">
+        <p className="text-xs text-gray-500 uppercase tracking-wide">Why this is happening</p>
+        <p className="text-gray-300 text-sm leading-relaxed">
+          {blocker.whyItMatters}
+        </p>
+      </div>
 
-          {/* The Cost */}
-          <div className="bg-red-500/5 border border-red-500/20 rounded-xl p-4">
-            <p className="text-xs text-red-400 uppercase tracking-wide font-bold mb-1">
-              What This Is Costing You
-            </p>
-            <p className="text-white text-sm leading-relaxed">
-              {blocker.whatItMeansForYou}
-            </p>
-          </div>
+      {/* Cost */}
+      <div className="bg-[#0f1117] rounded-xl px-4 py-3">
+        <p className="text-red-400 text-sm font-medium">
+          {blocker.whatItMeansForYou || blocker.cost}
+        </p>
+      </div>
 
-          {/* Evidence */}
-          {evidenceArray.length > 0 && (
-            <div className="space-y-2">
-              <p className="text-xs text-gray-500 uppercase tracking-wide font-medium">
-                The Evidence
-              </p>
-              <div className="space-y-1">
-                {evidenceArray.map((point, i) => (
-                  <div key={i} className="flex items-start gap-2 text-sm text-gray-300">
-                    <span className="text-gray-600 shrink-0 mt-0.5">•</span>
-                    {point}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Confidence */}
-          <div className="flex items-center justify-between pt-2 border-t border-gray-800">
-            <div className="flex items-center gap-2">
-              <p className="text-xs text-gray-500">JARVIS confidence:</p>
-              <p className="text-cyan-400 font-bold text-sm">{blocker.confidence}%</p>
-            </div>
-            <Link
-              href="/growth"
-              className="text-xs text-cyan-400 hover:text-cyan-300 transition-colors"
-            >
-              See full breakdown in Growth →
-            </Link>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
 
 export default function ChannelPage() {
   const [channelId, setChannelId] = useState("");
-  const [creatorId, setCreatorId] = useState("christine");
+  const [creatorId] = useState("christine");
   const [userId, setUserId] = useState("christine");
-
-  useEffect(() => {
-    async function loadUser() {
-      try {
-        const { createClient } = await import("@/lib/supabase");
-        const supabase = createClient();
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user?.id) setUserId(user.id);
-      } catch {}
-    }
-    loadUser();
-  }, []);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<DiagnosisResult | null>(null);
   const [loadingExisting, setLoadingExisting] = useState(true);
 
   useEffect(() => {
-    async function loadExisting() {
+    async function init() {
       try {
+        const { createClient } = await import("@/lib/supabase");
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user?.id) setUserId(user.id);
+
         const res = await fetch(
-          `/api/jarvis/channel-intelligence?userId=${userId}`
+          `/api/jarvis/channel-intelligence?userId=${user?.id ?? "christine"}`
         );
         const data = await res.json();
         if (data.success) setResult(data);
       } catch {}
       finally { setLoadingExisting(false); }
     }
-    loadExisting();
+    init();
   }, []);
 
   const handleDiagnose = async () => {
@@ -255,7 +179,7 @@ export default function ChannelPage() {
 
   const parseVideo = (v: any) => {
     if (typeof v === 'string') {
-      const title = v.match(/title=([^;]+)/)?.[1] ?? '';
+      const title = v.match(/title=([^;]+)/)?.[1]?.trim() ?? '';
       const views = parseInt(v.match(/views=(\d+)/)?.[1] ?? '0');
       return { title, views };
     }
@@ -322,8 +246,7 @@ export default function ChannelPage() {
             <div className="text-4xl animate-pulse">🧬</div>
             <p className="text-white font-semibold text-lg">Diagnosing your channel...</p>
             <p className="text-gray-400 text-sm">
-              Fetching videos, analyzing tags and descriptions, applying five intelligence lenses.
-              About 30 seconds.
+              Analyzing your videos, tags, and patterns. About 30 seconds.
             </p>
           </div>
         )}
@@ -343,9 +266,9 @@ export default function ChannelPage() {
                   <p className="text-gray-400 text-sm">
                     {result.subscribers.toLocaleString()} subscribers
                     · {result.totalVideos} total videos
-                    · Last upload: {result.lastUploadDays} days ago
+                    {result.lastUploadDays > 0 && ` · Last upload: ${result.lastUploadDays} days ago`}
                   </p>
-                  <p className="text-white text-sm mt-2 italic">
+                  <p className="text-gray-300 text-sm mt-2 italic">
                     "{result.oneLineSummary}"
                   </p>
                 </div>
@@ -367,80 +290,39 @@ export default function ChannelPage() {
             </div>
 
             {/* Why People Follow You */}
-            <div className="bg-[#1a1d27] border border-yellow-500/20 rounded-2xl overflow-hidden">
-              <div className="px-6 py-4 border-b border-yellow-500/20">
-                <p className="text-yellow-400 font-semibold text-sm uppercase tracking-wide">
-                  Why People Follow You
-                </p>
-              </div>
-              <div className="p-6">
-                <p className="text-white text-sm leading-relaxed">
-                  {result.truths.whyPeopleFollowYou}
-                </p>
-              </div>
+            <div className="bg-[#1a1d27] border border-yellow-500/20 rounded-2xl p-6 space-y-2">
+              <p className="text-yellow-400 font-semibold text-xs uppercase tracking-wide">
+                Why People Follow You
+              </p>
+              <p className="text-white text-sm leading-relaxed">
+                {result.truths.whyPeopleFollowYou}
+              </p>
             </div>
 
             {/* Creator DNA */}
-            <div className="bg-[#1a1d27] border border-cyan-500/20 rounded-2xl overflow-hidden">
-              <div className="px-6 py-4 border-b border-cyan-500/20">
-                <p className="text-cyan-400 font-semibold text-sm uppercase tracking-wide">
-                  Creator DNA
+            <div className="bg-[#1a1d27] border border-cyan-500/20 rounded-2xl p-6 space-y-3">
+              <p className="text-cyan-400 font-semibold text-xs uppercase tracking-wide">
+                Creator DNA
+              </p>
+              <div className="inline-block bg-cyan-500/10 border border-cyan-500/20 rounded-xl px-5 py-2">
+                <p className="text-cyan-400 font-bold text-lg">
+                  {result.truths.creatorDNA.creatorType}
                 </p>
               </div>
-              <div className="p-6 space-y-3">
-                <div className="inline-block bg-cyan-500/10 border border-cyan-500/20 rounded-xl px-6 py-3">
-                  <p className="text-cyan-400 font-bold text-xl">
-                    {result.truths.creatorDNA.creatorType}
-                  </p>
-                </div>
-                <p className="text-gray-300 text-sm leading-relaxed">
-                  {result.truths.creatorDNA.interpretation}
-                </p>
-              </div>
+              <p className="text-gray-300 text-sm leading-relaxed">
+                {result.truths.creatorDNA.interpretation}
+              </p>
             </div>
 
-            {/* Channel Positioning */}
-            <div className="bg-[#1a1d27] border border-gray-800 rounded-2xl overflow-hidden">
-              <div className="px-6 py-4 border-b border-gray-800">
-                <p className="text-white font-semibold text-sm uppercase tracking-wide">
-                  Channel Positioning
-                </p>
-              </div>
-              <div className="p-6 space-y-4">
-                <div className="grid md:grid-cols-3 gap-4">
-                  <div className="bg-[#0f1117] rounded-xl p-4">
-                    <p className="text-xs text-gray-500 uppercase mb-2">What you say you are</p>
-                    <p className="text-white text-sm font-medium">
-                      {result.truths.channelPositioning.whatYouSayYouAre}
-                    </p>
-                  </div>
-                  <div className="bg-[#0f1117] rounded-xl p-4">
-                    <p className="text-xs text-gray-500 uppercase mb-2">What audience responds to</p>
-                    <p className="text-white text-sm font-medium">
-                      {result.truths.channelPositioning.whatAudienceRespondsTo}
-                    </p>
-                  </div>
-                  <div className="bg-[#0f1117] rounded-xl p-4 text-center">
-                    <p className="text-xs text-gray-500 uppercase mb-2">Alignment</p>
-                    <p className={`text-4xl font-bold ${alignmentColor(result.truths.channelPositioning.alignmentScore)}`}>
-                      {result.truths.channelPositioning.alignmentScore}%
-                    </p>
-                  </div>
-                </div>
-                <p className="text-gray-300 text-sm leading-relaxed">
-                  {result.truths.channelPositioning.interpretation}
-                </p>
-              </div>
-            </div>
-
-            {/* Problems Found — FIVE BRAIN DIAGNOSIS */}
-            <div className="space-y-3">
+            {/* Problems */}
+            <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <p className="text-white font-bold text-lg">
-                  {result.blockers.filter(b => b.severity === 'Critical').length} Critical Problems Found
+                  What is holding you back
                 </p>
                 <span className="text-xs text-gray-500">
-                  Click any problem to see why it is happening
+                  {result.blockers.filter(b => b.severity === 'Critical').length} critical
+                  · {result.blockers.filter(b => b.severity === 'High').length} high
                 </span>
               </div>
               {result.blockers.map((blocker: Blocker) => (
@@ -449,26 +331,26 @@ export default function ChannelPage() {
             </div>
 
             {/* Cost of Drift */}
-            <div className="bg-[#1a1d27] border border-red-500/20 rounded-2xl overflow-hidden">
-              <div className="px-6 py-4 border-b border-red-500/20 flex items-center justify-between">
-                <p className="text-red-400 font-semibold text-sm uppercase tracking-wide">
-                  Cost of Drift
-                </p>
-                <span className="text-xs bg-red-500/20 text-red-400 border border-red-500/30 px-3 py-1 rounded-full font-bold">
-                  -{result.truths.costOfDrift.performanceLossPercent}% performance
-                </span>
-              </div>
-              <div className="p-6 space-y-4">
+            {result.truths.costOfDrift.alignedAverageViews > 0 && (
+              <div className="bg-[#1a1d27] border border-red-500/20 rounded-2xl p-6 space-y-4">
+                <div className="flex items-center justify-between">
+                  <p className="text-red-400 font-semibold text-xs uppercase tracking-wide">
+                    Cost of Drift
+                  </p>
+                  <span className="text-xs bg-red-500/20 text-red-400 border border-red-500/30 px-3 py-1 rounded-full font-bold">
+                    -{result.truths.costOfDrift.performanceLossPercent}% performance
+                  </span>
+                </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="bg-[#0f1117] rounded-xl p-4 text-center">
-                    <p className="text-xs text-gray-500 mb-1">When aligned</p>
+                    <p className="text-xs text-gray-500 mb-1">When making right content</p>
                     <p className="text-3xl font-bold text-green-400">
                       {result.truths.costOfDrift.alignedAverageViews}
                     </p>
                     <p className="text-xs text-gray-500 mt-1">avg views</p>
                   </div>
                   <div className="bg-[#0f1117] rounded-xl p-4 text-center">
-                    <p className="text-xs text-gray-500 mb-1">When misaligned</p>
+                    <p className="text-xs text-gray-500 mb-1">When making wrong content</p>
                     <p className="text-3xl font-bold text-red-400">
                       {result.truths.costOfDrift.misalignedAverageViews}
                     </p>
@@ -479,121 +361,100 @@ export default function ChannelPage() {
                   {result.truths.costOfDrift.interpretation}
                 </p>
               </div>
-            </div>
+            )}
 
             {/* Top + Bottom Videos */}
             <div className="grid md:grid-cols-2 gap-6">
-              <div className="bg-[#1a1d27] border border-gray-800 rounded-2xl overflow-hidden">
-                <div className="px-6 py-4 border-b border-gray-800">
-                  <p className="text-white font-semibold text-sm uppercase tracking-wide">Top 3 Videos</p>
-                </div>
-                <div className="p-6 space-y-3">
-                  {result.truths.topVideos.map((v: any, i: number) => {
-                    const parsed = parseVideo(v);
-                    return (
-                      <div key={i} className="flex items-start gap-3">
-                        <span className="text-cyan-400 font-bold text-sm w-5 shrink-0">#{i + 1}</span>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-white text-sm font-medium truncate">{parsed.title}</p>
-                          <p className="text-green-400 text-xs font-bold">{parsed.views.toLocaleString()} views</p>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-              <div className="bg-[#1a1d27] border border-gray-800 rounded-2xl overflow-hidden">
-                <div className="px-6 py-4 border-b border-gray-800">
-                  <p className="text-white font-semibold text-sm uppercase tracking-wide">Bottom 3 Videos</p>
-                </div>
-                <div className="p-6 space-y-3">
-                  {result.truths.bottomVideos.map((v: any, i: number) => {
-                    const parsed = parseVideo(v);
-                    return (
-                      <div key={i} className="flex items-start gap-3">
-                        <span className="text-red-400 font-bold text-sm w-5 shrink-0">#{i + 1}</span>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-white text-sm font-medium truncate">{parsed.title}</p>
-                          <p className="text-red-400 text-xs font-bold">{parsed.views.toLocaleString()} views</p>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-
-            {/* Audience Loves + Ignores */}
-            <div className="grid md:grid-cols-2 gap-6">
-              <div className="bg-[#1a1d27] border border-gray-800 rounded-2xl overflow-hidden">
-                <div className="px-6 py-4 border-b border-gray-800">
-                  <p className="text-white font-semibold text-sm uppercase tracking-wide">❤️ Audience Loves</p>
-                </div>
-                <div className="p-6 space-y-3">
-                  {(Array.isArray(result.truths.audienceLoves)
-                    ? result.truths.audienceLoves
-                    : String(result.truths.audienceLoves).split('\n').filter(Boolean)
-                  ).map((item: string, i: number) => (
-                    <div key={i} className="flex items-center gap-3">
-                      <span className="text-green-400 font-bold text-xs">#{i + 1}</span>
-                      <p className="text-white text-sm">{item}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <div className="bg-[#1a1d27] border border-gray-800 rounded-2xl overflow-hidden">
-                <div className="px-6 py-4 border-b border-gray-800">
-                  <p className="text-white font-semibold text-sm uppercase tracking-wide">❌ Audience Ignores</p>
-                </div>
-                <div className="p-6 space-y-3">
-                  {(Array.isArray(result.truths.audienceIgnores)
-                    ? result.truths.audienceIgnores
-                    : String(result.truths.audienceIgnores).split('\n').filter(Boolean)
-                  ).map((item: string, i: number) => (
-                    <div key={i} className="flex items-center gap-3">
-                      <span className="text-red-400 font-bold text-xs">#{i + 1}</span>
-                      <p className="text-white text-sm">{item}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Channel Drift */}
-            <div className={`bg-[#1a1d27] border rounded-2xl overflow-hidden ${result.truths.channelDrift.detected ? 'border-red-500/30' : 'border-green-500/30'}`}>
-              <div className="px-6 py-4 border-b border-gray-800 flex items-center justify-between">
-                <p className="text-white font-semibold text-sm uppercase tracking-wide">Channel Drift</p>
-                <span className={`text-xs px-3 py-1 rounded-full font-bold ${result.truths.channelDrift.detected ? 'bg-red-500/20 text-red-400 border border-red-500/30' : 'bg-green-500/20 text-green-400 border border-green-500/30'}`}>
-                  {result.truths.channelDrift.detected ? '⚠️ CRITICAL DRIFT' : '✅ ON TRACK'}
-                </span>
-              </div>
-              <div className="p-6">
-                <p className="text-gray-300 text-sm leading-relaxed">
-                  {result.truths.channelDrift.explanation}
+              <div className="bg-[#1a1d27] border border-gray-800 rounded-2xl p-6 space-y-3">
+                <p className="text-white font-semibold text-xs uppercase tracking-wide">
+                  What works
                 </p>
+                {result.truths.topVideos.map((v: any, i: number) => {
+                  const p = parseVideo(v);
+                  return (
+                    <div key={i} className="flex items-start gap-3">
+                      <span className="text-cyan-400 font-bold text-xs w-5 shrink-0 mt-0.5">
+                        #{i + 1}
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-white text-sm truncate">{p.title}</p>
+                        <p className="text-green-400 text-xs font-bold">
+                          {p.views.toLocaleString()} views
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="bg-[#1a1d27] border border-gray-800 rounded-2xl p-6 space-y-3">
+                <p className="text-white font-semibold text-xs uppercase tracking-wide">
+                  What does not work
+                </p>
+                {result.truths.bottomVideos.map((v: any, i: number) => {
+                  const p = parseVideo(v);
+                  return (
+                    <div key={i} className="flex items-start gap-3">
+                      <span className="text-red-400 font-bold text-xs w-5 shrink-0 mt-0.5">
+                        #{i + 1}
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-white text-sm truncate">{p.title}</p>
+                        <p className="text-red-400 text-xs font-bold">
+                          {p.views.toLocaleString()} views
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Audience */}
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="bg-[#1a1d27] border border-gray-800 rounded-2xl p-6 space-y-3">
+                <p className="text-white font-semibold text-xs uppercase tracking-wide">
+                  ❤️ Your audience loves
+                </p>
+                {(Array.isArray(result.truths.audienceLoves)
+                  ? result.truths.audienceLoves
+                  : String(result.truths.audienceLoves).split('\n').filter(Boolean)
+                ).map((item: string, i: number) => (
+                  <div key={i} className="flex items-center gap-2">
+                    <span className="text-green-400 text-xs">✓</span>
+                    <p className="text-gray-300 text-sm">{item}</p>
+                  </div>
+                ))}
+              </div>
+              <div className="bg-[#1a1d27] border border-gray-800 rounded-2xl p-6 space-y-3">
+                <p className="text-white font-semibold text-xs uppercase tracking-wide">
+                  ❌ Your audience ignores
+                </p>
+                {(Array.isArray(result.truths.audienceIgnores)
+                  ? result.truths.audienceIgnores
+                  : String(result.truths.audienceIgnores).split('\n').filter(Boolean)
+                ).map((item: string, i: number) => (
+                  <div key={i} className="flex items-center gap-2">
+                    <span className="text-red-400 text-xs">✗</span>
+                    <p className="text-gray-300 text-sm">{item}</p>
+                  </div>
+                ))}
               </div>
             </div>
 
             {/* Biggest Opportunity */}
-            <div className="bg-[#1a1d27] border border-purple-500/20 rounded-2xl overflow-hidden">
-              <div className="px-6 py-4 border-b border-purple-500/20">
-                <p className="text-purple-400 font-semibold text-sm uppercase tracking-wide">
-                  Biggest Opportunity
-                </p>
-              </div>
-              <div className="p-6">
-                <p className="text-white text-sm leading-relaxed">
-                  {result.truths.biggestOpportunity}
-                </p>
-              </div>
+            <div className="bg-[#1a1d27] border border-purple-500/20 rounded-2xl p-6 space-y-2">
+              <p className="text-purple-400 font-semibold text-xs uppercase tracking-wide">
+                Biggest Opportunity
+              </p>
+              <p className="text-white text-sm leading-relaxed">
+                {result.truths.biggestOpportunity}
+              </p>
             </div>
 
             {/* CTA */}
             <div className="bg-[#1a1d27] border border-cyan-500/20 rounded-2xl p-6 text-center space-y-3">
               <p className="text-white font-bold text-lg">Now you know what is wrong.</p>
-              <p className="text-gray-400 text-sm">
-                See the full breakdown of every blocker — then ask JARVIS to fix them.
-              </p>
+              <p className="text-gray-400 text-sm">Ask JARVIS what to do about it.</p>
               <div className="flex gap-3 justify-center flex-wrap">
                 <Link
                   href="/growth"
@@ -627,4 +488,3 @@ export default function ChannelPage() {
     </div>
   );
 }
-
