@@ -7,9 +7,7 @@ import { signOut, getUser } from '@/lib/auth';
 
 const NAV_ITEMS = [
   { label: 'Dashboard', href: '/dashboard', icon: '📊' },
-  { label: 'Sources',   href: '/sources',   icon: '🔗' },
-  { label: 'Content',   href: '/content',   icon: '📄' },
-  { label: 'Products',  href: '/products',  icon: '📦' },
+  { label: 'Channel',   href: '/channel',   icon: '🧬' },
   { label: 'Growth',    href: '/growth',    icon: '🚀' },
   { label: 'JARVIS',    href: '/jarvis',    icon: '🎯' },
 ];
