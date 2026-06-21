@@ -57,7 +57,7 @@ YOUR RULES:
 
 CRITICAL: Respond with valid JSON only. No prose. No markdown. Start with { end with }.
 
-Return exactly this structure:
+Return exactly this structure — add whyPeopleFollowYou before biggestOpportunity:
 {
   "channelPositioning": {
     "whatYouSayYouAre": "one phrase",
@@ -83,6 +83,7 @@ Return exactly this structure:
     "detected": true,
     "explanation": "2-4 sentences. What the drift data shows."
   },
+  "whyPeopleFollowYou": "2-3 sentences. The real reason the audience follows this creator. Not the surface reason. The emotional truth underneath. Start with what people think they follow this creator for. Then reveal what they actually follow them for.",
   "biggestOpportunity": "3-5 sentences. The most important truth about this channel right now. No advice. No titles. Just the truth."
 }`;
 
@@ -123,6 +124,7 @@ export interface ChannelDiagnosis {
       detected: boolean;
       explanation: string;
     };
+    whyPeopleFollowYou: string;
     biggestOpportunity: string;
   };
 }
@@ -262,3 +264,7 @@ Apply all five lenses. No advice. No titles. Just the truth.`;
     diagnosis: parsed
   };
 }
+
+
+
+
