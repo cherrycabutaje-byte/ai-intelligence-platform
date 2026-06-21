@@ -132,12 +132,12 @@ export default function ChannelPage() {
             </div>
             <div className="space-y-2">
               <label className="text-sm text-gray-300 font-medium">
-                Your Creator ID <span className="text-red-400">*</span>
+                Your Creator Name <span className="text-red-400">*</span>
               </label>
               <input
                 value={creatorId}
                 onChange={e => setCreatorId(e.target.value)}
-                placeholder="e.g. christine"
+                placeholder="e.g. Cherry Vibes or your name"
                 className="w-full bg-[#0f1117] border border-gray-700 rounded-xl px-4 py-3 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-cyan-500/50"
               />
             </div>
@@ -426,5 +426,6 @@ export default function ChannelPage() {
     </div>
   );
 }
+
 
 
