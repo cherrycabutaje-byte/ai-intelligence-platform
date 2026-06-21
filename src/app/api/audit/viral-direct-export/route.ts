@@ -9,19 +9,16 @@ import { scoreAudit }
   from '@/lib/coaching/audit-scorer';
 import { generateViralBrief }
   from '@/lib/coaching/viral-brief-generator';
+import { renderViralBriefPDF }
+  from '@/lib/coaching/viral-brief-pdf-renderer';
 
-export async function GET(req: Request) {
-  const { searchParams } =
-    new URL(req.url);
-
-  const creatorId =
-    searchParams.get('creatorId');
-
-  const topic =
-    searchParams.get('topic') ?? undefined;
-
-  const videoUrl =
-    searchParams.get('videoUrl') ?? undefined;
+export async function POST(req: Request) {
+  const {
+    creatorId,
+    videoTitle,
+    transcript,
+    topic
+  } = await req.json();
 
   if (!creatorId) {
     return NextResponse.json(
@@ -50,31 +47,6 @@ export async function GET(req: Request) {
   const top = selectTopLearnings(ranked);
   const score = scoreAudit(ranked);
 
-  let videoTitle: string | undefined;
-  let transcript: string | undefined;
-
-  if (videoUrl) {
-    const baseUrl = new URL(req.url).origin;
-    const scrapeRes = await fetch(
-      `${baseUrl}/api/jarvis/scrape`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          url: videoUrl,
-          platform: 'YouTube'
-        })
-      }
-    );
-    const scrapeData = await scrapeRes.json();
-    videoTitle =
-      scrapeData.scraped_data?.title ?? undefined;
-    transcript =
-      scrapeData.scraped_data?.transcript ?? undefined;
-  }
-
   const brief = await generateViralBrief(
     creatorId,
     top,
@@ -84,8 +56,14 @@ export async function GET(req: Request) {
     transcript
   );
 
-  return NextResponse.json({
-    success: true,
-    brief
+  const pdfBuffer =
+    await renderViralBriefPDF(brief);
+
+  return new Response(pdfBuffer, {
+    headers: {
+      'Content-Type': 'application/pdf',
+      'Content-Disposition':
+        `attachment; filename="jarvis-viral-brief-${creatorId}.pdf"`
+    }
   });
 }
