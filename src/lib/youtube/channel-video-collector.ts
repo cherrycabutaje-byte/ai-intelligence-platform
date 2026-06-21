@@ -1,4 +1,20 @@
-﻿const MAX_VIDEOS = 1;
+﻿export const MAX_VIDEOS = 20;
+
+export interface VideoStats {
+  videoId: string;
+  title: string;
+  views: number;
+  publishedAt: string;
+}
+
+export interface ChannelStats {
+  channelId: string;
+  channelTitle: string;
+  description: string;
+  subscribers: number;
+  totalVideos: number;
+  channelStartDate: string;
+}
 
 export interface ChannelVideoResult {
   channelId: string;
@@ -17,10 +33,8 @@ export async function resolveChannelId(
   }
 
   if (channelUrl.includes('youtube.com/@')) {
-    const handle =
-      channelUrl.split('youtube.com/@')[1]?.split('?')[0] ?? null;
+    const handle = channelUrl.split('youtube.com/@')[1]?.split('?')[0] ?? null;
     if (!handle) return null;
-
     const res = await fetch(
       `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${handle}&type=channel&key=${apiKey}`
     );
@@ -28,7 +42,68 @@ export async function resolveChannelId(
     return data.items?.[0]?.id?.channelId ?? null;
   }
 
+  if (channelUrl.startsWith('UC') && channelUrl.length > 20) {
+    return channelUrl;
+  }
+
   return null;
+}
+
+export async function fetchChannelStats(
+  channelId: string
+): Promise<ChannelStats> {
+  const apiKey = process.env.YOUTUBE_API_KEY;
+  if (!apiKey) throw new Error('YOUTUBE_API_KEY is not set');
+
+  const res = await fetch(
+    `https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&id=${channelId}&key=${apiKey}`
+  );
+  const data = await res.json();
+  const item = data.items?.[0];
+
+  if (!item) throw new Error(`Channel not found: ${channelId}`);
+
+  return {
+    channelId,
+    channelTitle: item.snippet?.title ?? '',
+    description: item.snippet?.description ?? '',
+    subscribers: parseInt(item.statistics?.subscriberCount ?? '0'),
+    totalVideos: parseInt(item.statistics?.videoCount ?? '0'),
+    channelStartDate: item.snippet?.publishedAt ?? ''
+  };
+}
+
+export async function fetchVideoStats(
+  channelId: string
+): Promise<VideoStats[]> {
+  const apiKey = process.env.YOUTUBE_API_KEY;
+  if (!apiKey) throw new Error('YOUTUBE_API_KEY is not set');
+
+  const searchRes = await fetch(
+    `https://www.googleapis.com/youtube/v3/search?part=id&channelId=${channelId}&type=video&order=date&maxResults=20&key=${apiKey}`
+  );
+  const searchData = await searchRes.json();
+  const videoIds: string[] = (searchData.items ?? [])
+    .map((item: { id?: { videoId?: string } }) => item.id?.videoId)
+    .filter(Boolean);
+
+  if (videoIds.length === 0) return [];
+
+  const statsRes = await fetch(
+    `https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics&id=${videoIds.join(',')}&key=${apiKey}`
+  );
+  const statsData = await statsRes.json();
+
+  return (statsData.items ?? []).map((item: {
+    id: string;
+    snippet?: { title?: string; publishedAt?: string };
+    statistics?: { viewCount?: string };
+  }) => ({
+    videoId: item.id,
+    title: item.snippet?.title ?? '',
+    views: parseInt(item.statistics?.viewCount ?? '0'),
+    publishedAt: item.snippet?.publishedAt ?? ''
+  }));
 }
 
 export async function collectChannelVideos(
@@ -38,19 +113,15 @@ export async function collectChannelVideos(
   if (!apiKey) throw new Error('YOUTUBE_API_KEY is not set');
 
   const response = await fetch(
-    `https://www.googleapis.com/youtube/v3/search?part=id&channelId=${channelId}&type=video&order=date&maxResults=${MAX_VIDEOS}&key=${apiKey}`
+    `https://www.googleapis.com/youtube/v3/search?part=id&channelId=${channelId}&type=video&order=date&maxResults=20&key=${apiKey}`
   );
-
   if (!response.ok) {
     throw new Error(`YouTube API error: ${response.status}`);
   }
-
   const data = await response.json();
-
-  const videoIds: string[] =
-    (data.items ?? [])
-      .map((item: any) => item.id?.videoId)
-      .filter(Boolean);
+  const videoIds: string[] = (data.items ?? [])
+    .map((item: { id?: { videoId?: string } }) => item.id?.videoId)
+    .filter(Boolean);
 
   return {
     channelId,
