@@ -1,115 +1,181 @@
 ﻿"use client";
 import { useState } from "react";
-import Link from "next/link";
 
-const PLATFORMS = [
-  "YouTube", "YouTube Shorts", "TikTok",
-  "Instagram Reels", "Instagram Feed",
-  "Facebook", "Pinterest"
-];
+const PLATFORMS = ["YouTube", "YouTube Shorts", "TikTok", "Instagram Reels", "Instagram Feed", "Facebook", "Pinterest"];
+
+interface VideoData {
+  videoId: string;
+  title: string;
+  description: string;
+  tags: string[];
+  views: number;
+  likes: number;
+  channelTitle: string;
+  thumbnail: string;
+}
+
+interface BriefResult {
+  hooks: string[];
+  titles: string[];
+  brief: string;
+  keyInsights: string[];
+}
 
 export default function BriefPage() {
-  const [form, setForm] = useState({
-    videoTitle: "",
-    transcript: "",
-    platform: "YouTube",
-    followers: "",
-    avgViews: ""
-  });
+  const [videoUrl, setVideoUrl] = useState('');
+  const [fetchingVideo, setFetchingVideo] = useState(false);
+  const [videoData, setVideoData] = useState<VideoData | null>(null);
+  const [platform, setPlatform] = useState('YouTube');
+  const [transcript, setTranscript] = useState('');
+  const [goal, setGoal] = useState('');
   const [loading, setLoading] = useState(false);
-  const [downloading, setDownloading] = useState(false);
+  const [result, setResult] = useState<BriefResult | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [done, setDone] = useState(false);
+  const [downloadingPdf, setDownloadingPdf] = useState(false);
 
-  const handleSubmit = async () => {
-    if (!form.videoTitle || !form.transcript) {
-      setError("Video title and transcript are required.");
+  const handleFetchVideo = async () => {
+    if (!videoUrl.trim()) return;
+    setFetchingVideo(true);
+    setError(null);
+    setVideoData(null);
+    try {
+      const res = await fetch('/api/jarvis/video-fetch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: videoUrl.trim() }),
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.message ?? 'Could not fetch video');
+      setVideoData(data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not fetch video');
+    } finally {
+      setFetchingVideo(false);
+    }
+  };
+
+  const handleAnalyze = async () => {
+    if (!videoData && !transcript) {
+      setError('Please add a video URL or paste a transcript.');
       return;
     }
     setLoading(true);
     setError(null);
-
+    setResult(null);
     try {
-      const res = await fetch("/api/audit/viral-direct-export", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const res = await fetch('/api/jarvis/video-brief', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          creatorId: "user",
-          videoTitle: form.videoTitle,
-          transcript: form.transcript
-        })
+          videoData,
+          platform,
+          transcript,
+          goal,
+        }),
       });
-
-      if (!res.ok) throw new Error("Brief generation failed");
-
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `jarvis-content-code-brief.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      setDone(true);
+      const data = await res.json();
+      if (!data.success) throw new Error(data.message ?? 'Analysis failed');
+      setResult(data.brief);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
+      setError(err instanceof Error ? err.message : 'Something went wrong');
     } finally {
       setLoading(false);
-      setDownloading(false);
+    }
+  };
+
+  const handleDownloadPdf = async () => {
+    if (!result || !videoData) return;
+    setDownloadingPdf(true);
+    try {
+      const res = await fetch('/api/jarvis/export-video-pdf', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ videoData, platform, result }),
+      });
+      if (!res.ok) throw new Error('PDF generation failed');
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `JARVIS-Video-Brief-${videoData.title.slice(0, 30).replace(/\s+/g, '-')}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      setError('PDF download failed');
+    } finally {
+      setDownloadingPdf(false);
     }
   };
 
   return (
     <div className="min-h-screen bg-[#0f1117] text-white">
-      <div className="max-w-2xl mx-auto px-6 py-8 space-y-6">
+      <div className="max-w-3xl mx-auto px-6 py-12 space-y-6">
 
         {/* Header */}
-        <div className="flex items-center gap-3">
-          <Link href="/jarvis" className="text-gray-500 hover:text-gray-300 text-sm">← Back</Link>
-          <div>
-            <h1 className="text-2xl font-bold text-white">⚡ Content Code Brief</h1>
-            <p className="text-gray-400 text-sm mt-0.5">Paste your transcript. Get your viral score and full PDF brief.</p>
+        <div className="space-y-2">
+          <div className="inline-flex items-center gap-2 bg-cyan-500/10 border border-cyan-500/20 rounded-full px-4 py-1.5 text-cyan-400 text-sm font-medium">
+            🎬 Video Brief
           </div>
+          <h1 className="text-3xl font-bold">Analyze any video</h1>
+          <p className="text-gray-400">Paste a YouTube URL and JARVIS will generate hooks, titles, and a full content brief.</p>
         </div>
 
-        {/* What you get */}
-        <div className="bg-[#1a1d27] border border-cyan-500/20 rounded-2xl p-5">
-          <p className="text-xs text-cyan-400 font-semibold uppercase tracking-wide mb-3">What you get</p>
-          <div className="grid grid-cols-2 gap-2">
-            {[
-              "Viral Score 0-10",
-              "Curiosity Stack diagnosis",
-              "Stakes diagnosis",
-              "Title rewrite (3 options)",
-              "Hook script ready to record",
-              "Time bombs to plant",
-              "The line they will screenshot",
-              "PDF download"
-            ].map(item => (
-              <div key={item} className="flex items-center gap-2 text-xs text-gray-300">
-                <span className="text-cyan-400">✓</span>
-                {item}
+        {!result && (
+          <div className="space-y-4">
+
+            {/* Video URL */}
+            <div className="bg-[#1a1d27] border border-gray-800 rounded-2xl p-6 space-y-4">
+              <div className="space-y-2">
+                <label className="text-sm text-gray-300 font-medium">YouTube Video URL</label>
+                <div className="flex gap-2">
+                  <input
+                    value={videoUrl}
+                    onChange={e => setVideoUrl(e.target.value)}
+                    onKeyDown={e => e.key === 'Enter' && handleFetchVideo()}
+                    placeholder="https://youtube.com/watch?v=..."
+                    className="flex-1 bg-[#0f1117] border border-gray-700 rounded-xl px-4 py-3 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-cyan-500/50"
+                  />
+                  <button
+                    onClick={handleFetchVideo}
+                    disabled={fetchingVideo || !videoUrl.trim()}
+                    className="bg-cyan-500 hover:bg-cyan-400 disabled:opacity-50 text-black font-bold px-5 py-3 rounded-xl transition-colors text-sm"
+                  >
+                    {fetchingVideo ? '...' : 'Fetch'}
+                  </button>
+                </div>
               </div>
-            ))}
-          </div>
-        </div>
 
-        {/* Form */}
-        {!done && (
-          <div className="bg-[#1a1d27] border border-gray-800 rounded-2xl p-6 space-y-5">
+              {/* Video preview */}
+              {videoData && (
+                <div className="bg-[#0f1117] rounded-xl p-4 flex gap-4">
+                  {videoData.thumbnail && (
+                    <img src={videoData.thumbnail} alt="" className="w-28 h-16 object-cover rounded-lg shrink-0" />
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-white font-medium text-sm truncate">{videoData.title}</p>
+                    <p className="text-gray-500 text-xs mt-1">{videoData.channelTitle}</p>
+                    <div className="flex gap-4 mt-2">
+                      <span className="text-xs text-gray-400">{videoData.views.toLocaleString()} views</span>
+                      <span className="text-xs text-gray-400">{videoData.likes.toLocaleString()} likes</span>
+                    </div>
+                  </div>
+                  <button onClick={() => setVideoData(null)} className="text-gray-600 hover:text-gray-400 text-xs">✕</button>
+                </div>
+              )}
+            </div>
 
-            <div className="space-y-2">
+            {/* Platform */}
+            <div className="bg-[#1a1d27] border border-gray-800 rounded-2xl p-6 space-y-3">
               <label className="text-sm text-gray-300 font-medium">Platform</label>
               <div className="flex flex-wrap gap-2">
                 {PLATFORMS.map(p => (
                   <button
                     key={p}
-                    onClick={() => setForm(f => ({ ...f, platform: p }))}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                      form.platform === p
-                        ? "bg-cyan-500 text-black"
-                        : "bg-[#0f1117] text-gray-400 border border-gray-700 hover:border-gray-500"
+                    onClick={() => setPlatform(p)}
+                    className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
+                      platform === p
+                        ? 'bg-cyan-500 text-black'
+                        : 'bg-[#0f1117] text-gray-400 border border-gray-700 hover:border-gray-500'
                     }`}
                   >
                     {p}
@@ -118,132 +184,163 @@ export default function BriefPage() {
               </div>
             </div>
 
-            <div className="space-y-2">
-              <label className="text-sm text-gray-300 font-medium">
-                Video title or caption <span className="text-red-400">*</span>
-              </label>
+            {/* Goal */}
+            <div className="bg-[#1a1d27] border border-gray-800 rounded-2xl p-6 space-y-3">
+              <label className="text-sm text-gray-300 font-medium">What is this video trying to do? <span className="text-gray-600">(optional)</span></label>
               <input
-                value={form.videoTitle}
-                onChange={e => setForm(f => ({ ...f, videoTitle: e.target.value }))}
-                placeholder="e.g. 10 Indoor Plants That Bring Good Luck"
+                value={goal}
+                onChange={e => setGoal(e.target.value)}
+                placeholder="e.g. Drive subscribers, sell a product, go viral, educate my audience"
                 className="w-full bg-[#0f1117] border border-gray-700 rounded-xl px-4 py-3 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-cyan-500/50"
               />
             </div>
 
-            <div className="space-y-2">
+            {/* Transcript */}
+            <div className="bg-[#1a1d27] border border-gray-800 rounded-2xl p-6 space-y-3">
               <label className="text-sm text-gray-300 font-medium">
-                Transcript or script <span className="text-red-400">*</span>
+                Transcript or script <span className="text-gray-600">(optional but improves analysis)</span>
               </label>
               <textarea
-                value={form.transcript}
-                onChange={e => setForm(f => ({ ...f, transcript: e.target.value }))}
-                placeholder="Paste your full video transcript or script here. The more detail the better."
-                rows={8}
+                value={transcript}
+                onChange={e => setTranscript(e.target.value)}
+                placeholder="Paste your video transcript or script here..."
+                rows={6}
                 className="w-full bg-[#0f1117] border border-gray-700 rounded-xl px-4 py-3 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-cyan-500/50 resize-none"
               />
-              <p className="text-xs text-gray-600">
-                No transcript? Write out roughly what you say in the video.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="text-sm text-gray-300 font-medium">Followers/Subscribers</label>
-                <input
-                  value={form.followers}
-                  onChange={e => setForm(f => ({ ...f, followers: e.target.value }))}
-                  placeholder="e.g. 2300"
-                  type="number"
-                  className="w-full bg-[#0f1117] border border-gray-700 rounded-xl px-4 py-3 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-cyan-500/50"
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm text-gray-300 font-medium">Average views</label>
-                <input
-                  value={form.avgViews}
-                  onChange={e => setForm(f => ({ ...f, avgViews: e.target.value }))}
-                  placeholder="e.g. 150"
-                  type="number"
-                  className="w-full bg-[#0f1117] border border-gray-700 rounded-xl px-4 py-3 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-cyan-500/50"
-                />
-              </div>
             </div>
 
             {error && (
-              <div className="bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-3 text-red-400 text-sm">
-                {error}
-              </div>
+              <div className="bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3 text-red-400 text-sm">{error}</div>
             )}
 
             <button
-              onClick={handleSubmit}
-              disabled={loading}
-              className="w-full bg-cyan-500 hover:bg-cyan-400 disabled:opacity-50 text-black font-bold py-3 rounded-xl transition-colors"
+              onClick={handleAnalyze}
+              disabled={loading || (!videoData && !transcript)}
+              className="w-full bg-cyan-500 hover:bg-cyan-400 disabled:opacity-50 text-black font-bold py-4 rounded-xl transition-colors text-base"
             >
-              {loading ? "Generating your brief..." : "Get My Content Code Brief →"}
+              {loading ? 'Analyzing...' : 'Analyze This Video →'}
             </button>
 
-            <p className="text-center text-xs text-gray-600">
-              Your PDF will download automatically in about 15 seconds.
-            </p>
           </div>
         )}
 
         {/* Loading */}
         {loading && (
-          <div className="bg-[#1a1d27] border border-gray-800 rounded-2xl px-6 py-12 text-center space-y-3">
-            <div className="text-3xl animate-pulse">⚡</div>
-            <p className="text-white font-semibold">JARVIS is analyzing your content...</p>
-            <p className="text-gray-400 text-sm">Applying the Jenny Hoyos and MrBeast frameworks. About 15 seconds.</p>
+          <div className="bg-[#1a1d27] border border-gray-800 rounded-2xl px-6 py-16 text-center space-y-3">
+            <div className="text-4xl animate-pulse">🎬</div>
+            <p className="text-white font-semibold text-lg">Analyzing your video...</p>
+            <p className="text-gray-400 text-sm">Generating hooks, titles, and content brief. About 20 seconds.</p>
           </div>
         )}
 
-        {/* Done */}
-        {done && (
-          <div className="space-y-4">
-            <div className="bg-[#1a1d27] border border-green-500/20 rounded-2xl p-6 text-center space-y-3">
-              <div className="text-4xl">✅</div>
-              <p className="text-white font-bold text-xl">Your brief is ready!</p>
-              <p className="text-gray-400 text-sm">
-                Your Content Code Brief has downloaded as a PDF.
-                Open it and follow the coaching inside.
-              </p>
-            </div>
+        {/* Results */}
+        {result && videoData && (
+          <div className="space-y-5">
 
-            <div className="bg-[#1a1d27] border border-gray-800 rounded-2xl p-5 space-y-3">
-              <p className="text-white font-semibold text-sm">What to do now:</p>
-              <div className="space-y-2">
-                {[
-                  "Open your PDF and read the Viral Score first",
-                  "Apply the hook script before uploading",
-                  "Use one of the three title options",
-                  "Plant the time bombs during editing",
-                  "Come back next week to track your improvement"
-                ].map((step, i) => (
-                  <div key={i} className="flex items-start gap-3 text-sm text-gray-300">
-                    <span className="text-cyan-400 font-bold shrink-0">{i + 1}.</span>
-                    {step}
-                  </div>
-                ))}
+            {/* Video header */}
+            <div className="bg-[#1a1d27] border border-gray-800 rounded-2xl p-5 flex gap-4">
+              {videoData.thumbnail && (
+                <img src={videoData.thumbnail} alt="" className="w-32 h-20 object-cover rounded-xl shrink-0" />
+              )}
+              <div className="flex-1 min-w-0">
+                <p className="text-white font-bold truncate">{videoData.title}</p>
+                <p className="text-gray-500 text-sm mt-1">{videoData.channelTitle} · {platform}</p>
+                <div className="flex gap-4 mt-2">
+                  <span className="text-xs text-cyan-400 font-bold">{videoData.views.toLocaleString()} views</span>
+                  <span className="text-xs text-gray-400">{videoData.likes.toLocaleString()} likes</span>
+                </div>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            {/* Key Insights */}
+            {result.keyInsights?.length > 0 && (
+              <div className="bg-[#1a1d27] border border-cyan-500/20 rounded-2xl p-6 space-y-3">
+                <h3 className="text-cyan-400 font-bold text-xs uppercase tracking-wide">What JARVIS Noticed</h3>
+                <div className="space-y-2">
+                  {result.keyInsights.map((insight, i) => (
+                    <div key={i} className="flex items-start gap-2">
+                      <span className="text-cyan-400 text-xs mt-0.5">•</span>
+                      <p className="text-gray-200 text-sm leading-relaxed">{insight}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Hooks */}
+            {result.hooks?.length > 0 && (
+              <div className="bg-[#1a1d27] border border-gray-800 rounded-2xl p-6 space-y-3">
+                <h3 className="text-white font-bold text-xs uppercase tracking-wide">Hook Options</h3>
+                <div className="space-y-2">
+                  {result.hooks.map((hook, i) => (
+                    <div key={i} className="bg-[#0f1117] rounded-xl p-4 flex items-start justify-between gap-3 group">
+                      <div className="flex items-start gap-3">
+                        <span className="text-cyan-400 font-bold text-xs w-5 shrink-0 mt-0.5">#{i + 1}</span>
+                        <p className="text-gray-200 text-sm leading-relaxed">{hook}</p>
+                      </div>
+                      <button
+                        onClick={() => navigator.clipboard.writeText(hook)}
+                        className="text-gray-600 hover:text-gray-300 text-xs shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        Copy
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Titles */}
+            {result.titles?.length > 0 && (
+              <div className="bg-[#1a1d27] border border-gray-800 rounded-2xl p-6 space-y-3">
+                <h3 className="text-white font-bold text-xs uppercase tracking-wide">Title Options</h3>
+                <div className="space-y-2">
+                  {result.titles.map((title, i) => (
+                    <div key={i} className="bg-[#0f1117] rounded-xl p-4 flex items-center justify-between gap-3 group">
+                      <div className="flex items-center gap-3">
+                        <span className="text-purple-400 font-bold text-xs w-5 shrink-0">#{i + 1}</span>
+                        <p className="text-gray-200 text-sm">{title}</p>
+                      </div>
+                      <button
+                        onClick={() => navigator.clipboard.writeText(title)}
+                        className="text-gray-600 hover:text-gray-300 text-xs shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        Copy
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Brief */}
+            {result.brief && (
+              <div className="bg-[#1a1d27] border border-gray-800 rounded-2xl p-6 space-y-3">
+                <h3 className="text-white font-bold text-xs uppercase tracking-wide">Content Brief</h3>
+                <div className="text-gray-300 text-sm leading-relaxed whitespace-pre-wrap">{result.brief}</div>
+              </div>
+            )}
+
+            {/* Actions */}
+            <div className="space-y-3">
               <button
-                onClick={() => { setDone(false); setForm({ videoTitle: "", transcript: "", platform: "YouTube", followers: "", avgViews: "" }); }}
-                className="bg-[#1a1d27] border border-gray-700 hover:border-gray-500 text-white font-medium py-3 rounded-xl transition-colors text-sm"
+                onClick={handleDownloadPdf}
+                disabled={downloadingPdf}
+                className="w-full bg-[#1a1d27] hover:bg-[#22263a] border border-gray-700 text-gray-300 font-medium py-3 rounded-xl transition-colors disabled:opacity-50"
+              >
+                {downloadingPdf ? 'Generating PDF...' : '⬇ Download Brief as PDF'}
+              </button>
+              <button
+                onClick={() => { setResult(null); setVideoData(null); setVideoUrl(''); setTranscript(''); setGoal(''); }}
+                className="w-full text-gray-500 hover:text-gray-300 text-sm py-2 transition-colors"
               >
                 Analyze another video
               </button>
-              <Link
-                href="/jarvis/analyze"
-                className="bg-cyan-500 hover:bg-cyan-400 text-black font-bold py-3 rounded-xl transition-colors text-sm text-center"
-              >
-                Pre-analyze next idea
-              </Link>
             </div>
+
           </div>
         )}
+
       </div>
     </div>
   );
