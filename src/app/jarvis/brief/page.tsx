@@ -85,7 +85,7 @@ export default function BriefPage() {
   };
 
   const handleDownloadPdf = async () => {
-    if (!result || !videoData) return;
+    if (!result) return; // videoData optional
     setDownloadingPdf(true);
     try {
       const res = await fetch('/api/jarvis/export-video-pdf', {
@@ -346,6 +346,8 @@ export default function BriefPage() {
     </div>
   );
 }
+
+
 
 
 
