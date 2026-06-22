@@ -13,56 +13,45 @@ export interface FullDiagnosis extends ScoredDiagnosis {
   alternativeExplanation: string;
 }
 
-const SIMPLE_BRAIN_PROMPT = `You are JARVIS — a channel intelligence system that thinks like a world-class YouTube strategist.
+const HUMAN_INTELLIGENCE_PROMPT = `You are a world-class YouTube channel strategist.
+You have just spent 3 hours studying this creator's channel.
+You know their best videos by name. You know their worst videos by name.
+You know when everything changed. You know why.
 
-You have looked at this creator's channel carefully.
-You are going to tell them what you found — simply and directly.
+Now you are sitting across from them.
+You are going to tell them the truth — with warmth, honesty, and specificity.
 
 YOUR VOICE:
-- Talk like a trusted friend who reviewed their channel
-- Short sentences. One idea per sentence.
-- Use their real video titles and real numbers
-- No jargon. No labels. No "MrBeast brain" or "Jenny brain"
-- The five-brain thinking happens INSIDE you — the creator never sees the labels
-- Just the truth, backed by their own data
+— Warm but honest. Like a trusted mentor who genuinely cares.
+— Emotional. You understand this is someone's dream and their time.
+— Specific. You always use their real video titles and real numbers.
+— Direct. You do not soften the hard truths.
+— Human. You find the story behind the data — not just the data.
 
-THE FORMAT:
-whatJarvisFound: 2 sentences max. The problem stated simply. Real titles and numbers.
-whyThisIsHappening: 3-4 sentences. The real reason behind the numbers. Specific. No fluff.
-whatThisMeansForYou: 1 sentence. The exact cost in real numbers.
-alternativeExplanation: 1 sentence. What they probably think is causing this.
+YOUR RULES:
+— Talk directly to the creator. Use "you" and "your."
+— Always reference their real video titles by name.
+— Always use their real view counts and numbers.
+— Find the human reason behind every number.
+— Never give solutions. This is diagnosis only.
+— Never say "you should" or "try this" or "consider."
+— Never use bullet points. Write in flowing paragraphs.
+— Make them feel understood before you tell them what is wrong.
+— End with one sentence that stays with them long after they close the page.
+— Simple words. No jargon. No technical terms.
+— Short sentences. One idea at a time.
 
-RULES:
-- Never say "MrBeast", "Jenny Hoyos", "Hormozi", "therapist", "data scientist"
-- Never use the word "alignment"
-- Never give solutions
-- Always use their real video titles
-- Always use their real view counts
-- Keep each section SHORT — 1 to 4 sentences maximum
-- Make every sentence earn its place
-
-EXAMPLES OF GOOD OUTPUT:
-
-whatJarvisFound:
-"Your in-laws video got 7,764 views. Your last 5 videos averaged 27 views."
-
-whyThisIsHappening:
-"The in-laws video was specific, Filipino, and real — every viewer had lived that exact moment.
-Your recent videos could have been made by any of 10,000 motivational channels.
-Your audience has no reason to choose you over anyone else anymore."
-
-whatThisMeansForYou:
-"Every video you upload in this direction costs you 99% of what your proven format delivers."
-
-alternativeExplanation:
-"You probably think the in-laws video was a lucky one-time hit."
+WHAT YOU ARE DIAGNOSING:
+Each problem has a human story behind it.
+Your job is to find that story and tell it back to them
+using their own data as proof.
 
 Return valid JSON only. No markdown. No backticks:
 {
-  "whatJarvisFound": "2 sentences max.",
-  "whyThisIsHappening": "3-4 sentences. Simple. Specific. Real.",
-  "whatThisMeansForYou": "1 sentence. Real number.",
-  "alternativeExplanation": "1 sentence."
+  "whatJarvisFound": "2-3 sentences. What the data shows. Use their real titles and numbers. Make the creator feel the gap.",
+  "whyThisIsHappening": "3-5 sentences. The human reason behind the numbers. Find the story. Use their real titles. Be specific and warm.",
+  "whatThisMeansForYou": "1-2 sentences. The real cost. What they are losing. Make it personal not generic.",
+  "alternativeExplanation": "1 sentence. The thing they probably tell themselves. The story they believe that is not quite right."
 }`;
 
 async function generateHypothesis(
@@ -72,66 +61,72 @@ async function generateHypothesis(
 
   const topVideosText = evidence.topVideos.length > 0
     ? evidence.topVideos.map((v, i) =>
-        `${i + 1}. "${v.title}" — ${v.views.toLocaleString()} views | ${v.durationSeconds}s | tags: ${v.tags.slice(0, 3).join(', ')}`
+        `${i + 1}. "${v.title}" — ${v.views.toLocaleString()} views | ${v.durationSeconds}s long | tags: ${v.tags.slice(0, 3).join(', ')}`
       ).join('\n')
     : evidence.topVideoTitles.map((t, i) => `${i + 1}. "${t}"`).join('\n');
 
   const bottomVideosText = evidence.bottomVideos.length > 0
     ? evidence.bottomVideos.map((v, i) =>
-        `${i + 1}. "${v.title}" — ${v.views.toLocaleString()} views | ${v.durationSeconds}s | tags: ${v.tags.slice(0, 3).join(', ')}`
+        `${i + 1}. "${v.title}" — ${v.views.toLocaleString()} views | ${v.durationSeconds}s long | tags: ${v.tags.slice(0, 3).join(', ')}`
       ).join('\n')
     : evidence.bottomVideoTitles.map((t, i) => `${i + 1}. "${t}"`).join('\n');
 
   const recentVideosText = evidence.recentVideos.length > 0
     ? evidence.recentVideos.map((v, i) =>
-        `${i + 1}. "${v.title}" — ${v.views.toLocaleString()} views | ${v.durationSeconds}s`
+        `${i + 1}. "${v.title}" — ${v.views.toLocaleString()} views | ${v.durationSeconds}s long`
       ).join('\n')
     : evidence.recentVideoTitles.map((t, i) => `${i + 1}. "${t}"`).join('\n');
 
   const prompt = `CHANNEL: ${evidence.channelStats.channelTitle}
 CHANNEL DESCRIPTION: "${evidence.channelDescription}"
-CHANNEL KEYWORDS: ${evidence.channelKeywords.join(', ') || 'none'}
+CHANNEL KEYWORDS: ${evidence.channelKeywords.join(', ') || 'none set'}
 SUBSCRIBERS: ${evidence.channelStats.subscribers.toLocaleString()}
 TOTAL VIDEOS: ${evidence.channelStats.totalVideos}
-DAYS SINCE LAST UPLOAD: ${evidence.daysSinceLastUpload}
 COUNTRY: ${evidence.channelStats.country}
+DAYS SINCE LAST UPLOAD: ${evidence.daysSinceLastUpload}
+UPLOADS EVERY: ${evidence.uploadFrequencyDays} days on average
 
 PERFORMANCE:
-Channel average: ${evidence.averageViews} views
-Top 3 average: ${evidence.topPerformerAverage} views
-Recent 5 average: ${evidence.recentPerformerAverage} views
+Channel average: ${evidence.averageViews} views per video
+Best content average: ${evidence.topPerformerAverage} views
+Recent content average: ${evidence.recentPerformerAverage} views
 Engagement rate: ${evidence.averageEngagementRate}%
-Average duration: ${Math.round(evidence.avgDurationSeconds / 60)} minutes
-Short form (under 60s): ${evidence.shortFormCount} videos
-Long form (over 5min): ${evidence.longFormCount} videos
+Short videos (under 60s): ${evidence.shortFormCount}
+Long videos (over 5min): ${evidence.longFormCount}
+Average video length: ${Math.round(evidence.avgDurationSeconds / 60)} minutes
 
-TOP 3 VIDEOS:
+BEST PERFORMING VIDEOS:
 ${topVideosText}
 
-RECENT 5 VIDEOS:
+MOST RECENT VIDEOS:
 ${recentVideosText}
 
-BOTTOM 3 VIDEOS:
+WORST PERFORMING VIDEOS:
 ${bottomVideosText}
 
-TOP TAGS: ${evidence.topTags.join(', ') || 'none'}
-ALL CATEGORIES: ${evidence.allCategories.join(', ') || 'none'}
-CHANNEL KEYWORDS: ${evidence.channelKeywords.join(', ') || 'none'}
+TOP TAGS FROM BEST VIDEOS: ${evidence.topTags.join(', ') || 'none'}
+ALL YOUTUBE CATEGORIES DETECTED: ${evidence.allCategories.join(', ') || 'none'}
+CHANNEL KEYWORDS SET BY CREATOR: ${evidence.channelKeywords.join(', ') || 'none'}
 
-PROBLEM: ${diagnosis.rule.name}
+TOP VIDEO DESCRIPTIONS:
+${evidence.topVideoDescriptions.map((d, i) => `${i + 1}. ${d.slice(0, 200)}`).join('\n')}
+
+PROBLEM BEING DIAGNOSED: ${diagnosis.rule.name}
 SEVERITY: ${diagnosis.rule.severity}
-EVIDENCE:
+WHAT TRIGGERED THIS:
 ${diagnosis.evidencePoints.map(e => `• ${e}`).join('\n')}
 
-Write a simple, direct diagnosis of this specific problem.
-Use their real video titles and numbers.
-No labels. No frameworks. Just the truth.`;
+Now diagnose this specific problem for this creator.
+Talk to them directly. Use their real video titles and numbers.
+Find the human story behind the data.
+Be warm. Be honest. Be specific.
+No solutions. No bullet points. Just the truth.`;
 
   try {
     const response = await client.messages.create({
       model: 'claude-sonnet-4-6',
-      max_tokens: 400,
-      system: SIMPLE_BRAIN_PROMPT,
+      max_tokens: 600,
+      system: HUMAN_INTELLIGENCE_PROMPT,
       messages: [{ role: 'user', content: prompt }]
     });
 
