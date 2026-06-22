@@ -98,9 +98,11 @@ export default function BriefPage() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `JARVIS-Video-Brief-${videoData.title.slice(0, 30).replace(/\s+/g, '-')}.pdf`;
+      a.download = \JARVIS-Video-Brief.pdf\;
+      document.body.appendChild(a);
       a.click();
-      URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
     } catch (err) {
       setError('PDF download failed');
     } finally {
@@ -346,6 +348,7 @@ export default function BriefPage() {
     </div>
   );
 }
+
 
 
 
