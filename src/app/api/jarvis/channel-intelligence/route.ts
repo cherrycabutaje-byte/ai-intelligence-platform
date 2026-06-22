@@ -29,14 +29,21 @@ export async function POST(req: Request) {
       if (user?.id) userId = user.id;
     } catch {}
 
-    // Run both engines in parallel
+    // Run evidence collection and channel diagnosis in parallel
     const [fiveBrain, evidence] = await Promise.all([
       runChannelDiagnosis(channelId, creatorId),
       collectChannelEvidence(channelId)
     ]);
+    console.log("[JARVIS] Evidence collected:", evidence.totalVideosAnalyzed, "videos, top:", evidence.topVideos.length, "allTimeTop:", evidence.allTimeTopVideo?.title ?? "null");
 
     // Generate 3 root cause diagnoses
-    const diagnoses = await generateThreeDiagnoses(evidence);
+    let diagnoses: any[] = [];
+    try {
+      diagnoses = await generateThreeDiagnoses(evidence);
+      console.log("[JARVIS] Diagnoses generated:", diagnoses.length);
+    } catch (diagErr) {
+      console.error("[JARVIS] Diagnosis generation error:", diagErr);
+    }
 
     // Build health and summary from evidence
     const overallHealth = evidence.driftScore > 80 ? 'At Risk'
@@ -53,8 +60,8 @@ export async function POST(req: Request) {
       whyPeopleFollowYou: fiveBrain.diagnosis.whyPeopleFollowYou,
       creatorDNA: fiveBrain.diagnosis.creatorDNA,
       channelPositioning: fiveBrain.diagnosis.channelPositioning,
-      topVideos: evidence.topVideos,
-      bottomVideos: evidence.bottomVideos,
+      topVideos: evidence.topVideos.length > 0 ? evidence.topVideos : [],
+      bottomVideos: evidence.bottomVideos.length > 0 ? evidence.bottomVideos : [],
       audienceLoves: fiveBrain.diagnosis.audienceLoves,
       audienceIgnores: fiveBrain.diagnosis.audienceIgnores,
       channelDrift: fiveBrain.diagnosis.channelDrift,
@@ -67,8 +74,8 @@ export async function POST(req: Request) {
         interpretation: fiveBrain.diagnosis.costOfDrift?.interpretation ?? ''
       },
       biggestOpportunity: fiveBrain.diagnosis.biggestOpportunity,
-      averageViews: evidence.averageViews,
-      gapRatio: evidence.gapRatio
+      averageViews: evidence.averageViews > 0 ? evidence.averageViews : evidence.channelStats.totalViews / Math.max(evidence.channelStats.totalVideos, 1),
+      gapRatio: evidence.gapRatio > 0 ? evidence.gapRatio : 0
     };
 
     // Save to Supabase
@@ -158,7 +165,7 @@ export async function GET(req: Request) {
       overallHealth: row.overall_health,
       oneLineSummary: row.one_line_summary,
       truths: row.truths,
-      blockers: row.blockers,
+      blockers: typeof row.blockers === "string" ? JSON.parse(row.blockers) : (row.blockers ?? []),
       savedAt: row.created_at
     });
 
@@ -170,3 +177,8 @@ export async function GET(req: Request) {
     );
   }
 }
+
+
+
+
+

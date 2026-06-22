@@ -222,6 +222,7 @@ Observe. Never assume.`;
       .trim();
 
     const parsed = JSON.parse(cleaned);
+    console.log("[JARVIS] Parsed diagnoses count:", parsed.diagnoses?.length ?? 0);
     return parsed.diagnoses ?? [];
 
   } catch (err) {
@@ -229,3 +230,5 @@ Observe. Never assume.`;
     return [];
   }
 }
+
+
