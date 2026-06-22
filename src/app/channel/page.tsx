@@ -137,6 +137,31 @@ export default function ChannelPage() {
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<V2Result | null>(null);
   const [devMode, setDevMode] = useState(false);
+  const [downloadingPdf, setDownloadingPdf] = useState(false);
+
+  const handleDownloadPdf = async () => {
+    if (!result) return;
+    setDownloadingPdf(true);
+    try {
+      const res = await fetch("/api/jarvis/export-pdf", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(result),
+      });
+      if (!res.ok) throw new Error("PDF generation failed");
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `JARVIS-${result.channelName.replace(/\s+/g, "-")}-Intelligence-Report.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("PDF download error:", err);
+    } finally {
+      setDownloadingPdf(false);
+    }
+  };
 
   const handleDiagnose = async () => {
     if (!channelId.trim()) { setError('Please enter your YouTube Channel ID.'); return; }
@@ -501,6 +526,13 @@ export default function ChannelPage() {
             </div>
 
             <button
+              onClick={handleDownloadPdf}
+              disabled={downloadingPdf}
+              className="w-full bg-[#1a1d27] hover:bg-[#22263a] border border-gray-700 text-gray-300 font-medium py-3 rounded-xl transition-colors disabled:opacity-50"
+            >
+              {downloadingPdf ? "Generating PDF..." : "⬇ Download Intelligence Report (PDF)"}
+            </button>
+            <button
               onClick={() => { setResult(null); setChannelId(''); }}
               className="w-full text-gray-500 hover:text-gray-300 text-sm py-2 transition-colors"
             >
@@ -513,3 +545,6 @@ export default function ChannelPage() {
     </div>
   );
 }
+
+
+
