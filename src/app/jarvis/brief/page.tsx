@@ -98,7 +98,7 @@ export default function BriefPage() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = \JARVIS-Video-Brief.pdf\;
+      a.download = "JARVIS-Video-Brief.pdf";
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -348,6 +348,7 @@ export default function BriefPage() {
     </div>
   );
 }
+
 
 
 
