@@ -76,13 +76,25 @@ export async function collectEvidence(channelId: string): Promise<ChannelEvidenc
 
   // Fetch video IDs — top by views + latest + oldest
   const [topIds, latestIds] = await Promise.all([
-    fetchVideoIds(channelId, 'viewCount', 25),
-    fetchVideoIds(channelId, 'date', 10),
+    fetchVideoIds(channelId, 'viewCount', 50),
+    fetchVideoIds(channelId, 'date', 25),
   ]);
 
   const allIds = [...new Set([...topIds, ...latestIds])];
-  const allVideos = await fetchVideoStats(allIds);
+  let allVideos = await fetchVideoStats(allIds);
   console.log("[V2] Videos fetched:", allVideos.length, "topIds:", topIds.length, "latestIds:", latestIds.length);
+
+  // Retry once if no videos returned
+  if (allVideos.length === 0) {
+    console.log("[V2] Retrying video fetch...");
+    const [retryTopIds, retryLatestIds] = await Promise.all([
+      fetchVideoIds(channelId, "viewCount", 50),
+      fetchVideoIds(channelId, "date", 25),
+    ]);
+    const retryAllIds = [...new Set([...retryTopIds, ...retryLatestIds])];
+    allVideos = await fetchVideoStats(retryAllIds);
+    console.log("[V2] Retry fetched:", allVideos.length, "videos");
+  }
 
   if (!allVideos.length) {
     return {
@@ -196,4 +208,6 @@ export async function collectEvidence(channelId: string): Promise<ChannelEvidenc
     avgDurationSeconds,
   };
 }
+
+
 

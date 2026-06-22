@@ -1,5 +1,6 @@
 ﻿import { ChannelEvidence } from '../types/evidence';
-import { Observation, Pattern } from '../types/diagnosis';
+import { Observation } from '../types/diagnosis';
+import { Pattern } from '../types/diagnosis';
 
 export function detectPatterns(
   evidence: ChannelEvidence,
@@ -93,3 +94,4 @@ export function detectPatterns(
 
   return patterns;
 }
+

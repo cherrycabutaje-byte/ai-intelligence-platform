@@ -36,7 +36,7 @@ export async function POST(req: Request) {
         firstVideo: result.evidence.firstVideo,
         topTags: result.evidence.topTags,
       },
-      diagnoses: result.diagnoses,
+      intelligence: result.intelligence,
       ...(isDev && { debug: result.debug }),
     });
 
@@ -48,5 +48,3 @@ export async function POST(req: Request) {
     );
   }
 }
-
-

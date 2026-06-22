@@ -11,23 +11,52 @@ export interface Pattern {
   explanation: string;
 }
 
-export interface Diagnosis {
-  title: string;
-  category: 'identity' | 'audience' | 'momentum';
-  severity: 'Critical' | 'High' | 'Medium';
-  jarvisNoticed: string;
-  pattern: string;
-  turningPoint: string;
-  whyItMatters: string;
-  proof: string[];
-  whatJarvisCannotIgnore: string;
-  evidenceStrength: string;
+export interface IntelligencePattern {
+  id: string;
+  observation: string;
+  confidence: number;
 }
 
-export interface DiagnosisResult {
-  diagnoses: Diagnosis[];
-  debug: {
-    observations: Observation[];
-    patterns: Pattern[];
-  };
+export interface Hypothesis {
+  explanation: string;
+  confidence: number;
+  evidenceFor: string[];
+  evidenceAgainst: string[];
+}
+
+export interface CoreMechanism {
+  name: string;
+  mechanismType: string;
+  creatorTranslation: string;
+  description: string;
+  evidence: string[];
+  confidence: number;
+  mechanismStrength: number;
+}
+
+export interface Contradiction {
+  creatorBelief: string;
+  audienceBehavior: string;
+  insight: string;
+}
+
+export interface BlindSpot {
+  insight: string;
+  confidence: number;
+  reasoning: string;
+  passesNonObvious: boolean;
+  passesEvidenceBased: boolean;
+  passesPerspectiveShift: boolean;
+}
+
+export interface ChannelIntelligence {
+  executiveSummary: string;
+  evidence: string[];
+  patterns: IntelligencePattern[];
+  hypotheses: Hypothesis[];
+  coreMechanisms: CoreMechanism[];
+  contradictions: Contradiction[];
+  blindSpots: BlindSpot[];
+  missingEvidence: string[];
+  strategicTension: string;
 }
