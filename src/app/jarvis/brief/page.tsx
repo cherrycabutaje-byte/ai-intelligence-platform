@@ -74,10 +74,11 @@ export default function BriefPage() {
         }),
       });
       const data = await res.json();
-      if (!data.success) throw new Error(data.message ?? 'Analysis failed');
+      if (!data.success) throw new Error(data.message ?? "Analysis failed");
       setResult(data.brief);
-      console.log("[Brief] videoData from response:", data.videoData);
-      if (data.videoData) setVideoData(data.videoData);
+      if (data.videoData) {
+        setVideoData(data.videoData);
+      }
     } catch (err) {
       const errMsg = err instanceof Error ? err.message : 'Something went wrong'; console.error('Brief error:', errMsg); setError(errMsg);
     } finally {
@@ -92,7 +93,7 @@ export default function BriefPage() {
       const res = await fetch('/api/jarvis/export-video-pdf', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ videoData, platform, result }),
+        body: JSON.stringify({ videoData, platform, result, title: videoData?.title ?? 'Video Brief' }),
       });
       if (!res.ok) throw new Error('PDF generation failed');
       const blob = await res.blob();
@@ -349,6 +350,8 @@ export default function BriefPage() {
     </div>
   );
 }
+
+
 
 
 

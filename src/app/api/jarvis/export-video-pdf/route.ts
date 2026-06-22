@@ -5,7 +5,8 @@ import { VideoBriefPDF } from '@/lib/pdf/video-brief-report';
 
 export async function POST(req: Request) {
   try {
-    const { videoData, platform, result } = await req.json();
+    const { videoData, platform, result, title } = await req.json();
+    if (videoData && !videoData.title && title) videoData.title = title;
     const element = React.createElement(VideoBriefPDF, {
       videoData, platform, result,
       generatedAt: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
@@ -25,3 +26,4 @@ export async function POST(req: Request) {
     return NextResponse.json({ success: false, message: String(error) }, { status: 500 });
   }
 }
+
