@@ -113,8 +113,8 @@ function DiagnosisCard({
   const relatedObs = relatedPattern
     ? observations.filter(o =>
         Array.isArray(relatedPattern.observations)
-          ? relatedPattern.observations.includes(o.id)
-          : relatedPattern.observations.toString().includes(o.id)
+          ? (relatedPattern.observations as string[]).includes(o.id)
+          : String(relatedPattern.observations).includes(o.id)
       )
     : [];
 
@@ -452,3 +452,4 @@ export default function ChannelPage() {
     </div>
   );
 }
+
