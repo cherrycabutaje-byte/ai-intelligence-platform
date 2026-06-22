@@ -76,6 +76,7 @@ export default function BriefPage() {
       const data = await res.json();
       if (!data.success) throw new Error(data.message ?? 'Analysis failed');
       setResult(data.brief);
+      console.log("[Brief] videoData from response:", data.videoData);
       if (data.videoData) setVideoData(data.videoData);
     } catch (err) {
       const errMsg = err instanceof Error ? err.message : 'Something went wrong'; console.error('Brief error:', errMsg); setError(errMsg);
@@ -348,6 +349,7 @@ export default function BriefPage() {
     </div>
   );
 }
+
 
 
 
