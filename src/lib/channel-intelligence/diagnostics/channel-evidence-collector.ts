@@ -34,6 +34,8 @@ export interface ChannelEvidence {
   longFormCount: number;
   topVideoDescriptions: string[];
   allCategories: string[];
+  firstVideo: VideoStats | null;
+  allTimeTopVideo: VideoStats | null;
 }
 
 function calculateAverageViews(videos: VideoStats[]): number {
@@ -141,7 +143,9 @@ export async function collectChannelEvidence(
     shortFormCount: 0,
     longFormCount: 0,
     topVideoDescriptions: [],
-    allCategories: []
+    allCategories: [],
+    firstVideo: null,
+    allTimeTopVideo: null
   };
 
   if (allVideos.length === 0) return empty;
@@ -211,6 +215,11 @@ export async function collectChannelEvidence(
     shortFormCount,
     longFormCount,
     topVideoDescriptions: topVideos.map(v => v.description),
+    firstVideo: [...allVideos].sort((a, b) => new Date(a.publishedAt).getTime() - new Date(b.publishedAt).getTime())[0] ?? null,
+    allTimeTopVideo: sortedByViews[0] ?? null,
     allCategories
   };
 }
+
+
+
