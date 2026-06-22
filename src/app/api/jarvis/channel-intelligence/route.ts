@@ -74,7 +74,7 @@ export async function POST(req: Request) {
         interpretation: fiveBrain.diagnosis.costOfDrift?.interpretation ?? ''
       },
       biggestOpportunity: fiveBrain.diagnosis.biggestOpportunity,
-      averageViews: evidence.averageViews > 0 ? evidence.averageViews : evidence.channelStats.totalViews / Math.max(evidence.channelStats.totalVideos, 1),
+      averageViews: evidence.averageViews > 0 ? evidence.averageViews : Math.round(evidence.channelStats.totalViews / Math.max(evidence.channelStats.totalVideos, 1)),
       gapRatio: evidence.gapRatio > 0 ? evidence.gapRatio : 0
     };
 
@@ -177,6 +177,7 @@ export async function GET(req: Request) {
     );
   }
 }
+
 
 
 
