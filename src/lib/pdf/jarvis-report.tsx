@@ -65,6 +65,7 @@ const styles = StyleSheet.create({
   // Body
   body: {
     padding: 40,
+    paddingBottom: 60,
   },
   // Channel header
   channelSection: {
@@ -774,5 +775,6 @@ export function JARVISReport({ channelName, subscribers, totalVideos, lastUpload
     </Document>
   );
 }
+
 
 
