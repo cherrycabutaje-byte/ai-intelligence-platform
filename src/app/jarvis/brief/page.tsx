@@ -77,7 +77,7 @@ export default function BriefPage() {
       if (!data.success) throw new Error(data.message ?? 'Analysis failed');
       setResult(data.brief);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong');
+      const errMsg = err instanceof Error ? err.message : 'Something went wrong'; console.error('Brief error:', errMsg); setError(errMsg);
     } finally {
       setLoading(false);
     }
@@ -148,15 +148,15 @@ export default function BriefPage() {
               {/* Video preview */}
               {videoData && (
                 <div className="bg-[#0f1117] rounded-xl p-4 flex gap-4">
-                  {videoData.thumbnail && (
-                    <img src={videoData.thumbnail} alt="" className="w-28 h-16 object-cover rounded-lg shrink-0" />
+                  {videoData?.thumbnail && (
+                    <img src={videoData?.thumbnail} alt="" className="w-28 h-16 object-cover rounded-lg shrink-0" />
                   )}
                   <div className="flex-1 min-w-0">
-                    <p className="text-white font-medium text-sm truncate">{videoData.title}</p>
-                    <p className="text-gray-500 text-xs mt-1">{videoData.channelTitle}</p>
+                    <p className="text-white font-medium text-sm truncate">{videoData?.title}</p>
+                    <p className="text-gray-500 text-xs mt-1">{videoData?.channelTitle}</p>
                     <div className="flex gap-4 mt-2">
-                      <span className="text-xs text-gray-400">{videoData.views.toLocaleString()} views</span>
-                      <span className="text-xs text-gray-400">{videoData.likes.toLocaleString()} likes</span>
+                      <span className="text-xs text-gray-400">{videoData?.views?.toLocaleString()} views</span>
+                      <span className="text-xs text-gray-400">{videoData?.likes?.toLocaleString()} likes</span>
                     </div>
                   </div>
                   <button onClick={() => setVideoData(null)} className="text-gray-600 hover:text-gray-400 text-xs">✕</button>
@@ -234,20 +234,20 @@ export default function BriefPage() {
         )}
 
         {/* Results */}
-        {result && videoData && (
+        {result && (
           <div className="space-y-5">
 
             {/* Video header */}
             <div className="bg-[#1a1d27] border border-gray-800 rounded-2xl p-5 flex gap-4">
-              {videoData.thumbnail && (
-                <img src={videoData.thumbnail} alt="" className="w-32 h-20 object-cover rounded-xl shrink-0" />
+              {videoData?.thumbnail && (
+                <img src={videoData?.thumbnail} alt="" className="w-32 h-20 object-cover rounded-xl shrink-0" />
               )}
               <div className="flex-1 min-w-0">
-                <p className="text-white font-bold truncate">{videoData.title}</p>
-                <p className="text-gray-500 text-sm mt-1">{videoData.channelTitle} · {platform}</p>
+                <p className="text-white font-bold truncate">{videoData?.title}</p>
+                <p className="text-gray-500 text-sm mt-1">{videoData?.channelTitle} · {platform}</p>
                 <div className="flex gap-4 mt-2">
-                  <span className="text-xs text-cyan-400 font-bold">{videoData.views.toLocaleString()} views</span>
-                  <span className="text-xs text-gray-400">{videoData.likes.toLocaleString()} likes</span>
+                  <span className="text-xs text-cyan-400 font-bold">{videoData?.views?.toLocaleString()} views</span>
+                  <span className="text-xs text-gray-400">{videoData?.likes?.toLocaleString()} likes</span>
                 </div>
               </div>
             </div>
@@ -345,3 +345,8 @@ export default function BriefPage() {
     </div>
   );
 }
+
+
+
+
+
