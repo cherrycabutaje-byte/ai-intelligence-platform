@@ -143,6 +143,7 @@ export async function generateThreeDiagnoses(
   evidence: ChannelEvidence
 ): Promise<RootDiagnosis[]> {
 
+  
   const topVideosText = evidence.topVideos.length > 0
     ? evidence.topVideos.map((v, i) =>
         `${i + 1}. "${v.title}" — ${v.views.toLocaleString()} views | ${v.durationSeconds}s | tags: ${v.tags.slice(0, 3).join(', ')}`
@@ -205,6 +206,13 @@ Merge any that share the same root cause.
 Find the turning point in each.
 Observe. Never assume.`;
 
+  console.log("[JARVIS] Evidence summary:", {
+    topVideos: evidence.topVideos?.length,
+    recentVideos: evidence.recentVideos?.length,
+    averageViews: evidence.averageViews,
+    allTimeTopVideo: evidence.allTimeTopVideo?.title ?? "null"
+  });
+  console.log("[JARVIS] Calling Anthropic API...");
   try {
     const response = await client.messages.create({
       model: 'claude-sonnet-4-6',
@@ -222,7 +230,8 @@ Observe. Never assume.`;
       .trim();
 
     const parsed = JSON.parse(cleaned);
-    console.log("[JARVIS] Parsed diagnoses count:", parsed.diagnoses?.length ?? 0);
+    console.log("[JARVIS] Parsed keys:", Object.keys(parsed));
+    console.log("[JARVIS] Diagnoses count:", parsed?.diagnoses?.length ?? 0);
     return parsed.diagnoses ?? [];
 
   } catch (err) {
@@ -230,5 +239,8 @@ Observe. Never assume.`;
     return [];
   }
 }
+
+
+
 
 

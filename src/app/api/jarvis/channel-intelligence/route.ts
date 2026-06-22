@@ -1,7 +1,6 @@
 ﻿import { NextResponse } from 'next/server';
-import { runChannelDiagnosis } from '@/lib/channel-intelligence/channel-diagnosis-engine';
 import { collectChannelEvidence } from '@/lib/channel-intelligence/diagnostics/channel-evidence-collector';
-import { generateThreeDiagnoses } from '@/lib/channel-intelligence/diagnostics/hypothesis-generator';
+import { generateThreeDiagnoses, RootDiagnosis } from '@/lib/channel-intelligence/diagnostics/hypothesis-generator';
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 
@@ -16,7 +15,7 @@ export async function POST(req: Request) {
       );
     }
 
-    // Get user ID from Supabase auth
+    // Get Supabase user ID
     let userId = creatorId;
     try {
       const cookieStore = await cookies();
@@ -29,53 +28,40 @@ export async function POST(req: Request) {
       if (user?.id) userId = user.id;
     } catch {}
 
-    // Run evidence collection and channel diagnosis in parallel
-    const [fiveBrain, evidence] = await Promise.all([
-      runChannelDiagnosis(channelId, creatorId),
-      collectChannelEvidence(channelId)
-    ]);
-    console.log("[JARVIS] Evidence collected:", evidence.totalVideosAnalyzed, "videos, top:", evidence.topVideos.length, "allTimeTop:", evidence.allTimeTopVideo?.title ?? "null");
+    // Collect evidence
+    const evidence = await collectChannelEvidence(channelId);
 
     // Generate 3 root cause diagnoses
-    let diagnoses: any[] = [];
-    try {
-      diagnoses = await generateThreeDiagnoses(evidence);
-      console.log("[JARVIS] Diagnoses generated:", diagnoses.length);
-    } catch (diagErr) {
-      console.error("[JARVIS] Diagnosis generation error:", diagErr);
-    }
+    const diagnoses = await generateThreeDiagnoses(evidence);
 
-    // Build health and summary from evidence
+    // Build health status from evidence
     const overallHealth = evidence.driftScore > 80 ? 'At Risk'
       : evidence.driftScore > 50 ? 'Needs Attention'
       : evidence.driftScore > 20 ? 'Room to Improve'
       : 'On Track';
 
+    // Build one line summary
     const oneLineSummary = evidence.topPerformerAverage > 0 && evidence.recentPerformerAverage > 0
       ? `Your best content gets ${evidence.topPerformerAverage.toLocaleString()} views. Your recent content gets ${evidence.recentPerformerAverage.toLocaleString()}. That gap is the whole story.`
       : 'Your channel has a unique growth pattern. Channel Diagnosis will identify exactly what it is.';
 
-    // Build truths for Channel page
+    // Build truths from evidence only
     const truths = {
-      whyPeopleFollowYou: fiveBrain.diagnosis.whyPeopleFollowYou,
-      creatorDNA: fiveBrain.diagnosis.creatorDNA,
-      channelPositioning: fiveBrain.diagnosis.channelPositioning,
-      topVideos: evidence.topVideos.length > 0 ? evidence.topVideos : [],
-      bottomVideos: evidence.bottomVideos.length > 0 ? evidence.bottomVideos : [],
-      audienceLoves: fiveBrain.diagnosis.audienceLoves,
-      audienceIgnores: fiveBrain.diagnosis.audienceIgnores,
-      channelDrift: fiveBrain.diagnosis.channelDrift,
+      topVideos: evidence.topVideos,
+      bottomVideos: evidence.bottomVideos,
+      averageViews: evidence.averageViews,
+      gapRatio: evidence.gapRatio,
+      topPerformerAverage: evidence.topPerformerAverage,
+      recentPerformerAverage: evidence.recentPerformerAverage,
+      allTimeTopVideo: evidence.allTimeTopVideo,
+      firstVideo: evidence.firstVideo,
       costOfDrift: {
         alignedAverageViews: evidence.topPerformerAverage,
         misalignedAverageViews: evidence.recentPerformerAverage,
-        performanceLossPercent: Math.round(
-          (1 - evidence.recentPerformerAverage / Math.max(evidence.topPerformerAverage, 1)) * 100
-        ),
-        interpretation: fiveBrain.diagnosis.costOfDrift?.interpretation ?? ''
-      },
-      biggestOpportunity: fiveBrain.diagnosis.biggestOpportunity,
-      averageViews: evidence.averageViews > 0 ? evidence.averageViews : Math.round(evidence.channelStats.totalViews / Math.max(evidence.channelStats.totalVideos, 1)),
-      gapRatio: evidence.gapRatio > 0 ? evidence.gapRatio : 0
+        performanceLossPercent: evidence.topPerformerAverage > 0
+          ? Math.round((1 - evidence.recentPerformerAverage / evidence.topPerformerAverage) * 100)
+          : 0
+      }
     };
 
     // Save to Supabase
@@ -100,7 +86,7 @@ export async function POST(req: Request) {
         created_at: new Date().toISOString()
       }, { onConflict: 'user_id,channel_id' });
     } catch (e) {
-      console.error('[JARVIS] Save diagnosis failed:', e);
+      console.error('[JARVIS] Supabase save failed:', e);
     }
 
     return NextResponse.json({
@@ -156,6 +142,16 @@ export async function GET(req: Request) {
       return NextResponse.json({ success: false, message: 'No diagnosis found' });
     }
 
+    const blockers = Array.isArray(row.blockers)
+      ? row.blockers
+      : typeof row.blockers === 'string'
+      ? JSON.parse(row.blockers)
+      : [];
+
+    const truths = typeof row.truths === 'string'
+      ? JSON.parse(row.truths)
+      : row.truths;
+
     return NextResponse.json({
       success: true,
       channelName: row.channel_name,
@@ -164,8 +160,8 @@ export async function GET(req: Request) {
       lastUploadDays: row.last_upload_days,
       overallHealth: row.overall_health,
       oneLineSummary: row.one_line_summary,
-      truths: row.truths,
-      blockers: typeof row.blockers === "string" ? JSON.parse(row.blockers) : (row.blockers ?? []),
+      truths,
+      blockers,
       savedAt: row.created_at
     });
 
@@ -177,8 +173,6 @@ export async function GET(req: Request) {
     );
   }
 }
-
-
 
 
 
