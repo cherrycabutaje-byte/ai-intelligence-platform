@@ -73,10 +73,11 @@ Return valid JSON only.`;
     const cleaned = raw.replace(/```json/gi, '').replace(/```/g, '').trim();
     const parsed = JSON.parse(cleaned);
 
-    return NextResponse.json({ success: true, brief: parsed });
+    return NextResponse.json({ success: true, brief: parsed, videoData });
 
   } catch (error) {
     console.error('[Video Brief] Error:', error);
     return NextResponse.json({ success: false, message: String(error) }, { status: 500 });
   }
 }
+
