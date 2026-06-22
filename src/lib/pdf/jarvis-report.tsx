@@ -5,199 +5,234 @@ import {
   Text,
   View,
   StyleSheet,
-  Font,
 } from '@react-pdf/renderer';
+
+const cyan = '#0891b2';
+const dark = '#0f172a';
+const gray = '#64748b';
+const lightGray = '#f8fafc';
+const borderColor = '#e2e8f0';
+const red = '#dc2626';
+const green = '#16a34a';
+const yellow = '#d97706';
+const purple = '#7c3aed';
 
 const styles = StyleSheet.create({
   page: {
-    backgroundColor: '#0f1117',
-    padding: 48,
+    backgroundColor: '#ffffff',
+    padding: 0,
     fontFamily: 'Helvetica',
   },
-  // Header
-  header: {
+  // Top bar
+  topBar: {
+    backgroundColor: dark,
+    paddingHorizontal: 40,
+    paddingVertical: 20,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 32,
-    paddingBottom: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#2a2d3a',
-  },
-  logoArea: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
   },
   logoText: {
-    fontSize: 22,
+    fontSize: 24,
     fontFamily: 'Helvetica-Bold',
-    color: '#00d4ff',
-    letterSpacing: 2,
+    color: '#22d3ee',
+    letterSpacing: 4,
   },
-  logoSubtext: {
-    fontSize: 8,
-    color: '#4a5568',
+  logoTagline: {
+    fontSize: 7,
+    color: '#94a3b8',
     letterSpacing: 3,
     marginTop: 2,
   },
-  headerRight: {
+  reportMeta: {
     alignItems: 'flex-end',
   },
-  reportLabel: {
+  reportType: {
     fontSize: 8,
-    color: '#4a5568',
+    color: '#94a3b8',
     letterSpacing: 2,
     marginBottom: 2,
   },
   reportDate: {
-    fontSize: 9,
-    color: '#6b7280',
+    fontSize: 8,
+    color: '#64748b',
   },
-  // Channel info
-  channelBlock: {
-    backgroundColor: '#1a1d27',
-    borderRadius: 8,
-    padding: 20,
+  // Cyan accent bar
+  accentBar: {
+    backgroundColor: cyan,
+    height: 3,
+  },
+  // Body
+  body: {
+    padding: 40,
+  },
+  // Channel header
+  channelSection: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
     marginBottom: 24,
-    borderWidth: 1,
-    borderColor: '#2a2d3a',
+    paddingBottom: 24,
+    borderBottomWidth: 1,
+    borderBottomColor: borderColor,
+  },
+  channelLeft: {
+    flex: 1,
   },
   channelName: {
-    fontSize: 20,
+    fontSize: 22,
     fontFamily: 'Helvetica-Bold',
-    color: '#ffffff',
+    color: dark,
     marginBottom: 4,
   },
   channelMeta: {
     fontSize: 9,
-    color: '#9ca3af',
-    marginBottom: 12,
+    color: gray,
+    marginBottom: 8,
   },
-  statsRow: {
+  healthBadge: {
+    backgroundColor: '#fef2f2',
+    borderRadius: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    alignSelf: 'flex-start',
+    borderWidth: 1,
+    borderColor: '#fecaca',
+  },
+  healthText: {
+    fontSize: 7,
+    color: red,
+    fontFamily: 'Helvetica-Bold',
+    letterSpacing: 1,
+  },
+  statsGrid: {
     flexDirection: 'row',
-    gap: 16,
-    marginTop: 12,
+    gap: 8,
   },
   statBox: {
-    flex: 1,
-    backgroundColor: '#0f1117',
+    backgroundColor: lightGray,
     borderRadius: 6,
     padding: 10,
     alignItems: 'center',
+    minWidth: 70,
+    borderWidth: 1,
+    borderColor: borderColor,
   },
   statLabel: {
-    fontSize: 7,
-    color: '#6b7280',
-    marginBottom: 3,
+    fontSize: 6,
+    color: gray,
     letterSpacing: 1,
+    marginBottom: 4,
+    textAlign: 'center',
   },
   statValue: {
-    fontSize: 16,
+    fontSize: 14,
     fontFamily: 'Helvetica-Bold',
-    color: '#ffffff',
+    color: dark,
+    textAlign: 'center',
   },
   statValueRed: {
-    fontSize: 16,
+    fontSize: 14,
     fontFamily: 'Helvetica-Bold',
-    color: '#ef4444',
+    color: red,
+    textAlign: 'center',
   },
   statValueYellow: {
-    fontSize: 16,
+    fontSize: 14,
     fontFamily: 'Helvetica-Bold',
-    color: '#f59e0b',
-  },
-  healthBadge: {
-    backgroundColor: '#7f1d1d',
-    borderRadius: 20,
-    paddingHorizontal: 10,
-    paddingVertical: 3,
-    alignSelf: 'flex-start',
-    marginTop: 8,
-  },
-  healthText: {
-    fontSize: 8,
-    color: '#fca5a5',
-    fontFamily: 'Helvetica-Bold',
-    letterSpacing: 1,
+    color: yellow,
+    textAlign: 'center',
   },
   // Section
   section: {
     marginBottom: 20,
-    backgroundColor: '#1a1d27',
-    borderRadius: 8,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: '#2a2d3a',
-  },
-  sectionCyan: {
-    marginBottom: 20,
-    backgroundColor: '#1a1d27',
-    borderRadius: 8,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: '#164e63',
-  },
-  sectionPurple: {
-    marginBottom: 20,
-    backgroundColor: '#1a1d27',
-    borderRadius: 8,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: '#4c1d95',
-  },
-  sectionYellow: {
-    marginBottom: 20,
-    backgroundColor: '#1a1d27',
-    borderRadius: 8,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: '#78350f',
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
-    gap: 6,
-  },
-  sectionIcon: {
-    fontSize: 10,
-    color: '#9ca3af',
   },
   sectionTitle: {
-    fontSize: 8,
+    fontSize: 7,
     fontFamily: 'Helvetica-Bold',
-    color: '#9ca3af',
+    color: cyan,
     letterSpacing: 2,
+    marginBottom: 8,
+    textTransform: 'uppercase',
+  },
+  divider: {
+    height: 1,
+    backgroundColor: borderColor,
+    marginBottom: 8,
   },
   bodyText: {
-    fontSize: 10,
-    color: '#d1d5db',
-    lineHeight: 1.6,
+    fontSize: 9,
+    color: '#374151',
+    lineHeight: 1.7,
   },
-  // Evidence
-  evidenceItem: {
+  // Drift boxes
+  driftRow: {
     flexDirection: 'row',
-    marginBottom: 5,
-    gap: 6,
+    gap: 12,
+    marginTop: 8,
   },
-  evidenceDot: {
-    fontSize: 9,
-    color: '#00d4ff',
-    marginTop: 1,
-  },
-  evidenceText: {
-    fontSize: 9,
-    color: '#9ca3af',
+  driftBox: {
     flex: 1,
-    lineHeight: 1.5,
+    borderRadius: 6,
+    padding: 14,
+    alignItems: 'center',
+    borderWidth: 1,
+  },
+  driftBoxGreen: {
+    backgroundColor: '#f0fdf4',
+    borderColor: '#bbf7d0',
+  },
+  driftBoxRed: {
+    backgroundColor: '#fef2f2',
+    borderColor: '#fecaca',
+  },
+  driftLabel: {
+    fontSize: 7,
+    color: gray,
+    letterSpacing: 1,
+    marginBottom: 6,
+    textAlign: 'center',
+  },
+  driftValueGreen: {
+    fontSize: 22,
+    fontFamily: 'Helvetica-Bold',
+    color: green,
+  },
+  driftValueRed: {
+    fontSize: 22,
+    fontFamily: 'Helvetica-Bold',
+    color: red,
+  },
+  driftSub: {
+    fontSize: 7,
+    color: gray,
+    marginTop: 2,
+  },
+  lossBadge: {
+    backgroundColor: '#fef2f2',
+    borderRadius: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    alignSelf: 'center',
+    marginTop: 8,
+    borderWidth: 1,
+    borderColor: '#fecaca',
+  },
+  lossBadgeText: {
+    fontSize: 9,
+    color: red,
+    fontFamily: 'Helvetica-Bold',
   },
   // Mechanism
   mechanismCard: {
-    backgroundColor: '#0f1117',
+    backgroundColor: lightGray,
     borderRadius: 6,
     padding: 12,
-    marginBottom: 10,
+    marginBottom: 8,
+    borderLeftWidth: 3,
+    borderLeftColor: purple,
+    borderWidth: 1,
+    borderColor: borderColor,
   },
   mechanismHeader: {
     flexDirection: 'row',
@@ -207,24 +242,60 @@ const styles = StyleSheet.create({
   },
   mechanismType: {
     fontSize: 7,
-    color: '#a78bfa',
-    backgroundColor: '#2e1065',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 10,
+    color: purple,
     fontFamily: 'Helvetica-Bold',
     letterSpacing: 1,
   },
   mechanismStrength: {
-    fontSize: 9,
-    color: '#a78bfa',
+    fontSize: 7,
+    color: purple,
     fontFamily: 'Helvetica-Bold',
   },
-  mechanismTranslation: {
-    fontSize: 10,
-    color: '#ffffff',
+  mechanismText: {
+    fontSize: 9,
+    color: '#1e293b',
+    lineHeight: 1.6,
+  },
+  // Hypothesis
+  hypothesisCard: {
+    backgroundColor: lightGray,
+    borderRadius: 6,
+    padding: 12,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: borderColor,
+  },
+  hypothesisText: {
+    fontSize: 9,
+    color: '#374151',
     lineHeight: 1.6,
     marginBottom: 6,
+  },
+  confidenceRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  confidenceLabel: {
+    fontSize: 7,
+    color: gray,
+  },
+  confidenceBarBg: {
+    flex: 1,
+    height: 3,
+    backgroundColor: '#e2e8f0',
+    borderRadius: 2,
+  },
+  confidenceBarFill: {
+    height: 3,
+    backgroundColor: cyan,
+    borderRadius: 2,
+  },
+  confidenceValue: {
+    fontSize: 7,
+    color: gray,
+    width: 24,
+    textAlign: 'right',
   },
   // Contradiction
   contradictionGrid: {
@@ -234,517 +305,472 @@ const styles = StyleSheet.create({
   },
   contradictionBox: {
     flex: 1,
-    backgroundColor: '#0f1117',
+    backgroundColor: lightGray,
     borderRadius: 6,
     padding: 10,
+    borderWidth: 1,
+    borderColor: borderColor,
   },
   contradictionLabel: {
-    fontSize: 7,
-    color: '#6b7280',
-    marginBottom: 4,
+    fontSize: 6,
+    color: gray,
     letterSpacing: 1,
+    marginBottom: 4,
+    fontFamily: 'Helvetica-Bold',
   },
   contradictionText: {
-    fontSize: 9,
-    color: '#d1d5db',
+    fontSize: 8,
+    color: '#374151',
     lineHeight: 1.5,
   },
   contradictionInsight: {
-    backgroundColor: '#451a03',
+    backgroundColor: '#fffbeb',
     borderRadius: 6,
     padding: 10,
     borderLeftWidth: 3,
-    borderLeftColor: '#f59e0b',
+    borderLeftColor: yellow,
+    borderWidth: 1,
+    borderColor: '#fde68a',
   },
   contradictionInsightText: {
     fontSize: 9,
-    color: '#fcd34d',
+    color: '#92400e',
     lineHeight: 1.5,
+    fontFamily: 'Helvetica-Bold',
   },
   // Blind spot
   blindSpotCard: {
-    backgroundColor: '#0c2231',
+    backgroundColor: '#f0f9ff',
     borderRadius: 6,
     padding: 12,
     marginBottom: 8,
     borderLeftWidth: 3,
-    borderLeftColor: '#00d4ff',
+    borderLeftColor: cyan,
+    borderWidth: 1,
+    borderColor: '#bae6fd',
   },
   blindSpotText: {
-    fontSize: 10,
-    color: '#ffffff',
+    fontSize: 9,
+    color: '#0c4a6e',
     lineHeight: 1.6,
     fontFamily: 'Helvetica-Bold',
   },
-  // Hypothesis
-  hypothesisCard: {
-    backgroundColor: '#0f1117',
+  // Strategic tension
+  tensionCard: {
+    backgroundColor: '#fafafa',
     borderRadius: 6,
     padding: 12,
-    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: borderColor,
   },
-  hypothesisText: {
-    fontSize: 10,
-    color: '#d1d5db',
-    lineHeight: 1.6,
-    marginBottom: 6,
-  },
-  hypothesisConfidence: {
-    fontSize: 8,
-    color: '#6b7280',
-  },
-  confidenceBar: {
-    height: 3,
-    backgroundColor: '#1f2937',
-    borderRadius: 2,
-    marginTop: 4,
-  },
-  confidenceFill: {
-    height: 3,
-    backgroundColor: '#00d4ff',
-    borderRadius: 2,
+  tensionText: {
+    fontSize: 9,
+    color: '#374151',
+    lineHeight: 1.7,
+    fontStyle: 'italic',
   },
   // Videos
   videosRow: {
     flexDirection: 'row',
     gap: 12,
-    marginBottom: 20,
   },
   videoColumn: {
     flex: 1,
-    backgroundColor: '#1a1d27',
-    borderRadius: 8,
-    padding: 14,
+    backgroundColor: lightGray,
+    borderRadius: 6,
+    padding: 12,
     borderWidth: 1,
-    borderColor: '#2a2d3a',
+    borderColor: borderColor,
   },
   videoColumnTitle: {
-    fontSize: 8,
+    fontSize: 7,
     fontFamily: 'Helvetica-Bold',
-    color: '#9ca3af',
-    letterSpacing: 2,
-    marginBottom: 10,
+    color: gray,
+    letterSpacing: 1,
+    marginBottom: 8,
+    paddingBottom: 6,
+    borderBottomWidth: 1,
+    borderBottomColor: borderColor,
   },
   videoItem: {
-    flexDirection: 'row',
     marginBottom: 8,
-    gap: 6,
+    paddingBottom: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f1f5f9',
+  },
+  videoRankTitle: {
+    flexDirection: 'row',
+    gap: 4,
+    marginBottom: 2,
   },
   videoRank: {
     fontSize: 8,
     fontFamily: 'Helvetica-Bold',
-    color: '#00d4ff',
-    width: 16,
+    color: cyan,
   },
   videoRankRed: {
     fontSize: 8,
     fontFamily: 'Helvetica-Bold',
-    color: '#ef4444',
-    width: 16,
+    color: red,
   },
   videoTitle: {
     fontSize: 8,
-    color: '#d1d5db',
+    color: dark,
     flex: 1,
     lineHeight: 1.4,
   },
   videoViews: {
     fontSize: 8,
-    color: '#10b981',
+    color: green,
     fontFamily: 'Helvetica-Bold',
+    marginTop: 2,
   },
   videoViewsRed: {
     fontSize: 8,
-    color: '#ef4444',
+    color: red,
     fontFamily: 'Helvetica-Bold',
+    marginTop: 2,
   },
-  // Cost of drift
-  driftRow: {
+  // Missing evidence
+  missingItem: {
     flexDirection: 'row',
-    gap: 12,
-    marginTop: 8,
+    gap: 6,
+    marginBottom: 5,
   },
-  driftBox: {
+  missingDot: {
+    fontSize: 8,
+    color: gray,
+  },
+  missingText: {
+    fontSize: 8,
+    color: gray,
     flex: 1,
-    backgroundColor: '#0f1117',
-    borderRadius: 6,
-    padding: 12,
-    alignItems: 'center',
+    lineHeight: 1.5,
   },
-  driftLabel: {
-    fontSize: 7,
-    color: '#6b7280',
-    marginBottom: 4,
-    letterSpacing: 1,
+  // Evidence facts
+  evidenceItem: {
+    flexDirection: 'row',
+    gap: 6,
+    marginBottom: 5,
   },
-  driftValueGreen: {
-    fontSize: 20,
-    fontFamily: 'Helvetica-Bold',
-    color: '#10b981',
+  evidenceDot: {
+    fontSize: 8,
+    color: cyan,
   },
-  driftValueRed: {
-    fontSize: 20,
-    fontFamily: 'Helvetica-Bold',
-    color: '#ef4444',
+  evidenceText: {
+    fontSize: 8,
+    color: '#374151',
+    flex: 1,
+    lineHeight: 1.5,
   },
   // Footer
   footer: {
     position: 'absolute',
-    bottom: 30,
-    left: 48,
-    right: 48,
+    bottom: 20,
+    left: 40,
+    right: 40,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     borderTopWidth: 1,
-    borderTopColor: '#1f2937',
-    paddingTop: 12,
+    borderTopColor: borderColor,
+    paddingTop: 8,
   },
-  footerLeft: {
+  footerText: {
     fontSize: 7,
-    color: '#374151',
+    color: '#cbd5e1',
   },
-  footerRight: {
+  footerConfidential: {
     fontSize: 7,
-    color: '#374151',
-  },
-  confidential: {
-    fontSize: 7,
-    color: '#374151',
+    color: '#cbd5e1',
     letterSpacing: 2,
   },
-  strategicTension: {
-    fontSize: 10,
-    color: '#d1d5db',
-    lineHeight: 1.6,
-    fontStyle: 'italic',
+  pageNum: {
+    fontSize: 7,
+    color: '#cbd5e1',
   },
 });
 
-interface VideoData {
-  title: string;
-  views: number;
+interface VideoData { title: string; views: number; }
+interface CoreMechanism { name: string; mechanismType: string; creatorTranslation: string; mechanismStrength: number; }
+interface Hypothesis { explanation: string; confidence: number; }
+interface Contradiction { creatorBelief: string; audienceBehavior: string; insight: string; }
+interface BlindSpot { insight: string; confidence: number; }
+interface EvidenceData {
+  averageViews: number; topPerformerAverage: number; recentPerformerAverage: number;
+  gapRatio: number; driftScore: number; topVideos: VideoData[]; bottomVideos: VideoData[];
 }
-
-interface CoreMechanism {
-  name: string;
-  mechanismType: string;
-  creatorTranslation: string;
-  mechanismStrength: number;
-}
-
-interface Hypothesis {
-  explanation: string;
-  confidence: number;
-}
-
-interface Contradiction {
-  creatorBelief: string;
-  audienceBehavior: string;
-  insight: string;
-}
-
-interface BlindSpot {
-  insight: string;
-  confidence: number;
-}
-
-interface Evidence {
-  averageViews: number;
-  topPerformerAverage: number;
-  recentPerformerAverage: number;
-  gapRatio: number;
-  driftScore: number;
-  topVideos: VideoData[];
-  bottomVideos: VideoData[];
-}
-
 interface Intelligence {
-  executiveSummary: string;
-  evidence: string[];
-  patterns: any[];
-  hypotheses: Hypothesis[];
-  coreMechanisms: CoreMechanism[];
-  contradictions: Contradiction[];
-  blindSpots: BlindSpot[];
-  missingEvidence: string[];
-  strategicTension: string;
+  executiveSummary: string; evidence: string[]; hypotheses: Hypothesis[];
+  coreMechanisms: CoreMechanism[]; contradictions: Contradiction[];
+  blindSpots: BlindSpot[]; missingEvidence: string[]; strategicTension: string;
 }
-
 interface JARVISReportProps {
-  channelName: string;
-  subscribers: number;
-  totalVideos: number;
-  lastUploadDays: number;
-  overallHealth: string;
-  evidence: Evidence;
-  intelligence: Intelligence;
-  generatedAt: string;
+  channelName: string; subscribers: number; totalVideos: number;
+  lastUploadDays: number; overallHealth: string; evidence: EvidenceData;
+  intelligence: Intelligence; generatedAt: string;
 }
 
-export function JARVISReport({
-  channelName,
-  subscribers,
-  totalVideos,
-  lastUploadDays,
-  overallHealth,
-  evidence,
-  intelligence,
-  generatedAt,
-}: JARVISReportProps) {
+export function JARVISReport({ channelName, subscribers, totalVideos, lastUploadDays, overallHealth, evidence, intelligence, generatedAt }: JARVISReportProps) {
   const lossPercent = evidence.topPerformerAverage > 0
-    ? Math.round((1 - evidence.recentPerformerAverage / evidence.topPerformerAverage) * 100)
-    : 0;
+    ? Math.round((1 - evidence.recentPerformerAverage / evidence.topPerformerAverage) * 100) : 0;
+
+  const PageHeader = ({ subtitle }: { subtitle?: string }) => (
+    <>
+      <View style={styles.topBar}>
+        <View>
+          <Text style={styles.logoText}>JARVIS</Text>
+          <Text style={styles.logoTagline}>CHANNEL INTELLIGENCE</Text>
+        </View>
+        <View style={styles.reportMeta}>
+          <Text style={styles.reportType}>INTELLIGENCE REPORT</Text>
+          <Text style={styles.reportDate}>{subtitle ?? generatedAt}</Text>
+        </View>
+      </View>
+      <View style={styles.accentBar} />
+    </>
+  );
+
+  const PageFooter = () => (
+    <View style={styles.footer} fixed>
+      <Text style={styles.footerText}>JARVIS Channel Intelligence</Text>
+      <Text style={styles.footerConfidential}>CONFIDENTIAL</Text>
+      <Text style={styles.pageNum} render={({ pageNumber, totalPages }) => `${pageNumber} / ${totalPages}`} />
+    </View>
+  );
 
   return (
     <Document>
+
+      {/* PAGE 1 */}
       <Page size="A4" style={styles.page}>
+        <PageHeader />
+        <View style={styles.body}>
 
-        {/* Header */}
-        <View style={styles.header}>
-          <View style={styles.logoArea}>
-            <View>
-              <Text style={styles.logoText}>JARVIS</Text>
-              <Text style={styles.logoSubtext}>CHANNEL INTELLIGENCE</Text>
+          {/* Channel */}
+          <View style={styles.channelSection}>
+            <View style={styles.channelLeft}>
+              <Text style={styles.channelName}>{channelName}</Text>
+              <Text style={styles.channelMeta}>
+                {subscribers.toLocaleString()} subscribers · {totalVideos} videos
+                {lastUploadDays > 0 ? ` · ${lastUploadDays} days since last upload` : ''}
+              </Text>
+              <View style={styles.healthBadge}>
+                <Text style={styles.healthText}>{overallHealth.toUpperCase()}</Text>
+              </View>
+            </View>
+            <View style={styles.statsGrid}>
+              <View style={styles.statBox}>
+                <Text style={styles.statLabel}>AVG VIEWS</Text>
+                <Text style={styles.statValue}>{evidence.averageViews.toLocaleString()}</Text>
+              </View>
+              <View style={styles.statBox}>
+                <Text style={styles.statLabel}>BEST AVG</Text>
+                <Text style={styles.statValue}>{evidence.topPerformerAverage.toLocaleString()}</Text>
+              </View>
+              <View style={styles.statBox}>
+                <Text style={styles.statLabel}>RECENT AVG</Text>
+                <Text style={styles.statValueRed}>{evidence.recentPerformerAverage.toLocaleString()}</Text>
+              </View>
+              <View style={styles.statBox}>
+                <Text style={styles.statLabel}>GAP</Text>
+                <Text style={styles.statValueYellow}>{evidence.gapRatio}x</Text>
+              </View>
+              <View style={styles.statBox}>
+                <Text style={styles.statLabel}>DRIFT</Text>
+                <Text style={styles.statValueRed}>{evidence.driftScore}%</Text>
+              </View>
             </View>
           </View>
-          <View style={styles.headerRight}>
-            <Text style={styles.reportLabel}>INTELLIGENCE REPORT</Text>
-            <Text style={styles.reportDate}>{generatedAt}</Text>
-          </View>
-        </View>
 
-        {/* Channel Block */}
-        <View style={styles.channelBlock}>
-          <Text style={styles.channelName}>{channelName}</Text>
-          <Text style={styles.channelMeta}>
-            {subscribers.toLocaleString()} subscribers · {totalVideos} total videos
-            {lastUploadDays > 0 ? ` · ${lastUploadDays} days since last upload` : ''}
-          </Text>
-          <View style={styles.healthBadge}>
-            <Text style={styles.healthText}>{overallHealth.toUpperCase()}</Text>
+          {/* Intelligence Summary */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Intelligence Summary</Text>
+            <View style={styles.divider} />
+            <Text style={styles.bodyText}>{intelligence.executiveSummary}</Text>
           </View>
-          <View style={styles.statsRow}>
-            <View style={styles.statBox}>
-              <Text style={styles.statLabel}>AVG VIEWS</Text>
-              <Text style={styles.statValue}>{evidence.averageViews.toLocaleString()}</Text>
-            </View>
-            <View style={styles.statBox}>
-              <Text style={styles.statLabel}>BEST CONTENT</Text>
-              <Text style={styles.statValue}>{evidence.topPerformerAverage.toLocaleString()}</Text>
-            </View>
-            <View style={styles.statBox}>
-              <Text style={styles.statLabel}>RECENT CONTENT</Text>
-              <Text style={styles.statValueRed}>{evidence.recentPerformerAverage.toLocaleString()}</Text>
-            </View>
-            <View style={styles.statBox}>
-              <Text style={styles.statLabel}>GAP RATIO</Text>
-              <Text style={styles.statValueYellow}>{evidence.gapRatio}x</Text>
-            </View>
-            <View style={styles.statBox}>
-              <Text style={styles.statLabel}>DRIFT SCORE</Text>
-              <Text style={styles.statValueRed}>{evidence.driftScore}%</Text>
-            </View>
-          </View>
-        </View>
 
-        {/* Executive Summary */}
-        <View style={styles.sectionCyan}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>INTELLIGENCE SUMMARY</Text>
+          {/* Cost of Drift */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Cost of Drift</Text>
+            <View style={styles.divider} />
+            <View style={styles.driftRow}>
+              <View style={[styles.driftBox, styles.driftBoxGreen]}>
+                <Text style={styles.driftLabel}>BEST CONTENT AVERAGE</Text>
+                <Text style={styles.driftValueGreen}>{evidence.topPerformerAverage.toLocaleString()}</Text>
+                <Text style={styles.driftSub}>views per video</Text>
+              </View>
+              <View style={[styles.driftBox, styles.driftBoxRed]}>
+                <Text style={styles.driftLabel}>RECENT CONTENT AVERAGE</Text>
+                <Text style={styles.driftValueRed}>{evidence.recentPerformerAverage.toLocaleString()}</Text>
+                <Text style={styles.driftSub}>views per video</Text>
+              </View>
+            </View>
+            <View style={styles.lossBadge}>
+              <Text style={styles.lossBadgeText}>-{lossPercent}% performance gap</Text>
+            </View>
           </View>
-          <Text style={styles.bodyText}>{intelligence.executiveSummary}</Text>
-        </View>
 
-        {/* Cost of Drift */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>COST OF DRIFT — -{lossPercent}% PERFORMANCE GAP</Text>
-          </View>
-          <View style={styles.driftRow}>
-            <View style={styles.driftBox}>
-              <Text style={styles.driftLabel}>BEST CONTENT AVERAGE</Text>
-              <Text style={styles.driftValueGreen}>{evidence.topPerformerAverage.toLocaleString()}</Text>
-            </View>
-            <View style={styles.driftBox}>
-              <Text style={styles.driftLabel}>RECENT CONTENT AVERAGE</Text>
-              <Text style={styles.driftValueRed}>{evidence.recentPerformerAverage.toLocaleString()}</Text>
-            </View>
-          </View>
-        </View>
-
-        {/* Core Mechanisms */}
-        {intelligence.coreMechanisms.length > 0 && (
-          <View style={styles.sectionPurple}>
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>WHAT YOUR CONTENT IS ACTUALLY DOING</Text>
-            </View>
-            {[...intelligence.coreMechanisms]
-              .sort((a, b) => b.mechanismStrength - a.mechanismStrength)
-              .map((m, i) => (
-                <View key={i} style={styles.mechanismCard}>
-                  <View style={styles.mechanismHeader}>
-                    <Text style={styles.mechanismType}>{m.mechanismType.toUpperCase()}</Text>
-                    <Text style={styles.mechanismStrength}>Strength: {m.mechanismStrength}%</Text>
+          {/* Core Mechanisms */}
+          {intelligence.coreMechanisms.length > 0 && (
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>What Your Content Is Actually Doing</Text>
+              <View style={styles.divider} />
+              {[...intelligence.coreMechanisms]
+                .sort((a, b) => b.mechanismStrength - a.mechanismStrength)
+                .map((m, i) => (
+                  <View key={i} style={styles.mechanismCard}>
+                    <View style={styles.mechanismHeader}>
+                      <Text style={styles.mechanismType}>{m.mechanismType.toUpperCase()} · {m.name}</Text>
+                      <Text style={styles.mechanismStrength}>Strength: {m.mechanismStrength}%</Text>
+                    </View>
+                    <Text style={styles.mechanismText}>{m.creatorTranslation}</Text>
                   </View>
-                  <Text style={styles.mechanismTranslation}>{m.creatorTranslation}</Text>
+                ))}
+            </View>
+          )}
+
+        </View>
+        <PageFooter />
+      </Page>
+
+      {/* PAGE 2 */}
+      <Page size="A4" style={styles.page}>
+        <PageHeader subtitle={channelName} />
+        <View style={styles.body}>
+
+          {/* Hypotheses */}
+          {intelligence.hypotheses.length > 0 && (
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Possible Explanations</Text>
+              <View style={styles.divider} />
+              {intelligence.hypotheses.map((h, i) => (
+                <View key={i} style={styles.hypothesisCard}>
+                  <Text style={styles.hypothesisText}>{h.explanation}</Text>
+                  <View style={styles.confidenceRow}>
+                    <Text style={styles.confidenceLabel}>Confidence: {h.confidence}%</Text>
+                    <View style={styles.confidenceBarBg}>
+                      <View style={[styles.confidenceBarFill, { width: `${h.confidence}%` }]} />
+                    </View>
+                  </View>
                 </View>
               ))}
-          </View>
-        )}
-
-        {/* Hypotheses */}
-        {intelligence.hypotheses.length > 0 && (
-          <View style={styles.section}>
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>POSSIBLE EXPLANATIONS</Text>
             </View>
-            {intelligence.hypotheses.map((h, i) => (
-              <View key={i} style={styles.hypothesisCard}>
-                <Text style={styles.hypothesisText}>{h.explanation}</Text>
-                <Text style={styles.hypothesisConfidence}>Confidence: {h.confidence}%</Text>
-                <View style={styles.confidenceBar}>
-                  <View style={[styles.confidenceFill, { width: `${h.confidence}%` }]} />
-                </View>
-              </View>
-            ))}
-          </View>
-        )}
+          )}
 
-        {/* Footer Page 1 */}
-        <View style={styles.footer} fixed>
-          <Text style={styles.footerLeft}>JARVIS Channel Intelligence · Confidential</Text>
-          <Text style={styles.confidential}>CONFIDENTIAL</Text>
-          <Text style={styles.footerRight} render={({ pageNumber, totalPages }) => `${pageNumber} / ${totalPages}`} />
-        </View>
-
-      </Page>
-
-      {/* Page 2 */}
-      <Page size="A4" style={styles.page}>
-
-        {/* Header Page 2 */}
-        <View style={styles.header}>
-          <Text style={styles.logoText}>JARVIS</Text>
-          <Text style={styles.reportLabel}>{channelName} · CONTINUED</Text>
-        </View>
-
-        {/* Contradictions */}
-        {intelligence.contradictions.length > 0 && (
-          <View style={styles.sectionYellow}>
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>WHAT THE DATA CONTRADICTS</Text>
-            </View>
-            {intelligence.contradictions.map((c, i) => (
-              <View key={i}>
-                <View style={styles.contradictionGrid}>
-                  <View style={styles.contradictionBox}>
-                    <Text style={styles.contradictionLabel}>WHAT THE CHANNEL SAYS</Text>
-                    <Text style={styles.contradictionText}>{c.creatorBelief}</Text>
+          {/* Contradictions */}
+          {intelligence.contradictions.length > 0 && (
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>What the Data Contradicts</Text>
+              <View style={styles.divider} />
+              {intelligence.contradictions.map((c, i) => (
+                <View key={i} style={{ marginBottom: 12 }}>
+                  <View style={styles.contradictionGrid}>
+                    <View style={styles.contradictionBox}>
+                      <Text style={styles.contradictionLabel}>WHAT THE CHANNEL SAYS</Text>
+                      <Text style={styles.contradictionText}>{c.creatorBelief}</Text>
+                    </View>
+                    <View style={styles.contradictionBox}>
+                      <Text style={styles.contradictionLabel}>WHAT THE DATA SHOWS</Text>
+                      <Text style={styles.contradictionText}>{c.audienceBehavior}</Text>
+                    </View>
                   </View>
-                  <View style={styles.contradictionBox}>
-                    <Text style={styles.contradictionLabel}>WHAT THE DATA SHOWS</Text>
-                    <Text style={styles.contradictionText}>{c.audienceBehavior}</Text>
+                  <View style={styles.contradictionInsight}>
+                    <Text style={styles.contradictionInsightText}>{c.insight}</Text>
                   </View>
                 </View>
-                <View style={styles.contradictionInsight}>
-                  <Text style={styles.contradictionInsightText}>{c.insight}</Text>
-                </View>
-              </View>
-            ))}
-          </View>
-        )}
-
-        {/* Blind Spots */}
-        {intelligence.blindSpots.length > 0 && (
-          <View style={styles.sectionCyan}>
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>WHAT JARVIS CANNOT IGNORE</Text>
+              ))}
             </View>
-            {intelligence.blindSpots.map((b, i) => (
-              <View key={i} style={styles.blindSpotCard}>
-                <Text style={styles.blindSpotText}>{b.insight}</Text>
-              </View>
-            ))}
-          </View>
-        )}
+          )}
 
-        {/* Strategic Tension */}
-        {intelligence.strategicTension && (
+          {/* Blind Spots */}
+          {intelligence.blindSpots.length > 0 && (
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>What JARVIS Cannot Ignore</Text>
+              <View style={styles.divider} />
+              {intelligence.blindSpots.map((b, i) => (
+                <View key={i} style={styles.blindSpotCard}>
+                  <Text style={styles.blindSpotText}>{b.insight}</Text>
+                </View>
+              ))}
+            </View>
+          )}
+
+          {/* Strategic Tension */}
+          {intelligence.strategicTension && (
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>The Strategic Tension</Text>
+              <View style={styles.divider} />
+              <View style={styles.tensionCard}>
+                <Text style={styles.tensionText}>{intelligence.strategicTension}</Text>
+              </View>
+            </View>
+          )}
+
+          {/* Evidence */}
+          {intelligence.evidence.length > 0 && (
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Evidence on Record</Text>
+              <View style={styles.divider} />
+              {intelligence.evidence.map((fact, i) => (
+                <View key={i} style={styles.evidenceItem}>
+                  <Text style={styles.evidenceDot}>•</Text>
+                  <Text style={styles.evidenceText}>{fact}</Text>
+                </View>
+              ))}
+            </View>
+          )}
+
+          {/* Videos */}
           <View style={styles.section}>
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>THE STRATEGIC TENSION</Text>
+            <Text style={styles.sectionTitle}>Performance Comparison</Text>
+            <View style={styles.divider} />
+            <View style={styles.videosRow}>
+              <View style={styles.videoColumn}>
+                <Text style={styles.videoColumnTitle}>WHAT WORKS</Text>
+                {evidence.topVideos.slice(0, 3).map((v, i) => (
+                  <View key={i} style={styles.videoItem}>
+                    <View style={styles.videoRankTitle}>
+                      <Text style={styles.videoRank}>#{i + 1}</Text>
+                      <Text style={styles.videoTitle}>{v.title}</Text>
+                    </View>
+                    <Text style={styles.videoViews}>{v.views.toLocaleString()} views</Text>
+                  </View>
+                ))}
+              </View>
+              <View style={styles.videoColumn}>
+                <Text style={styles.videoColumnTitle}>WHAT DOES NOT WORK</Text>
+                {evidence.bottomVideos.slice(0, 3).map((v, i) => (
+                  <View key={i} style={styles.videoItem}>
+                    <View style={styles.videoRankTitle}>
+                      <Text style={styles.videoRankRed}>#{i + 1}</Text>
+                      <Text style={styles.videoTitle}>{v.title}</Text>
+                    </View>
+                    <Text style={styles.videoViewsRed}>{v.views.toLocaleString()} views</Text>
+                  </View>
+                ))}
+              </View>
             </View>
-            <Text style={styles.strategicTension}>{intelligence.strategicTension}</Text>
           </View>
-        )}
 
-        {/* Evidence */}
-        {intelligence.evidence.length > 0 && (
-          <View style={styles.section}>
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>EVIDENCE ON RECORD</Text>
+          {/* Missing Evidence */}
+          {intelligence.missingEvidence.length > 0 && (
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>What JARVIS Cannot Determine</Text>
+              <View style={styles.divider} />
+              {intelligence.missingEvidence.map((m, i) => (
+                <View key={i} style={styles.missingItem}>
+                  <Text style={styles.missingDot}>?</Text>
+                  <Text style={styles.missingText}>{m}</Text>
+                </View>
+              ))}
             </View>
-            {intelligence.evidence.map((fact, i) => (
-              <View key={i} style={styles.evidenceItem}>
-                <Text style={styles.evidenceDot}>•</Text>
-                <Text style={styles.evidenceText}>{fact}</Text>
-              </View>
-            ))}
-          </View>
-        )}
+          )}
 
-        {/* Videos */}
-        <View style={styles.videosRow}>
-          <View style={styles.videoColumn}>
-            <Text style={styles.videoColumnTitle}>WHAT WORKS</Text>
-            {evidence.topVideos.slice(0, 3).map((v, i) => (
-              <View key={i} style={styles.videoItem}>
-                <Text style={styles.videoRank}>#{i + 1}</Text>
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.videoTitle}>{v.title}</Text>
-                  <Text style={styles.videoViews}>{v.views.toLocaleString()} views</Text>
-                </View>
-              </View>
-            ))}
-          </View>
-          <View style={styles.videoColumn}>
-            <Text style={styles.videoColumnTitle}>WHAT DOES NOT WORK</Text>
-            {evidence.bottomVideos.slice(0, 3).map((v, i) => (
-              <View key={i} style={styles.videoItem}>
-                <Text style={styles.videoRankRed}>#{i + 1}</Text>
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.videoTitle}>{v.title}</Text>
-                  <Text style={styles.videoViewsRed}>{v.views.toLocaleString()} views</Text>
-                </View>
-              </View>
-            ))}
-          </View>
         </View>
-
-        {/* Missing Evidence */}
-        {intelligence.missingEvidence.length > 0 && (
-          <View style={styles.section}>
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>WHAT JARVIS CANNOT DETERMINE</Text>
-            </View>
-            {intelligence.missingEvidence.map((m, i) => (
-              <View key={i} style={styles.evidenceItem}>
-                <Text style={styles.evidenceDot}>?</Text>
-                <Text style={styles.evidenceText}>{m}</Text>
-              </View>
-            ))}
-          </View>
-        )}
-
-        {/* Footer */}
-        <View style={styles.footer} fixed>
-          <Text style={styles.footerLeft}>JARVIS Channel Intelligence · Confidential</Text>
-          <Text style={styles.confidential}>CONFIDENTIAL</Text>
-          <Text style={styles.footerRight} render={({ pageNumber, totalPages }) => `${pageNumber} / ${totalPages}`} />
-        </View>
-
+        <PageFooter />
       </Page>
+
     </Document>
   );
 }
