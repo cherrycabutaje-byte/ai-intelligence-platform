@@ -152,15 +152,17 @@ export default function ChannelPage() {
   useEffect(() => {
     async function init() {
       try {
-        const { createClient } = await import('@/lib/supabase');
+        const { createClient } = await import("@/lib/supabase");
         const supabase = createClient();
         const { data: { user } } = await supabase.auth.getUser();
         if (user?.id) setUserId(user.id);
         const res = await fetch(
-          `/api/jarvis/channel-intelligence?userId=${user?.id ?? 'christine'}`
+          `/api/jarvis/channel-intelligence?userId=${user?.id ?? "christine"}`
         );
         const data = await res.json();
-        if (data.success) setResult(data);
+        if (data.success && data.blockers && data.blockers.length > 0) {
+          setResult(data);
+        }
       } catch {}
       finally { setLoadingExisting(false); }
     }
@@ -468,3 +470,4 @@ export default function ChannelPage() {
     </div>
   );
 }
+
