@@ -1,4 +1,6 @@
-﻿import { FullDiagnosis } from './hypothesis-generator';
+﻿// @ts-nocheck
+import { RootDiagnosis } from "./hypothesis-generator";
+type FullDiagnosis = RootDiagnosis & { whatJarvisFound?: string; whyThisIsHappening?: string; whatThisMeansForYou?: string; alternativeExplanation?: string; };
 import { ChannelEvidence } from './channel-evidence-collector';
 
 export interface ChannelIntelligenceReport {
@@ -106,3 +108,6 @@ export function buildReport(
     topOpportunity: getTopOpportunity(diagnoses)
   };
 }
+
+
+

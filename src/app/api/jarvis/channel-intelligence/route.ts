@@ -1,39 +1,9 @@
 ﻿import { NextResponse } from 'next/server';
-import { runChannelDiagnosis }
-  from '@/lib/channel-intelligence/channel-diagnosis-engine';
-import { collectChannelEvidence }
-  from '@/lib/channel-intelligence/diagnostics/channel-evidence-collector';
-import { evaluateAllRules }
-  from '@/lib/channel-intelligence/diagnostics/rule-evaluator';
-import { calculateConfidence }
-  from '@/lib/channel-intelligence/diagnostics/confidence-calculator';
-import { generateAllHypotheses }
-  from '@/lib/channel-intelligence/diagnostics/hypothesis-generator';
-import { buildReport }
-  from '@/lib/channel-intelligence/diagnostics/channel-intelligence-report-builder';
+import { runChannelDiagnosis } from '@/lib/channel-intelligence/channel-diagnosis-engine';
+import { collectChannelEvidence } from '@/lib/channel-intelligence/diagnostics/channel-evidence-collector';
+import { generateThreeDiagnoses } from '@/lib/channel-intelligence/diagnostics/hypothesis-generator';
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
-
-function buildBlockers(diagnoses: any[], evidence: any) {
-  return diagnoses.map((d, index) => ({
-    number: index + 1,
-    name: d.rule.name,
-    severity: d.rule.severity,
-    category: d.rule.category,
-    whatIsBroken: d.whatJarvisFound,
-    whyItMatters: d.whyThisIsHappening,
-    whatItMeansForYou: d.whatThisMeansForYou,
-    cost: d.rule.id === 'RULE_001'
-      ? `Your proven content averages ${evidence.topPerformerAverage.toLocaleString()} views. Your recent content averages ${evidence.recentPerformerAverage.toLocaleString()} views. That is a ${evidence.driftScore}% performance loss.`
-      : d.rule.id === 'RULE_009'
-      ? `Every week without posting is another week the algorithm deprioritizes your channel. You have been quiet for ${evidence.daysSinceLastUpload} days.`
-      : d.whatThisMeansForYou,
-    estimatedImpact: d.rule.severity === 'Critical' ? 'HIGH' : d.rule.severity === 'High' ? 'MEDIUM' : 'LOW',
-    confidence: d.finalConfidence,
-    evidencePoints: d.evidencePoints,
-    recommendedAction: d.rule.recommendedAction
-  }));
-}
 
 export async function POST(req: Request) {
   try {
@@ -46,20 +16,14 @@ export async function POST(req: Request) {
       );
     }
 
-    // Get user ID
+    // Get user ID from Supabase auth
     let userId = creatorId;
     try {
       const cookieStore = await cookies();
       const supabase = createServerClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-        {
-          cookies: {
-            get(name: string) {
-              return cookieStore.get(name)?.value;
-            }
-          }
-        }
+        { cookies: { get(name: string) { return cookieStore.get(name)?.value; } } }
       );
       const { data: { user } } = await supabase.auth.getUser();
       if (user?.id) userId = user.id;
@@ -71,14 +35,18 @@ export async function POST(req: Request) {
       collectChannelEvidence(channelId)
     ]);
 
-    // Run diagnostic engine
-    const triggered = evaluateAllRules(evidence);
-    const scored = calculateConfidence(triggered, evidence);
-    const fullDiagnoses = await generateAllHypotheses(scored, evidence);
-    const report = buildReport(fullDiagnoses, evidence, channelId, creatorId);
+    // Generate 3 root cause diagnoses
+    const diagnoses = await generateThreeDiagnoses(evidence);
 
-    // Build blockers for Growth page
-    const blockers = buildBlockers(fullDiagnoses, evidence);
+    // Build health and summary from evidence
+    const overallHealth = evidence.driftScore > 80 ? 'At Risk'
+      : evidence.driftScore > 50 ? 'Needs Attention'
+      : evidence.driftScore > 20 ? 'Room to Improve'
+      : 'On Track';
+
+    const oneLineSummary = evidence.topPerformerAverage > 0 && evidence.recentPerformerAverage > 0
+      ? `Your best content gets ${evidence.topPerformerAverage.toLocaleString()} views. Your recent content gets ${evidence.recentPerformerAverage.toLocaleString()}. That gap is the whole story.`
+      : 'Your channel has a unique growth pattern. Channel Diagnosis will identify exactly what it is.';
 
     // Build truths for Channel page
     const truths = {
@@ -93,8 +61,10 @@ export async function POST(req: Request) {
       costOfDrift: {
         alignedAverageViews: evidence.topPerformerAverage,
         misalignedAverageViews: evidence.recentPerformerAverage,
-        performanceLossPercent: Math.round((1 - evidence.recentPerformerAverage / Math.max(evidence.topPerformerAverage, 1)) * 100),
-        interpretation: fiveBrain.diagnosis.costOfDrift?.interpretation ?? ""
+        performanceLossPercent: Math.round(
+          (1 - evidence.recentPerformerAverage / Math.max(evidence.topPerformerAverage, 1)) * 100
+        ),
+        interpretation: fiveBrain.diagnosis.costOfDrift?.interpretation ?? ''
       },
       biggestOpportunity: fiveBrain.diagnosis.biggestOpportunity,
       averageViews: evidence.averageViews,
@@ -107,32 +77,21 @@ export async function POST(req: Request) {
       const supabase = createServerClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-        {
-          cookies: {
-            get(name: string) {
-              return cookieStore.get(name)?.value;
-            }
-          }
-        }
+        { cookies: { get(name: string) { return cookieStore.get(name)?.value; } } }
       );
-
-      await supabase
-        .from('channel_diagnoses')
-        .upsert({
-          user_id: userId,
-          channel_id: channelId,
-          channel_name: evidence.channelStats.channelTitle,
-          subscribers: evidence.channelStats.subscribers,
-          total_videos: evidence.channelStats.totalVideos,
-          last_upload_days: evidence.daysSinceLastUpload,
-          overall_health: report.executiveSummary.overallHealth,
-          one_line_summary: report.executiveSummary.oneLineSummary,
-          truths,
-          blockers,
-          created_at: new Date().toISOString()
-        }, {
-          onConflict: 'user_id,channel_id'
-        });
+      await supabase.from('channel_diagnoses').upsert({
+        user_id: userId,
+        channel_id: channelId,
+        channel_name: evidence.channelStats.channelTitle,
+        subscribers: evidence.channelStats.subscribers,
+        total_videos: evidence.channelStats.totalVideos,
+        last_upload_days: evidence.daysSinceLastUpload,
+        overall_health: overallHealth,
+        one_line_summary: oneLineSummary,
+        truths,
+        blockers: diagnoses,
+        created_at: new Date().toISOString()
+      }, { onConflict: 'user_id,channel_id' });
     } catch (e) {
       console.error('[JARVIS] Save diagnosis failed:', e);
     }
@@ -143,10 +102,10 @@ export async function POST(req: Request) {
       subscribers: evidence.channelStats.subscribers,
       totalVideos: evidence.channelStats.totalVideos,
       lastUploadDays: evidence.daysSinceLastUpload,
-      overallHealth: report.executiveSummary.overallHealth,
-      oneLineSummary: report.executiveSummary.oneLineSummary,
+      overallHealth,
+      oneLineSummary,
       truths,
-      blockers,
+      blockers: diagnoses,
       savedAt: new Date().toISOString()
     });
 
@@ -163,7 +122,6 @@ export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
     const userId = searchParams.get('userId') ?? '';
-    const channelId = searchParams.get('channelId') ?? '';
 
     if (!userId) {
       return NextResponse.json(
@@ -176,33 +134,21 @@ export async function GET(req: Request) {
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          }
-        }
-      }
+      { cookies: { get(name: string) { return cookieStore.get(name)?.value; } } }
     );
 
-    let query = supabase
+    const { data: row, error } = await supabase
       .from('channel_diagnoses')
       .select('*')
       .eq('user_id', userId)
       .order('created_at', { ascending: false })
-      .limit(1);
+      .limit(1)
+      .single();
 
-    if (channelId) {
-      query = query.eq('channel_id', channelId);
-    }
-
-    const { data, error } = await query;
-
-    if (error || !data || data.length === 0) {
+    if (error || !row) {
       return NextResponse.json({ success: false, message: 'No diagnosis found' });
     }
 
-    const row = data[0];
     return NextResponse.json({
       success: true,
       channelName: row.channel_name,
@@ -217,13 +163,10 @@ export async function GET(req: Request) {
     });
 
   } catch (error) {
+    console.error('[JARVIS] GET error:', error);
     return NextResponse.json(
       { success: false, message: String(error) },
       { status: 500 }
     );
   }
 }
-
-
-
-

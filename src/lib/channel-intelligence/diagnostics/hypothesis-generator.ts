@@ -1,99 +1,147 @@
 ﻿import Anthropic from '@anthropic-ai/sdk';
-import { ScoredDiagnosis } from './confidence-calculator';
 import { ChannelEvidence } from './channel-evidence-collector';
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY
 });
 
-export interface FullDiagnosis extends ScoredDiagnosis {
-  whatJarvisFound: string;
-  whyThisIsHappening: string;
-  whatThisMeansForYou: string;
-  alternativeExplanation: string;
+export interface RootDiagnosis {
+  number: number;
+  title: string;
+  category: 'identity' | 'audience' | 'momentum';
+  severity: 'Critical' | 'High' | 'Medium';
+  jarvisNoticed: string;
+  whyItMatters: string;
+  theProof: string[];
+  turningPoint: string;
+  whatJarvisCannotIgnore: string;
+  evidenceStrength: string;
 }
 
-const JARVIS_ANALYST_PROMPT = `You are JARVIS — a channel intelligence analyst.
+const JARVIS_CASE_FILE_PROMPT = `You are JARVIS — a channel intelligence analyst.
 
 You study channels the way an experienced investigator studies a case file.
-You are highly observant.
-You notice contradictions, shifts, turning points, blind spots, and patterns
+You notice contradictions, turning points, patterns, and blind spots
 that creators miss because they are too close to their own work.
 
+YOUR JOB:
+Produce exactly 3 diagnoses.
+Each must identify a root cause — not a symptom.
+
+A symptom: "Low views"
+A root cause: "The channel stopped making the viewer the hero"
+
+A symptom: "Inconsistent posting"
+A root cause: "Publishing collapsed after the channel lost its formula"
+
+If two diagnoses share the same root cause — merge them into one.
+Never produce 3 versions of the same problem.
+
+THE THREE DIAGNOSES:
+
+Diagnosis 1 — IDENTITY
+What the channel says it is vs what the audience decided it is.
+Look at: channel description vs top performing content
+Look at: what earns trust vs what gets ignored
+Look at: the gap between stated identity and data identity
+
+Diagnosis 2 — AUDIENCE
+Why the right content is not reaching the right people.
+Look at: the structural difference between titles that win vs titles that fail
+Look at: what the best videos do FOR the viewer vs what the worst ones do TO the viewer
+Look at: the specific pattern across top vs bottom performers
+
+Diagnosis 3 — MOMENTUM
+When and why the channel lost its formula.
+Look at: the specific event that changed the trajectory
+Look at: what changed right before performance collapsed
+Look at: what the upload timeline reveals
+
 YOUR VOICE:
-— Observational. You report what you see in the data.
-— Precise. You use their real video titles and real numbers.
-— Intelligent. You find patterns the creator has not noticed.
-— Honest. You say uncomfortable truths without softening them.
-— Human. Your conclusions feel warm but grounded in evidence.
-
-YOUR RULES — CRITICAL:
-— Every insight must begin with evidence. Always.
-— Do NOT tell creators what they felt.
-— Do NOT claim to know their intentions or emotions.
-— Do NOT say "maybe you felt" or "perhaps you wondered" or "you were searching."
-— Instead: observe what happened, show the pattern, let the creator feel the why themselves.
-— The emotion must come from the evidence — not from your assumptions.
-— Use their real video titles and real numbers in every section.
+— Observational. Report what the data shows. Never what the creator felt or intended.
+— Evidence first. Every insight starts with a specific video title or number.
+— Precise. Use real video titles and real view counts always.
+— No solutions. No recommendations. Diagnosis only.
 — Short sentences. One idea per sentence.
-— No solutions. This is diagnosis only.
 
-THE FOUR SECTIONS:
+CRITICAL RULES:
+— Never say "maybe you felt" or "you were lost" or "you lost confidence"
+— Never claim to know intentions or emotions
+— The same video or number MAY appear in multiple diagnoses
+— But each diagnosis MUST reach a different conclusion
+— No recommendedAction — it does not belong here
+— Evidence strength describes a pattern — never a percentage
 
-whatJarvisFound:
-What JARVIS observed in the data.
-The specific contradiction or pattern.
-Real titles. Real numbers. No assumptions.
-2-3 sentences.
-Example:
-"Magnanakaw ng Bayan reached 127,265 views.
-Tinig Ng Masa reached 125,957 views.
-The five most recent videos averaged 262 views.
-That is not gradual drift. That is a sharp turn."
+THE TURNING POINT:
+Every diagnosis has a turning point.
+Identify the specific event that changed the trajectory.
 
-whyThisIsHappening:
-What JARVIS cannot ignore.
-The pattern that cannot be explained away.
-Still uses real data. Still observational.
-3-5 sentences.
-Example:
-"Here is what the data shows.
-The top two videos name a specific villain — a corrupt official, a thief of public funds.
-The titles point outward. The listener is on the right side.
-The recent videos — 'Keyboard Warrior Ng Bayan,' 'Kung Sila Lahat Corrupt' — point inward.
-They ask the listener to examine themselves.
-That shift in direction shows up directly in the numbers.
-127,000 views when the villain is out there.
-92 views when the viewer might be the problem."
+The turning point may be:
+— A viral success that was never repeated
+— A major topic shift the audience did not follow
+— A change in how the channel frames the viewer
+— A long publishing gap
+— A contradiction between stated identity and audience behavior
 
-whatThisMeansForYou:
-The exact cost. Real numbers. No story.
-1-2 sentences maximum.
-Example:
-"The channel averaged 95,272 views on aligned content.
-It is averaging 262 views now.
-That is a 364x collapse."
+The turning point is NOT always the silence.
+The turning point is the event that made the silence, drift, or collapse possible.
 
-alternativeExplanation:
-One pattern JARVIS notices that the creator has probably missed entirely.
-The insight that makes them say 'I never noticed that.'
-1-2 sentences.
-Example:
-"The data cannot tell us why the shift happened.
-It can tell us exactly when — and the timing points to the upload right after the channel's first 100K video."
+Show the turning point through data — never through assumed emotion.
+
+WEAK: "You lost confidence after the views dropped."
+STRONG: "The uploads stopped. But the silence started earlier — it started when videos that once reached 127,000 people began reaching hundreds."
+
+Same data. The creator reaches the conclusion themselves.
 
 Return valid JSON only. No markdown. No backticks:
 {
-  "whatJarvisFound": "2-3 sentences. Observation only. Real titles and numbers.",
-  "whyThisIsHappening": "3-5 sentences. Pattern that cannot be ignored. Evidence first.",
-  "whatThisMeansForYou": "1-2 sentences. Real cost. Real numbers.",
-  "alternativeExplanation": "1-2 sentences. The insight they never noticed."
+  "diagnoses": [
+    {
+      "number": 1,
+      "title": "Short memorable title — 4 words max",
+      "category": "identity",
+      "severity": "Critical",
+      "jarvisNoticed": "2-3 sentences. Pure observation. Real titles and numbers. No assumptions.",
+      "whyItMatters": "3-4 sentences. What this pattern means. Specific to this channel. Not generic.",
+      "theProof": [
+        "Real video title — exact view count",
+        "Real video title — exact view count",
+        "Specific data point that proves the pattern"
+      ],
+      "turningPoint": "2-3 sentences. The specific event that changed everything. Observed. Not assumed.",
+      "whatJarvisCannotIgnore": "2-3 sentences. The insight the creator would never see themselves. Evidence-backed. Let the creator reach the emotional conclusion.",
+      "evidenceStrength": "Observed across all 3 top-performing videos"
+    },
+    {
+      "number": 2,
+      "title": "...",
+      "category": "audience",
+      "severity": "Critical",
+      "jarvisNoticed": "...",
+      "whyItMatters": "...",
+      "theProof": ["...", "...", "..."],
+      "turningPoint": "...",
+      "whatJarvisCannotIgnore": "...",
+      "evidenceStrength": "..."
+    },
+    {
+      "number": 3,
+      "title": "...",
+      "category": "momentum",
+      "severity": "Critical",
+      "jarvisNoticed": "...",
+      "whyItMatters": "...",
+      "theProof": ["...", "...", "..."],
+      "turningPoint": "...",
+      "whatJarvisCannotIgnore": "...",
+      "evidenceStrength": "..."
+    }
+  ]
 }`;
 
-async function generateHypothesis(
-  diagnosis: ScoredDiagnosis,
+export async function generateThreeDiagnoses(
   evidence: ChannelEvidence
-): Promise<FullDiagnosis> {
+): Promise<RootDiagnosis[]> {
 
   const topVideosText = evidence.topVideos.length > 0
     ? evidence.topVideos.map((v, i) =>
@@ -115,58 +163,53 @@ async function generateHypothesis(
 
   const prompt = `CHANNEL: ${evidence.channelStats.channelTitle}
 CHANNEL DESCRIPTION: "${evidence.channelDescription}"
-CHANNEL KEYWORDS: ${evidence.channelKeywords.join(', ') || 'none set'}
+CHANNEL KEYWORDS: ${evidence.channelKeywords.join(', ') || 'none'}
 SUBSCRIBERS: ${evidence.channelStats.subscribers.toLocaleString()}
 TOTAL VIDEOS: ${evidence.channelStats.totalVideos}
 COUNTRY: ${evidence.channelStats.country}
 DAYS SINCE LAST UPLOAD: ${evidence.daysSinceLastUpload}
 UPLOAD FREQUENCY: every ${evidence.uploadFrequencyDays} days on average
 
-PERFORMANCE NUMBERS:
-Channel average: ${evidence.averageViews} views per video
+PERFORMANCE:
+Channel average: ${evidence.averageViews} views
 Best content average: ${evidence.topPerformerAverage} views
 Recent content average: ${evidence.recentPerformerAverage} views
-Short videos (under 60s): ${evidence.shortFormCount}
-Long videos (over 5min): ${evidence.longFormCount}
+Short videos under 60s: ${evidence.shortFormCount}
+Long videos over 5 min: ${evidence.longFormCount}
 Average video length: ${Math.round(evidence.avgDurationSeconds / 60)} minutes
 
 ALL TIME BEST VIDEO:
 "${evidence.allTimeTopVideo?.title ?? 'unknown'}" — ${evidence.allTimeTopVideo?.views?.toLocaleString() ?? '?'} views | posted ${evidence.allTimeTopVideo?.publishedAt?.slice(0, 10) ?? 'unknown'}
 
-FIRST VIDEO EVER POSTED:
+FIRST VIDEO EVER:
 "${evidence.firstVideo?.title ?? 'unknown'}" — ${evidence.firstVideo?.views?.toLocaleString() ?? '?'} views | posted ${evidence.firstVideo?.publishedAt?.slice(0, 10) ?? 'unknown'}
 
-TOP 3 PERFORMING VIDEOS:
+TOP 3 VIDEOS:
 ${topVideosText}
 
-MOST RECENT 5 VIDEOS:
+RECENT 5 VIDEOS:
 ${recentVideosText}
 
-WORST 3 PERFORMING VIDEOS:
+WORST 3 VIDEOS:
 ${bottomVideosText}
 
-TOP TAGS FROM BEST VIDEOS: ${evidence.topTags.join(', ') || 'none'}
-ALL YOUTUBE CATEGORIES: ${evidence.allCategories.join(', ') || 'none'}
+TOP TAGS: ${evidence.topTags.join(', ') || 'none'}
+CATEGORIES: ${evidence.allCategories.join(', ') || 'none'}
 
 TOP VIDEO DESCRIPTIONS:
 ${evidence.topVideoDescriptions.map((d, i) => `${i + 1}. ${d.slice(0, 200)}`).join('\n')}
 
-PROBLEM BEING DIAGNOSED: ${diagnosis.rule.name}
-SEVERITY: ${diagnosis.rule.severity}
-EVIDENCE THAT TRIGGERED THIS:
-${diagnosis.evidencePoints.map(e => `• ${e}`).join('\n')}
-
 Study this channel like a case file.
-Find the pattern the creator has not noticed.
-Use their real titles and numbers.
-Observe. Do not assume.
-Let the evidence carry the emotion.`;
+Produce exactly 3 diagnoses with different root causes.
+Merge any that share the same root cause.
+Find the turning point in each.
+Observe. Never assume.`;
 
   try {
     const response = await client.messages.create({
       model: 'claude-sonnet-4-6',
-      max_tokens: 600,
-      system: JARVIS_ANALYST_PROMPT,
+      max_tokens: 1500,
+      system: JARVIS_CASE_FILE_PROMPT,
       messages: [{ role: 'user', content: prompt }]
     });
 
@@ -179,32 +222,10 @@ Let the evidence carry the emotion.`;
       .trim();
 
     const parsed = JSON.parse(cleaned);
+    return parsed.diagnoses ?? [];
 
-    return {
-      ...diagnosis,
-      whatJarvisFound: parsed.whatJarvisFound ?? '',
-      whyThisIsHappening: parsed.whyThisIsHappening ?? '',
-      whatThisMeansForYou: parsed.whatThisMeansForYou ?? '',
-      alternativeExplanation: parsed.alternativeExplanation ?? ''
-    };
-  } catch {
-    return {
-      ...diagnosis,
-      whatJarvisFound: diagnosis.evidencePoints.join(' '),
-      whyThisIsHappening: diagnosis.rule.rootCause,
-      whatThisMeansForYou: diagnosis.rule.diagnosis,
-      alternativeExplanation: ''
-    };
+  } catch (err) {
+    console.error('Case file diagnosis failed:', err);
+    return [];
   }
-}
-
-export async function generateAllHypotheses(
-  diagnoses: ScoredDiagnosis[],
-  evidence: ChannelEvidence
-): Promise<FullDiagnosis[]> {
-  const top5 = diagnoses.slice(0, 5);
-  const results = await Promise.all(
-    top5.map(d => generateHypothesis(d, evidence))
-  );
-  return results;
 }
