@@ -145,7 +145,7 @@ const styles = StyleSheet.create({
   },
   // Section
   section: {
-    marginBottom: 20,
+    marginBottom: 14,
   },
   sectionTitle: {
     fontSize: 7,
@@ -227,8 +227,8 @@ const styles = StyleSheet.create({
   mechanismCard: {
     backgroundColor: lightGray,
     borderRadius: 6,
-    padding: 12,
-    marginBottom: 8,
+    padding: 10,
+    marginBottom: 6,
     borderLeftWidth: 3,
     borderLeftColor: purple,
     borderWidth: 1,
@@ -774,3 +774,5 @@ export function JARVISReport({ channelName, subscribers, totalVideos, lastUpload
     </Document>
   );
 }
+
+
